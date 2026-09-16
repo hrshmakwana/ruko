@@ -1,0 +1,20 @@
+version = 0.1
+
+[default.global.parameters]
+stack_name = "ruko"
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.validate.parameters]
+lint = true
+
+[default.deploy.parameters]
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = false
+fail_on_empty_changeset = false
+resolve_s3 = true
+s3_prefix = "ruko"
+parameter_overrides = "Stage=\"prod\" BedrockRegion=\"us-east-1\" BedrockModelId=\"us.amazon.nova-2-lite-v1:0\" BedrockFoundationModelId=\"amazon.nova-2-lite-v1:0\""

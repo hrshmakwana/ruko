@@ -1,0 +1,2 @@
+# boto3 / botocore ship with the Lambda Python 3.12 runtime, so nothing is vendored.
+# Keeping this empty is deliberate: it keeps the package small and the build fast.

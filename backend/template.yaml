@@ -1,0 +1,220 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Ruko - scam check API. Single stack: HTTP API + Lambda + S3 + DynamoDB + Bedrock.
+  Serverless only, no idle cost.
+
+Parameters:
+  Stage:
+    Type: String
+    Default: prod
+    AllowedPattern: "[a-z0-9-]+"
+    Description: Short environment name, used in resource names.
+
+  BedrockRegion:
+    Type: String
+    Default: us-east-1
+    Description: Region used for the Bedrock Converse call.
+
+  BedrockModelId:
+    Type: String
+    Default: us.amazon.nova-2-lite-v1:0
+    Description: >
+      Model id passed to Converse. Normally a cross-region inference profile id.
+      Fallback if unavailable: us.amazon.nova-lite-v1:0
+
+  BedrockFoundationModelId:
+    Type: String
+    Default: amazon.nova-2-lite-v1:0
+    Description: >
+      The underlying foundation model behind BedrockModelId. Used only to scope the
+      IAM policy. Must be kept in step with BedrockModelId.
+
+  AllowedOrigins:
+    Type: CommaDelimitedList
+    Default: "*"
+    Description: >
+      CORS origins for the API. Tightened to the Amplify domain plus localhost once
+      the frontend is deployed.
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Architectures: [arm64]
+    MemorySize: 512
+    Timeout: 30
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref RukoTable
+        UPLOADS_BUCKET: !Ref UploadsBucket
+        BEDROCK_REGION: !Ref BedrockRegion
+        BEDROCK_MODEL_ID: !Ref BedrockModelId
+        LOG_LEVEL: INFO
+
+Resources:
+  # ---------------------------------------------------------------- API ----
+  RukoApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Stage
+      CorsConfiguration:
+        AllowOrigins: !Ref AllowedOrigins
+        AllowHeaders: [content-type]
+        AllowMethods: [GET, POST, OPTIONS]
+        MaxAge: 300
+      DefaultRouteSettings:
+        # Cheap by design: roughly 5 requests/second, burst 10.
+        ThrottlingRateLimit: 5
+        ThrottlingBurstLimit: 10
+
+  # ------------------------------------------------------------ storage ----
+  UploadsBucket:
+    Type: AWS::S3::Bucket
+    # Keep the bucket out of harm's way on a stack delete; it self-empties in 1 day.
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub "ruko-uploads-${Stage}-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: expire-uploads-after-1-day
+            Status: Enabled
+            Prefix: uploads/
+            ExpirationInDays: 1
+          - Id: abort-incomplete-uploads
+            Status: Enabled
+            AbortIncompleteMultipartUpload:
+              DaysAfterInitiation: 1
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods: [PUT]
+            AllowedOrigins: !Ref AllowedOrigins
+            AllowedHeaders: ["*"]
+            MaxAge: 300
+
+  RukoTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "ruko-${Stage}"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  # ---------------------------------------------------------- functions ----
+  HealthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "ruko-${Stage}-health"
+      CodeUri: src/
+      Handler: handlers.health.lambda_handler
+      Timeout: 10
+      MemorySize: 256
+      Events:
+        Get:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RukoApi
+            Path: /health
+            Method: GET
+
+  CheckFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "ruko-${Stage}-check"
+      CodeUri: src/
+      Handler: handlers.check.lambda_handler
+      Policies:
+        - Statement:
+            - Sid: BedrockInvokeChosenModel
+              Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+              Resource:
+                - !Sub "arn:aws:bedrock:*::foundation-model/${BedrockFoundationModelId}"
+                - !Sub "arn:aws:bedrock:${BedrockRegion}:${AWS::AccountId}:inference-profile/${BedrockModelId}"
+        - Statement:
+            - Sid: ReadUploadedScreenshot
+              Effect: Allow
+              Action:
+                - s3:GetObject
+              Resource: !Sub "arn:aws:s3:::${UploadsBucket}/uploads/*"
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RukoTable
+      Events:
+        Post:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RukoApi
+            Path: /check
+            Method: POST
+
+  UploadUrlFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "ruko-${Stage}-upload-url"
+      CodeUri: src/
+      Handler: handlers.upload_url.lambda_handler
+      Timeout: 10
+      MemorySize: 256
+      Policies:
+        - Statement:
+            - Sid: PresignUploadPut
+              Effect: Allow
+              Action:
+                - s3:PutObject
+              Resource: !Sub "arn:aws:s3:::${UploadsBucket}/uploads/*"
+      Events:
+        Post:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RukoApi
+            Path: /upload-url
+            Method: POST
+
+  # ----------------------------------------------------------- logging ----
+  # Declared explicitly so retention is 7 days instead of "never expire".
+  HealthLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/ruko-${Stage}-health"
+      RetentionInDays: 7
+
+  CheckLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/ruko-${Stage}-check"
+      RetentionInDays: 7
+
+  UploadUrlLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/ruko-${Stage}-upload-url"
+      RetentionInDays: 7
+
+Outputs:
+  ApiUrl:
+    Description: Base URL of the Ruko API
+    Value: !Sub "https://${RukoApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}"
+  TableName:
+    Value: !Ref RukoTable
+  UploadsBucketName:
+    Value: !Ref UploadsBucket
