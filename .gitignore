@@ -36,3 +36,6 @@ dist-ssr/
 .idea/
 .vscode/
 *.swp
+
+# python venv used for running the backend tests locally
+backend/.venv/
