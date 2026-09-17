@@ -62,6 +62,7 @@ flowchart TB
         fcheck["check<br/><i>extract → model → rules → combine</i>"]
         fupload["upload-url<br/><i>presigned PUT</i>"]
         freport["report<br/><i>idempotent</i>"]
+        fhealth["health<br/><i>liveness</i>"]
     end
 
     s3[("<b>Amazon S3</b><br/>private uploads<br/>presigned PUT only<br/>deleted after 1 day")]
@@ -71,6 +72,7 @@ flowchart TB
 
     pwa -->|"served from"| amplify
     pwa -->|"HTTPS"| api
+    r1 --> fhealth
     r2 --> fupload
     r3 --> fcheck
     r4 --> freport
