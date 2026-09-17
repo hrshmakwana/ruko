@@ -21,6 +21,7 @@ from ruko.extract import extract_all
 from ruko.fallback import text as fallback_text
 from ruko.http import LOG, ApiError, handler_wrapper, parse_json_body, response
 from ruko.model import ModelUnavailable, analyse
+from ruko.ocr import OcrUnavailable, read_text
 from ruko.rule_text import reason_for
 from ruko.rules import SEVERITY_FLOOR, RuleHit, run_rules
 from ruko.verdict import MAX_TEXT_CHARS, build_verdict, level_from_score, normalise_language
@@ -136,10 +137,23 @@ def lambda_handler(event, context):  # noqa: ANN001, ARG001
     image = _load_image(image_key) if image_key else None
     image_bytes, image_format = image if image else (None, "jpeg")
 
-    # 1. Deterministic extraction from whatever text we were given.
-    extracted = extract_all(text)
+    # 1. Read the screenshot. The rules engine - the half that cannot be talked
+    #    out of a verdict - works on text, so without this a scam that arrives
+    #    as a picture skips the deterministic layer entirely.
+    ocr_text = ""
+    if image_bytes:
+        try:
+            ocr_text = read_text(image_bytes)
+        except OcrUnavailable:
+            LOG.warning("ocr_unavailable check_id=%s", check_id)
 
-    # 2. Ask the model. A failure here is survivable; an error page is not.
+    # Everything downstream reasons over the words, wherever they came from.
+    combined_text = "\n".join(part for part in (text, ocr_text) if part)
+
+    # 2. Deterministic extraction over pasted text and screenshot text alike.
+    extracted = extract_all(combined_text)
+
+    # 3. Ask the model. A failure here is survivable; an error page is not.
     model_result: dict | None = None
     engine = "rules"
     try:
@@ -150,13 +164,13 @@ def lambda_handler(event, context):  # noqa: ANN001, ARG001
     except KeyError:
         LOG.warning("model_not_configured check_id=%s", check_id)
 
-    # 3. Rules run over text plus anything the model read out of the image.
+    # 4. Rules run over pasted text, OCR text, and whatever the model read.
     extracted = _merge_extracted(extracted, model_result.get("extracted") if model_result else None)
     indicators = store.indicators_from(extracted)
     community = store.report_counts(indicators)
-    rules = run_rules(text, extracted, store.counts_by_masked(community))
+    rules = run_rules(combined_text, extracted, store.counts_by_masked(community))
 
-    # 4. A message carrying instructions for an AI is itself a red flag, and it
+    # 5. A message carrying instructions for an AI is itself a red flag, and it
     #    is treated as a hard rule so the model cannot argue the score back down.
     if model_result and model_result.get("ai_manipulation_detected"):
         rules.hits.append(
@@ -168,10 +182,18 @@ def lambda_handler(event, context):  # noqa: ANN001, ARG001
             )
         )
 
-    # 5. Combine. The floor is a floor, never a ceiling.
+    # 6. Combine. The floor is a floor, never a ceiling.
     model_score = model_result["risk_score"] if model_result else 0
     score = max(model_score, rules.floor)
     level = level_from_score(score)
+
+    # Nothing read the screenshot: OCR could not, and the model did not run.
+    # Saying "no scam signs" about content we never saw is the single most
+    # dangerous thing Ruko could do, so it says it could not read it instead.
+    image_unread = bool(image_bytes) and not ocr_text and model_result is None
+    # ...but it only takes over the headline when the screenshot was all we had.
+    # If they also typed something, that text still deserves a real verdict.
+    nothing_was_read = image_unread and not text
 
     if model_result:
         red_flags = list(model_result["red_flags"])
@@ -186,13 +208,16 @@ def lambda_handler(event, context):  # noqa: ANN001, ARG001
         teach_me = model_result["teach_me"]
     else:
         red_flags = _rule_red_flags(rules.hits, language, 5)
-        headline = strings[level]
+        headline = strings["image_unread"] if nothing_was_read else strings[level]
         scam_type = rules.suggested_scam_type() or (
             "other_scam" if level != "no_scam_signs" else "none_detected"
         )
         clean = level == "no_scam_signs"
         do_now = strings["do_now_clean"] if clean else strings["do_now"]
         dont_do = strings["dont_do_clean"] if clean else strings["dont_do"]
+        if nothing_was_read:
+            do_now = strings["do_now_clean"]
+            dont_do = strings["dont_do_clean"]
         consequence = []
         callback_script = None
         teach_me = None
@@ -228,6 +253,11 @@ def lambda_handler(event, context):  # noqa: ANN001, ARG001
         engine=engine,
     )
 
+    # What Ruko actually read out of the picture. Showing it back is how someone
+    # can tell the difference between "checked and clear" and "never read".
+    verdict["screenshot_text"] = ocr_text or None
+    verdict["image_unread"] = nothing_was_read
+
     store.save_check(check_id, verdict, indicators, family_code)
 
     # If this person has a guardian linked and it is a scam, tell the guardian.
@@ -248,12 +278,14 @@ def lambda_handler(event, context):  # noqa: ANN001, ARG001
 
     # Identifiers, timings and rule ids only. Never the text, never the image.
     LOG.info(
-        "check_done check_id=%s lang=%s has_text=%s has_image=%s level=%s score=%d "
-        "model_score=%d floor=%d engine=%s rules=%s ms=%d",
+        "check_done check_id=%s lang=%s has_text=%s has_image=%s ocr_chars=%d "
+        "unread=%s level=%s score=%d model_score=%d floor=%d engine=%s rules=%s ms=%d",
         check_id,
         language,
         bool(text),
         bool(image_bytes),
+        len(ocr_text),
+        image_unread,
         verdict["risk_level"],
         score,
         model_score,

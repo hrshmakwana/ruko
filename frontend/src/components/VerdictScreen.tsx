@@ -1,6 +1,7 @@
 import type { Strings } from "../i18n";
+import { screenshotFor } from "../i18n/screenshot";
 import type { Verdict } from "../types";
-import { ArrowLeftIcon, CrossIcon, OkIcon } from "./Icons";
+import { ArrowLeftIcon, CrossIcon, OkIcon, SuspiciousIcon } from "./Icons";
 import { MessageBubble } from "./MessageBubble";
 import { SignalBanner } from "./SignalBanner";
 import { ConsequenceChain, ScriptCard, TeachCard } from "./VerdictParts";
@@ -36,6 +37,7 @@ export function VerdictScreen({
   onAlreadyPaid,
   onBack,
 }: Props) {
+  const shot = screenshotFor(verdict.language);
   let delay = 120;
   const next = () => (delay += 90);
 
@@ -50,10 +52,26 @@ export function VerdictScreen({
         {t.checkAnotherButton}
       </button>
 
-      <SignalBanner level={verdict.risk_level} score={verdict.risk_score} t={t} />
+      {verdict.image_unread ? (
+        <section className="ruko-slam rounded-3xl border-2 border-amber-line bg-amber-tint p-5">
+          <div className="flex items-start gap-3">
+            <SuspiciousIcon className="h-10 w-10 shrink-0 text-amber" />
+            <div>
+              <p className="text-[1.3rem] leading-tight font-extrabold text-amber-ink">
+                {shot.unreadTitle}
+              </p>
+              <p className="mt-1.5 text-[0.98rem] leading-snug font-medium text-amber-ink">
+                {verdict.headline}
+              </p>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <SignalBanner level={verdict.risk_level} score={verdict.risk_score} t={t} />
+      )}
 
       <Rise delay={next()}>
-        <div className="space-y-2">
+        <div className={`space-y-2 ${verdict.image_unread ? "hidden" : ""}`}>
           {verdict.scam_type !== "none_detected" && (
             <span className="inline-block rounded-full border border-line bg-sunken px-3 py-1 text-[0.78rem] font-bold uppercase tracking-wider text-muted">
               {t.scamTypes[verdict.scam_type]}
@@ -78,6 +96,8 @@ export function VerdictScreen({
             imagePreview={imagePreview}
             flags={verdict.red_flags}
             label={t.receivedLabel}
+            screenshotText={verdict.screenshot_text}
+            screenshotLabel={shot.readLabel}
           />
         </Rise>
       )}

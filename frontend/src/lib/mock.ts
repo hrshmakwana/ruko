@@ -181,6 +181,8 @@ export async function mockCheck(req: CheckRequest): Promise<Verdict> {
     },
     community: canned ? canned.community : [],
     language: req.language,
+    screenshot_text: null,
+    image_unread: false,
     rule_hits: ["mock.local"],
     partial: false,
     engine: "stub",

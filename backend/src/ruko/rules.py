@@ -249,7 +249,8 @@ _PHRASE_RULES: list[tuple[str, str, str, str, list[str]]] = [
 _OTP_REQUEST = re.compile(
     r"""(?xi)
     (?:
-      (?:share|send|tell|give|provide|enter|forward)[^.\n]{0,25}
+      (?:share|send|tell|give|provide|enter|forward|want|need|ask(?:ing)?\s*for|demand)
+      [^.\n]{0,25}
       (?:otp|pin|cvv|password|card\s*number)
       |
       (?:otp|pin|cvv)[^.\n]{0,20}(?:share|send|bat(?:a|aa)|batao|forward)

@@ -154,6 +154,15 @@ Resources:
               Action:
                 - s3:GetObject
               Resource: !Sub "arn:aws:s3:::${UploadsBucket}/uploads/*"
+        - Statement:
+            # Textract reads the words out of a screenshot so the rules engine
+            # can run on them. DetectDocumentText only - no analysis APIs, and
+            # no async jobs, so nothing is stored on Amazon's side.
+            - Sid: ReadScreenshotText
+              Effect: Allow
+              Action:
+                - textract:DetectDocumentText
+              Resource: "*"
         - DynamoDBCrudPolicy:
             TableName: !Ref RukoTable
       Events:

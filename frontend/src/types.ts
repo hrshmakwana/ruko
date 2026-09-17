@@ -79,6 +79,10 @@ export interface Verdict {
   /** Only present once the person says they already paid. */
   complaint: ComplaintPack | null;
   language: Language;
+  /** The words Ruko read out of the screenshot, if there was one. */
+  screenshot_text: string | null;
+  /** True when a screenshot was supplied and nothing could read it. */
+  image_unread: boolean;
   /** Debug only, never rendered. */
   rule_hits: string[];
   partial: boolean;
