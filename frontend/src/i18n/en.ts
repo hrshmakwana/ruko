@@ -13,6 +13,21 @@ export const en = {
   checkButton: "Check it",
   checkingButton: "Checking…",
   privacyNote: "We never need your OTP, PIN or password.",
+  examplesLabel: "Or try a real one",
+  examples: [
+    {
+      label: "Fake KYC",
+      text: "Dear Customer, your SBI account will be blocked today. Your KYC has expired. Update immediately at http://sbi-kyc-verify.in or call 9876543210.",
+    },
+    {
+      label: "UPI refund",
+      text: "Sir your order is cancelled. To get refund of Rs 4,999 please accept the payment request I am sending on your UPI app and enter your UPI PIN.",
+    },
+    {
+      label: "Digital arrest",
+      text: "This is Delhi Cyber Crime Branch. A parcel in your name contains illegal items. Join this video call immediately for verification or a non-bailable warrant will be issued. Do not tell anyone, this is a confidential investigation.",
+    },
+  ],
   languageLabel: "Language",
   emptyInputError: "Paste a message or upload a screenshot first.",
   networkError: "Could not reach Ruko. Check your internet and try again.",

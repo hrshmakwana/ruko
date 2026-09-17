@@ -347,6 +347,33 @@ Evening:
 
 ## Status
 
-- Done: brief written (planning, pre-event)
-- In progress: waiting for kickoff
-- Next: Thursday tasks
+Last updated: Thu 17 Sept, Day 1.
+
+**Done**
+- Repo initialised, local commits only (no GitHub repo yet — Harsh will say when to push)
+- SAM stack written and validated: HTTP API, `/health`, `/upload-url`, stubbed `/check` in en/hi/gu,
+  S3 uploads bucket, DynamoDB table, 7-day log retention, per-function least-privilege IAM
+- Frontend: landing page at `/`, app at `/check` — Check, Verdict and Golden-hour screens,
+  three languages, dark mode, road-sign design language
+- Verdict extended beyond a risk score: consequence chain, callback script, teach-me line,
+  complaint pack
+- `scripts/screenshot.mjs` — true-360px screenshots plus overflow and tap-target audit
+
+**Blocked / waiting**
+- **Deploy**: Harsh has asked to hold until the evening. Nothing has been deployed to AWS.
+- **Bedrock**: the AWS account is new and still in verification ("normally less than 2 hours").
+  Every Nova call fails until that clears. Retest, then wire the real model call.
+
+**Next**
+1. Retest Bedrock; wire the real Converse call once the account clears
+2. Rules engine + unit tests (the allowlist is the part that must not be wrong)
+3. Real `/check`: presigned upload, multimodal call, schema validation, rules combine
+4. DynamoDB `/report` + community counts + seed script
+5. Synthetic samples and `scripts/eval`
+6. Deploy backend, then frontend, when Harsh gives the go-ahead
+
+**Overrides in force (from Harsh, Day 1)**
+- Local commits only; do not create or push to GitHub until told
+- Region `us-east-1`; model `us.amazon.nova-2-lite-v1:0`, fallback `us.amazon.nova-lite-v1:0`
+- Real samples live in `~/ruko-samples` → copied to `samples/private/`, never committed
+- Ask before the first deploy, and list what it will create

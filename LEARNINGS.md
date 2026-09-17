@@ -18,3 +18,90 @@ scratch. The frontend is a plain static site that talks to the backend over HTTP
 
 **Private samples:** Harsh's real screenshots live in `samples/private/`, which is listed in
 `.gitignore` and never committed. Only synthetic samples go into the public repo.
+
+---
+
+## Day 1 — SAM backend skeleton
+
+**New:** First AWS SAM stack. One `template.yaml` describes an HTTP API, three Lambdas, an S3
+bucket, a DynamoDB table and three log groups. Region and Bedrock model id are **parameters**, so
+switching model is a config change and never a code change.
+
+**What broke:** Nothing, but two things were worth getting right up front. Log groups were declared
+explicitly, because a Lambda that creates its own log group keeps logs forever and quietly costs
+money; declaring them lets us set 7-day retention. And each function got its own narrow IAM policy
+instead of one shared role — the check function can invoke exactly one Bedrock model and read only
+the `uploads/` prefix.
+
+**How it works, plainly:** SAM is shorthand for CloudFormation. We write what we want, AWS works out
+how to build it, and the same file rebuilds the whole stack from nothing. `sam build` packages the
+Python; `sam deploy` compares the file to what already exists and changes only the difference. No
+Docker is needed because the functions use only `boto3`, which the Lambda runtime already has.
+
+---
+
+## Day 1 — Bedrock looked broken, wasn't
+
+**What broke:** Every Bedrock call failed with `ValidationException: Operation not allowed` — for
+Nova 2 Lite, Nova Lite *and* Nova Micro, and for both `InvokeModel` and `Converse`. The IAM user has
+AdministratorAccess, so it was not permissions. `get-foundation-model-availability` said
+`authorizationStatus: NOT_AUTHORIZED`, and the model-access form was rejected too.
+
+**How it was fixed:** The same call in **us-east-2** returned the honest error:
+*"Your account is currently being verified. Verification normally takes less than 2 hours."* The
+account is new. Nothing was misconfigured.
+
+**Lesson worth keeping:** when an AWS error is vague, try the identical call in another region — the
+error text is not always the same, and one region may tell you what the others won't.
+
+---
+
+## Day 1 — frontend, and a screenshot tool that lies
+
+**New:** React + Vite + TypeScript + Tailwind v4. Tailwind v4 has no config file: design tokens are
+declared in CSS with `@theme`, and semantic colours are plain custom properties that flip inside one
+`prefers-color-scheme` block, so light and dark are defined once.
+
+**What broke:** The app looked badly broken at 360px in every screenshot — content clipped off the
+right edge. It was not the app. **Headless Chrome refuses to open a window narrower than 500px**, so
+`--window-size=360` silently lays out at 500 and crops the image to 360. Two hours of "layout bug"
+that did not exist.
+
+**How it was fixed:** `scripts/screenshot.mjs` drives Chrome over the DevTools protocol and uses
+`Emulation.setDeviceMetricsOverride`, which gives a genuine 360px viewport. It now also reports
+horizontal overflow and any tap target under 44px on every shot, so accessibility is checked
+automatically rather than by eye.
+
+---
+
+## Day 1 — the product decision that changed the UI
+
+**What changed:** The first build showed a risk score and red flags. That is a *diagnosis*, and "88
+out of 100" means nothing to a 60-year-old. The verdict now also answers the question people
+actually have next:
+
+- **the consequence chain** — the scammer's plan in four steps, ending in the loss
+- **a callback script** — words to read out if they ring back
+- **a teach-me line** — how to spot this kind of message next time
+- **the complaint pack** — the complaint already written out, ready to paste into cybercrime.gov.in
+
+**How the design works, plainly:** Ruko means stop, so the interface speaks in road signs — a
+three-lamp signal head, a red octagon, marigold for caution. That means risk is carried by **shape
+and position as well as colour**, which is what accessibility guidance asks for and what makes it
+readable to someone who cannot read English. The checked message is shown as the chat bubble it
+arrived in, with the scam words marked in place and numbered to the explanation below, instead of a
+disconnected list of bullets.
+
+**Type:** one family, Anek, covers Latin, Devanagari and Gujarati, so all three languages sit at the
+same optical weight instead of looking like three different products.
+
+---
+
+## Day 1 — two pages instead of a router
+
+**New:** The site is a landing page at `/` and the app at `/check`, built as two real HTML entry
+points in `vite.config.ts` rather than one React app with a client-side router.
+
+**Why:** The landing page does not download the app bundle, and `/check` is a real file — so Amplify
+needs no SPA rewrite rule, and a hard refresh or a shared link cannot 404. The PWA `start_url` points
+at `/check`, so installing Ruko gives a clean app with no marketing page in front of it.

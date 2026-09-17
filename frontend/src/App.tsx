@@ -99,7 +99,11 @@ export default function App() {
             onBack={() => setScreen("check")}
           />
         ) : screen === "golden-hour" ? (
-          <GoldenHourScreen t={t} onBack={() => setScreen(verdict ? "verdict" : "check")} />
+          <GoldenHourScreen
+            t={t}
+            verdict={verdict}
+            onBack={() => setScreen(verdict ? "verdict" : "check")}
+          />
         ) : (
           <CheckScreen t={t} busy={busy} error={error} onCheck={handleCheck} onError={setError} />
         )}

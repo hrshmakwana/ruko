@@ -38,8 +38,7 @@ export function CheckScreen({ t, busy, error, onCheck, onError }: Props) {
       return;
     }
     try {
-      const prepared = await prepareImage(file);
-      setImage(prepared);
+      setImage(await prepareImage(file));
     } catch {
       onError(t.imageTypeError);
     }
@@ -55,13 +54,18 @@ export function CheckScreen({ t, busy, error, onCheck, onError }: Props) {
 
   return (
     <div className="space-y-5">
-      <header className="space-y-1.5">
-        <h1 className="text-[1.6rem] leading-tight font-bold">{t.checkHeading}</h1>
-        <p className="text-[0.95rem] text-muted">{t.checkSubheading}</p>
+      <header className="ruko-rise space-y-1.5">
+        <h1 className="text-[1.75rem] leading-tight font-extrabold tracking-tight">
+          {t.checkHeading}
+        </h1>
+        <p className="text-[0.98rem] text-muted">{t.checkSubheading}</p>
       </header>
 
-      <div className="rounded-2xl border border-line bg-surface p-4 shadow-sm">
-        <label htmlFor="message" className="block text-[0.9rem] font-semibold">
+      <div
+        className="ruko-rise rounded-3xl border border-line bg-surface p-4 shadow-sm"
+        style={{ "--rise-delay": "70ms" } as React.CSSProperties}
+      >
+        <label htmlFor="message" className="block text-[0.88rem] font-bold">
           {t.pasteLabel}
         </label>
         <textarea
@@ -72,23 +76,23 @@ export function CheckScreen({ t, busy, error, onCheck, onError }: Props) {
             if (error) onError(null);
           }}
           placeholder={t.pastePlaceholder}
-          rows={6}
+          rows={5}
           maxLength={4000}
-          className="mt-2 w-full resize-y rounded-xl border border-line bg-sunken p-3 text-[1rem] leading-relaxed text-ink placeholder:text-muted focus:border-action focus:outline-none"
+          className="mt-2 w-full resize-y rounded-2xl border border-line bg-sunken p-3.5 text-[1rem] leading-relaxed text-ink placeholder:text-muted focus:border-action focus:outline-none"
         />
 
         {image ? (
-          <div className="mt-3 flex items-start gap-3 rounded-xl border border-line bg-sunken p-3">
+          <div className="mt-3 flex items-start gap-3 rounded-2xl border border-line bg-sunken p-3">
             <img
               src={image.previewUrl}
               alt=""
-              className="h-20 w-20 shrink-0 rounded-lg object-cover"
+              className="h-20 w-20 shrink-0 rounded-xl object-cover"
             />
             <div className="flex min-w-0 flex-1 flex-col gap-2">
               <button
                 type="button"
                 onClick={() => fileInput.current?.click()}
-                className="min-h-[44px] rounded-lg border border-line bg-surface px-3 text-[0.9rem] font-semibold"
+                className="min-h-[44px] rounded-xl border border-line bg-surface px-3 text-[0.9rem] font-bold"
               >
                 {t.changeImageButton}
               </button>
@@ -98,7 +102,7 @@ export function CheckScreen({ t, busy, error, onCheck, onError }: Props) {
                   URL.revokeObjectURL(image.previewUrl);
                   setImage(null);
                 }}
-                className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg px-3 text-[0.9rem] font-semibold text-muted"
+                className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-3 text-[0.9rem] font-bold text-muted"
               >
                 <CrossIcon className="h-4 w-4" />
                 {t.removeImageButton}
@@ -109,9 +113,9 @@ export function CheckScreen({ t, busy, error, onCheck, onError }: Props) {
           <button
             type="button"
             onClick={() => fileInput.current?.click()}
-            className="mt-3 flex min-h-[56px] w-full items-center justify-center gap-2.5 rounded-xl border-2 border-dashed border-line bg-sunken px-4 text-[1rem] font-semibold text-ink"
+            className="mt-3 flex min-h-[58px] w-full items-center justify-center gap-2.5 rounded-2xl border-2 border-dashed border-line bg-sunken px-4 text-[1rem] font-bold text-ink"
           >
-            <UploadIcon className="h-6 w-6 text-action" />
+            <UploadIcon className="h-6 w-6" />
             {t.uploadButton}
           </button>
         )}
@@ -128,10 +132,33 @@ export function CheckScreen({ t, busy, error, onCheck, onError }: Props) {
         />
       </div>
 
+      {/* Real messages, so the first thing someone sees Ruko do is recognise a
+          scam they have actually received. */}
+      <div className="ruko-rise" style={{ "--rise-delay": "140ms" } as React.CSSProperties}>
+        <p className="mb-2 text-[0.78rem] font-bold uppercase tracking-wider text-muted">
+          {t.examplesLabel}
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {t.examples.map((example) => (
+            <button
+              key={example.label}
+              type="button"
+              onClick={() => {
+                setText(example.text);
+                onError(null);
+              }}
+              className="min-h-[44px] rounded-full border border-line bg-surface px-4 text-[0.88rem] font-bold text-ink"
+            >
+              {example.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {error && (
         <p
           role="alert"
-          className="rounded-xl border border-red-line bg-red-tint px-4 py-3 text-[0.95rem] font-medium text-red-ink"
+          className="rounded-2xl border-2 border-red-line bg-red-tint px-4 py-3 text-[0.95rem] font-semibold text-red-ink"
         >
           {error}
         </p>
@@ -141,18 +168,19 @@ export function CheckScreen({ t, busy, error, onCheck, onError }: Props) {
         type="button"
         onClick={submit}
         disabled={busy}
-        className="min-h-[60px] w-full rounded-2xl bg-action px-5 text-[1.15rem] font-bold text-on-action shadow-sm transition-opacity disabled:opacity-60"
+        className="ruko-rise min-h-[62px] w-full rounded-2xl bg-action px-5 text-[1.2rem] font-extrabold text-on-action shadow-sm transition-opacity disabled:opacity-60"
+        style={{ "--rise-delay": "210ms" } as React.CSSProperties}
       >
         {busy ? t.checkingButton : t.checkButton}
       </button>
 
       <p className="flex items-start justify-center gap-2 text-center text-[0.9rem] text-muted">
-        <ShieldIcon className="mt-0.5 h-5 w-5 shrink-0 text-action" />
+        <ShieldIcon className="mt-0.5 h-5 w-5 shrink-0" />
         <span>{t.privacyNote}</span>
       </p>
 
       {IS_MOCK && (
-        <p className="rounded-lg bg-sunken px-3 py-2 text-center text-[0.75rem] text-muted">
+        <p className="rounded-xl bg-sunken px-3 py-2 text-center text-[0.75rem] text-muted">
           Demo mode — no API connected yet (VITE_API_URL is unset).
         </p>
       )}

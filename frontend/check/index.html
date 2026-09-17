@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Ruko — before you pay, click, or call back</title>
+    <title>Ruko — is this a scam?</title>
     <meta
       name="description"
-      content="Ruko checks whether a message, link, UPI ID or screenshot is a scam, shows you the words that gave it away, and tells you what to do next — in English, Hindi or Gujarati."
+      content="Paste a message or upload a screenshot and Ruko tells you whether it looks like a scam, and why — in English, Hindi or Gujarati."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -16,19 +16,13 @@
     />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" content="#101d2b" />
+    <meta name="theme-color" content="#f4efe7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a141f" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Ruko" />
-
-    <meta property="og:title" content="Ruko — before you pay, click, or call back" />
-    <meta
-      property="og:description"
-      content="Paste a suspicious message or screenshot. Ruko tells you if it is a scam, why, and what to do next — in English, Hindi or Gujarati."
-    />
-    <meta property="og:type" content="website" />
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/landing-main.tsx"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
