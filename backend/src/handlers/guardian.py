@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import re
 
-from ruko import family
+from ruko import family, notify
 from ruko.auth import bearer_from, hash_password, issue_token, read_token, verify_password
 from ruko.http import LOG, ApiError, handler_wrapper, parse_json_body, response
 
@@ -60,13 +60,19 @@ def signup(event, context):  # noqa: ANN001, ARG001
     if error or not item:
         raise ApiError(500, "signup_failed", "Could not create the account. Please try again.")
 
-    LOG.info("guardian_signup family=%s", item["family_code"])
+    # Email alerts need a confirmed SNS subscription. AWS sends the
+    # confirmation; until they click it, SNS drops messages silently, so the
+    # dashboard tells them to look for it rather than letting them assume.
+    subscribed = notify.subscribe_guardian(email, item["family_code"]) is not None
+
+    LOG.info("guardian_signup family=%s subscribed=%s", item["family_code"], subscribed)
     return response(
         201,
         {
             "token": issue_token(item["pk"], item["family_code"]),
             "family_code": item["family_code"],
             "email_masked": item["email_masked"],
+            "email_pending": subscribed,
         },
     )
 

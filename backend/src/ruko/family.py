@@ -25,6 +25,7 @@ import uuid
 
 import boto3
 
+from . import notify
 from .http import LOG
 
 MAX_ALERTS = 20
@@ -174,6 +175,9 @@ def add_alert(code: str, alert: dict) -> str | None:
             }
         )
         LOG.info("alert_added family=%s kind=%s id=%s", code, entry["kind"], alert_id)
+        # Email as well as the in-app feed: the dashboard alarm only fires if
+        # the dashboard happens to be open, and usually it will not be.
+        notify.publish_alert(code, entry)
         return alert_id
     except Exception as exc:  # noqa: BLE001
         LOG.warning("alert_write_failed type=%s", type(exc).__name__)

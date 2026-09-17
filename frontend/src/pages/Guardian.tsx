@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ScamIcon, OkIcon, CrossIcon, ShieldIcon } from "../components/Icons";
+import { ScamIcon, OkIcon, CrossIcon, ShieldIcon, SuspiciousIcon } from "../components/Icons";
 import { primeAlarm, startAlarm, vibrate } from "../lib/alarm";
 import {
   fetchAlerts,
@@ -33,6 +33,13 @@ export default function Guardian() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState<"stop" | "safe" | null>(null);
+  const [emailDismissed, setEmailDismissed] = useState(() => {
+    try {
+      return localStorage.getItem("ruko.guardian.emailNoticeDone") === "1";
+    } catch {
+      return false;
+    }
+  });
   const lastSeen = useRef<number>(0);
 
   const poll = useCallback(async () => {
@@ -128,6 +135,37 @@ export default function Guardian() {
             Copy code
           </button>
         </section>
+
+        {/* SNS drops mail to an unconfirmed address silently, so say it rather
+            than letting them assume they are covered. */}
+        {!emailDismissed && (
+          <section className="flex items-start gap-3 rounded-2xl border-2 border-amber-line bg-amber-tint p-4">
+            <SuspiciousIcon className="mt-0.5 h-6 w-6 shrink-0 text-amber" />
+            <div className="min-w-0 flex-1">
+              <p className="text-[0.98rem] font-bold text-amber-ink">
+                Confirm your email to get alerts when this page is closed
+              </p>
+              <p className="mt-1 text-[0.88rem] text-amber-ink/85">
+                AWS has sent you a “Subscription Confirmation” email. Tap the link in it once, and
+                we can reach you even when Ruko is not open.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmailDismissed(true);
+                  try {
+                    localStorage.setItem("ruko.guardian.emailNoticeDone", "1");
+                  } catch {
+                    /* private browsing */
+                  }
+                }}
+                className="mt-2 inline-flex min-h-[44px] items-center text-[0.88rem] font-bold text-amber-ink underline"
+              >
+                I have confirmed it
+              </button>
+            </div>
+          </section>
+        )}
 
         {live.length > 0 && (
           <section className="ruko-slam rounded-3xl border-2 border-transparent bg-red-panel p-5 text-white">

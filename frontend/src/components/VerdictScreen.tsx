@@ -1,7 +1,8 @@
 import type { Strings } from "../i18n";
 import { screenshotFor } from "../i18n/screenshot";
+import { whatsappWarningUrl } from "../i18n/warn";
 import type { Verdict } from "../types";
-import { ArrowLeftIcon, CrossIcon, OkIcon, SuspiciousIcon } from "./Icons";
+import { ArrowLeftIcon, CrossIcon, OkIcon, SuspiciousIcon, WhatsAppIcon } from "./Icons";
 import { MessageBubble } from "./MessageBubble";
 import { SignalBanner } from "./SignalBanner";
 import { ConsequenceChain, ScriptCard, TeachCard } from "./VerdictParts";
@@ -208,6 +209,23 @@ export function VerdictScreen({
           >
             {t.alreadyPaidButton}
           </button>
+          {/* People already forward scams to the family group. This gives them
+              the warning to forward instead of the scam itself. */}
+          {verdict.risk_level !== "no_scam_signs" && (
+            <a
+              href={whatsappWarningUrl(
+                verdict.language,
+                verdict.headline,
+                t.scamTypes[verdict.scam_type],
+              )}
+              target="_blank"
+              rel="noreferrer"
+              className="flex min-h-[54px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-green-line bg-green-tint px-5 text-[1.02rem] font-bold text-green-ink"
+            >
+              <WhatsAppIcon className="h-5 w-5" />
+              {t.warnFamilyButton}
+            </a>
+          )}
           <button
             type="button"
             onClick={onReport}

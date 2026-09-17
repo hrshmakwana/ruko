@@ -30,6 +30,11 @@ Parameters:
       The underlying foundation model behind BedrockModelId. Used only to scope the
       IAM policy. Must be kept in step with BedrockModelId.
 
+  AppUrl:
+    Type: String
+    Default: "https://main.d1qvcci82uzrvx.amplifyapp.com"
+    Description: Public site URL, used for the link inside guardian alert emails.
+
   AllowedOrigins:
     Type: CommaDelimitedList
     Default: "*"
@@ -49,6 +54,8 @@ Globals:
         UPLOADS_BUCKET: !Ref UploadsBucket
         BEDROCK_REGION: !Ref BedrockRegion
         BEDROCK_MODEL_ID: !Ref BedrockModelId
+        ALERT_TOPIC_ARN: !Ref AlertTopic
+        APP_URL: !Ref AppUrl
         LOG_LEVEL: INFO
 
 Resources:
@@ -100,6 +107,15 @@ Resources:
             AllowedOrigins: !Ref AllowedOrigins
             AllowedHeaders: ["*"]
             MaxAge: 300
+
+  # One topic for every family. Each guardian's subscription carries a filter
+  # policy on family_code, so SNS does the routing and Ruko never keeps a list
+  # of who to email. Free tier covers 1,000 emails a month.
+  AlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub "ruko-alerts-${Stage}"
+      DisplayName: Ruko
 
   RukoTable:
     Type: AWS::DynamoDB::Table
@@ -163,6 +179,12 @@ Resources:
               Action:
                 - textract:DetectDocumentText
               Resource: "*"
+        - Statement:
+            - Sid: EmailGuardians
+              Effect: Allow
+              Action:
+                - sns:Publish
+              Resource: !Ref AlertTopic
         - DynamoDBCrudPolicy:
             TableName: !Ref RukoTable
       Events:
@@ -228,6 +250,12 @@ Resources:
       Timeout: 15
       MemorySize: 512
       Policies:
+        - Statement:
+            - Sid: SubscribeGuardianEmail
+              Effect: Allow
+              Action:
+                - sns:Subscribe
+              Resource: !Ref AlertTopic
         - DynamoDBCrudPolicy:
             TableName: !Ref RukoTable
       Events:
@@ -343,6 +371,12 @@ Resources:
       Timeout: 10
       MemorySize: 256
       Policies:
+        - Statement:
+            - Sid: EmailGuardians
+              Effect: Allow
+              Action:
+                - sns:Publish
+              Resource: !Ref AlertTopic
         - DynamoDBCrudPolicy:
             TableName: !Ref RukoTable
       Events:
@@ -436,6 +470,8 @@ Outputs:
   ApiUrl:
     Description: Base URL of the Ruko API
     Value: !Sub "https://${RukoApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}"
+  AlertTopicArn:
+    Value: !Ref AlertTopic
   TableName:
     Value: !Ref RukoTable
   UploadsBucketName:
