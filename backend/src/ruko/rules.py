@@ -20,6 +20,7 @@ from .allowlist import (
     URL_SHORTENERS,
     bait_words_in_domain,
     brands_in_domain,
+    primary_domain,
     is_official,
 )
 
@@ -351,7 +352,7 @@ def run_rules(
         brands = brands_in_domain(domain)
         if brands:
             brand = brands[0]
-            real = sorted(BRAND_DOMAINS[brand])[0]
+            real = primary_domain(brand)
             tld = domain.rsplit(".", 1)[-1]
             # A brand name plus bait ("sbi-kyc-verify") is not ambiguous. A brand
             # name on its own might just be a company domain we have not listed,

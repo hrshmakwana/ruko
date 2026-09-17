@@ -110,6 +110,39 @@ BRAND_DOMAINS: dict[str, frozenset[str]] = {
 
 BRAND_TOKENS = tuple(BRAND_DOMAINS)
 
+# The domain to name when telling someone "the real one is ___". Alphabetical
+# order would offer onlinesbi.com for SBI, which is real but is not the address
+# people are told to remember.
+BRAND_PRIMARY: dict[str, str] = {
+    "sbi": "sbi.co.in",
+    "hdfc": "hdfcbank.com",
+    "icici": "icicibank.com",
+    "axis": "axisbank.com",
+    "kotak": "kotak.com",
+    "paytm": "paytm.com",
+    "phonepe": "phonepe.com",
+    "npci": "npci.org.in",
+    "bhim": "bhimupi.org.in",
+    "uidai": "uidai.gov.in",
+    "aadhaar": "uidai.gov.in",
+    "incometax": "incometax.gov.in",
+    "epfo": "epfindia.gov.in",
+    "indiapost": "indiapost.gov.in",
+    "amazon": "amazon.in",
+    "flipkart": "flipkart.com",
+    "airtel": "airtel.in",
+    "jio": "jio.com",
+    "irctc": "irctc.co.in",
+    "rbi": "rbi.org.in",
+}
+
+
+def primary_domain(brand: str) -> str:
+    """The address worth telling someone to remember for this brand."""
+    if brand in BRAND_PRIMARY:
+        return BRAND_PRIMARY[brand]
+    return sorted(BRAND_DOMAINS[brand])[0]
+
 # Every official domain in one set, so a brand word borrowed by another brand's
 # real domain (say "amazonpay.in" containing "pay") is never flagged.
 OFFICIAL_DOMAINS: frozenset[str] = frozenset().union(*BRAND_DOMAINS.values())

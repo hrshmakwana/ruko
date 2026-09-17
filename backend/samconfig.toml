@@ -17,4 +17,4 @@ confirm_changeset = false
 fail_on_empty_changeset = false
 resolve_s3 = true
 s3_prefix = "ruko"
-parameter_overrides = "Stage=\"prod\" BedrockRegion=\"us-east-1\" BedrockModelId=\"us.amazon.nova-2-lite-v1:0\" BedrockFoundationModelId=\"amazon.nova-2-lite-v1:0\""
+parameter_overrides = "Stage=\"prod\" BedrockRegion=\"us-east-1\" BedrockModelId=\"us.amazon.nova-2-lite-v1:0\" BedrockFoundationModelId=\"amazon.nova-2-lite-v1:0\" AllowedOrigins=\"https://main.d1qvcci82uzrvx.amplifyapp.com,http://localhost:5173,http://localhost:4173\""
