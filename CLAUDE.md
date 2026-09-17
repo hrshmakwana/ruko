@@ -347,40 +347,36 @@ Evening:
 
 ## Status
 
-Last updated: Thu 17 Sept, Day 1 evening.
+Last updated: Thu 17 Sept, Day 1 afternoon.
 
-**Done (7 local commits, nothing pushed to GitHub)**
-- SAM stack: HTTP API, `/health`, `/upload-url`, `/check`, `/report`, S3 uploads bucket,
-  DynamoDB table with TTL, 7-day log retention, per-function least-privilege IAM
-- Rules engine: extraction, official-domain allowlist, brand lookalike, punycode, raw IP,
-  shorteners, .apk, risky TLDs, OTP/PIN requests, UPI collect trap, high-risk phrases in
-  en/hi/gu/Hinglish, community hits. Every reason translated into all three languages.
-- Real `/check` pipeline with `final_score = max(model_score, rules_floor)`
-- `/report`, idempotent per check; indicators stored as SHA-256 + masked display only
-- Frontend: landing page at `/`, app at `/check`. Check, Verdict and Golden-hour screens,
-  road-sign design language, three languages, dark mode
-- Verdict carries the consequence chain, callback script, teach-me line and complaint pack
-- 149 unit tests; 19 samples; `scripts/eval.py`, `scripts/seed.py`, `scripts/screenshot.mjs`
+**Live**
+- Site: https://main.d1qvcci82uzrvx.amplifyapp.com (app at `/check`, guardian at `/guardian`)
+- API: https://ep3lukybhg.execute-api.us-east-1.amazonaws.com/prod
 
-**Eval, rules only (Bedrock unavailable):** 19/19 level accuracy, 17/19 scam type,
-**0 missed scams, 0 false alarms.**
+**Done (18 local commits, nothing pushed to GitHub)**
+- Check: text + screenshot. Screenshots are OCR'd with Textract so the rules run on them
+- Rules engine + allowlist; `final_score = max(model_score, rules_floor)`
+- 15 languages end to end (dropdown, Urdu RTL), incl. rule reasons and fallback text
+- Report + community counts (seeded); golden hour + complaint pack
+- Verdict extras: consequence chain, callback script, teach-me line
+- Guardian side: login, family code, auto-alerts, press-and-hold panic button,
+  STOP/"it is fine" pushed to the parent's screen, alarm, SNS email alerts
+- Warn my family (WhatsApp share); landing page; README + Mermaid diagram
+- 323 tests; eval 19/19, 0 missed scams, 0 false alarms (rules only)
 
-**Blocked**
-- **Bedrock**: `authorizationStatus: NOT_AUTHORIZED` on this account since kickoff. The
-  model-access form is refused with "create a support case". Not a code or IAM problem —
-  the IAM user has AdministratorAccess. Needs Harsh to raise a support case, or more time.
-- **Deploy**: waiting on Harsh's go-ahead. Nothing has been deployed to AWS.
+**Blocked on Harsh (evening)**
+- Bedrock: account not authorised; needs a support case or hackathon credits check
+- GitHub: create the public repo and push
 
 **Next**
-1. Deploy the backend, then Amplify, when Harsh says go
-2. Seed the table, run the eval against the deployed API
-3. Flip the model on the moment Bedrock access lands (parameter change, no logic change)
-4. Guardian email (SNS), WhatsApp warning share, Web Share Target
-5. Mermaid architecture diagram and the README writeup
+1. Lookup mode (check a bare number/UPI before calling back)
+2. Read it aloud; proper PWA install (PNG icons + service worker); Web Share Target
+3. Landing page in all 15 languages
+4. Roadmap slide for the native-only parts (call screening, SMS filtering)
 
 **Overrides in force (from Harsh, Day 1)**
-- Local commits only; do not create or push to GitHub until told
+- Local commits only; do not push to GitHub until told
+- Zero-spend goal: stay inside free tier; Bedrock (~₹40 for the demo) is the only paid item
 - Region `us-east-1`; model `us.amazon.nova-2-lite-v1:0`, fallback `us.amazon.nova-lite-v1:0`
-- Real samples live in `~/ruko-samples` -> copied to `samples/private/`, never committed
-- Ask before the first deploy, and list what it will create
+- Real samples in `~/ruko-samples` -> `samples/private/`, never committed
 - No statistics on the landing page until the sources are verified
