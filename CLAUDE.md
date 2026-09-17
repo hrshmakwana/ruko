@@ -347,33 +347,40 @@ Evening:
 
 ## Status
 
-Last updated: Thu 17 Sept, Day 1.
+Last updated: Thu 17 Sept, Day 1 evening.
 
-**Done**
-- Repo initialised, local commits only (no GitHub repo yet — Harsh will say when to push)
-- SAM stack written and validated: HTTP API, `/health`, `/upload-url`, stubbed `/check` in en/hi/gu,
-  S3 uploads bucket, DynamoDB table, 7-day log retention, per-function least-privilege IAM
-- Frontend: landing page at `/`, app at `/check` — Check, Verdict and Golden-hour screens,
-  three languages, dark mode, road-sign design language
-- Verdict extended beyond a risk score: consequence chain, callback script, teach-me line,
-  complaint pack
-- `scripts/screenshot.mjs` — true-360px screenshots plus overflow and tap-target audit
+**Done (7 local commits, nothing pushed to GitHub)**
+- SAM stack: HTTP API, `/health`, `/upload-url`, `/check`, `/report`, S3 uploads bucket,
+  DynamoDB table with TTL, 7-day log retention, per-function least-privilege IAM
+- Rules engine: extraction, official-domain allowlist, brand lookalike, punycode, raw IP,
+  shorteners, .apk, risky TLDs, OTP/PIN requests, UPI collect trap, high-risk phrases in
+  en/hi/gu/Hinglish, community hits. Every reason translated into all three languages.
+- Real `/check` pipeline with `final_score = max(model_score, rules_floor)`
+- `/report`, idempotent per check; indicators stored as SHA-256 + masked display only
+- Frontend: landing page at `/`, app at `/check`. Check, Verdict and Golden-hour screens,
+  road-sign design language, three languages, dark mode
+- Verdict carries the consequence chain, callback script, teach-me line and complaint pack
+- 149 unit tests; 19 samples; `scripts/eval.py`, `scripts/seed.py`, `scripts/screenshot.mjs`
 
-**Blocked / waiting**
-- **Deploy**: Harsh has asked to hold until the evening. Nothing has been deployed to AWS.
-- **Bedrock**: the AWS account is new and still in verification ("normally less than 2 hours").
-  Every Nova call fails until that clears. Retest, then wire the real model call.
+**Eval, rules only (Bedrock unavailable):** 19/19 level accuracy, 17/19 scam type,
+**0 missed scams, 0 false alarms.**
+
+**Blocked**
+- **Bedrock**: `authorizationStatus: NOT_AUTHORIZED` on this account since kickoff. The
+  model-access form is refused with "create a support case". Not a code or IAM problem —
+  the IAM user has AdministratorAccess. Needs Harsh to raise a support case, or more time.
+- **Deploy**: waiting on Harsh's go-ahead. Nothing has been deployed to AWS.
 
 **Next**
-1. Retest Bedrock; wire the real Converse call once the account clears
-2. Rules engine + unit tests (the allowlist is the part that must not be wrong)
-3. Real `/check`: presigned upload, multimodal call, schema validation, rules combine
-4. DynamoDB `/report` + community counts + seed script
-5. Synthetic samples and `scripts/eval`
-6. Deploy backend, then frontend, when Harsh gives the go-ahead
+1. Deploy the backend, then Amplify, when Harsh says go
+2. Seed the table, run the eval against the deployed API
+3. Flip the model on the moment Bedrock access lands (parameter change, no logic change)
+4. Guardian email (SNS), WhatsApp warning share, Web Share Target
+5. Mermaid architecture diagram and the README writeup
 
 **Overrides in force (from Harsh, Day 1)**
 - Local commits only; do not create or push to GitHub until told
 - Region `us-east-1`; model `us.amazon.nova-2-lite-v1:0`, fallback `us.amazon.nova-lite-v1:0`
-- Real samples live in `~/ruko-samples` → copied to `samples/private/`, never committed
+- Real samples live in `~/ruko-samples` -> copied to `samples/private/`, never committed
 - Ask before the first deploy, and list what it will create
+- No statistics on the landing page until the sources are verified
