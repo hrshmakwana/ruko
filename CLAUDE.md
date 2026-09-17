@@ -353,7 +353,7 @@ Last updated: Thu 17 Sept, Day 1 evening.
 - Site: https://main.d1qvcci82uzrvx.amplifyapp.com (app at `/check`, guardian at `/guardian`)
 - API: https://ep3lukybhg.execute-api.us-east-1.amazonaws.com/prod
 
-**Done (local commits only, nothing pushed to GitHub)**
+**Done** (public repo: https://github.com/hrshmakwana/ruko)
 - Check: text + screenshot. Screenshots are OCR'd with Textract so the rules run on them
 - Rules engine + allowlist; `final_score = max(model_score, rules_floor)`
 - 15 languages end to end (dropdown, Urdu RTL), incl. rule reasons and fallback text
@@ -368,7 +368,6 @@ Last updated: Thu 17 Sept, Day 1 evening.
 
 **Blocked on Harsh (evening)**
 - Bedrock: account not authorised; needs a support case or hackathon credits check
-- GitHub: create the public repo and push
 
 **Next**
 1. Screenshot samples in the eval, incl. an injection screenshot
@@ -377,7 +376,7 @@ Last updated: Thu 17 Sept, Day 1 evening.
 4. Roadmap slide for the native-only parts (call screening, SMS filtering)
 
 **Overrides in force (from Harsh, Day 1)**
-- Local commits only; do not push to GitHub until told
+- Repo is public; commit and push after each milestone (Harsh approved the push, Day 1 evening)
 - Zero-spend goal: stay inside free tier; Bedrock (~₹40 for the demo) is the only paid item
 - Region `us-east-1`; model `us.amazon.nova-2-lite-v1:0`, fallback `us.amazon.nova-lite-v1:0`
 - Real samples in `~/ruko-samples` -> `samples/private/`, never committed
