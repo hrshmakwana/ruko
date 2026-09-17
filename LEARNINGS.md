@@ -148,3 +148,36 @@ talk a regular expression round, so the floor holds and the verdict stays "scam"
 **Worth saying out loud:** the 100% is on nineteen samples we wrote ourselves. It
 shows the rules cover the patterns we targeted; it is not a claim about the real
 world. Harsh's real screenshots in `samples/private/` are the harder test.
+
+---
+
+## Day 1 evening — screenshots, guardian email, lookup mode
+
+**What broke (the worst one):** a blatant fake-SBI *screenshot* came back as "no scam signs".
+The image could only be read by the model; with Bedrock unavailable nothing read it, the rules saw
+an empty string, and Ruko reassured someone about a scam it never looked at.
+
+**How it was fixed:** every screenshot is now OCR'd with **Amazon Textract** first, and the rules run
+on the words it reads — so the deterministic layer covers pictures too. And when something genuinely
+cannot be read, Ruko says "could not read this screenshot" instead of anything reassuring.
+
+**Also found by testing lookup mode:** "+91 98765 43210" was not recognised as a phone number. The
+five-and-five split is how Indian mobiles are normally written, so scam SMS numbers written that way
+never matched the community counts either — in the main check, not just lookup. And a grammar bug:
+"This is not a AXIS website" (AXIS, ICICI, Amazon, IRCTC, Airtel all start with a vowel). Rephrased
+to "not the real AXIS website", which needs no article.
+
+**How guardian email works, plainly:** there is one SNS topic for everyone. Each guardian's email
+subscription carries a filter that says "only send me messages whose family_code is mine". When an
+alert is published, it carries the family code as a label, and SNS delivers it only to matching
+subscribers — so Ruko never has to keep a list of who to email. The email has the headline and a link,
+never the message itself.
+
+**How lookup mode works, plainly:** it reuses the same /check endpoint. Typing a bare number, UPI ID
+or website runs the same extraction, rules and community lookup, and the app shows a compact answer
+instead of a full verdict. A number with no reports is shown as "no reports yet — that does not make
+it safe", never as safe.
+
+**Bedrock:** still blocked. Ireland finally gave the real reason — the account is stuck in AWS's new-
+account verification, and after 2+ hours the documented fix is emailing aws-verification@amazon.com.
+Hackathon credits pay the bill but do not grant model access.

@@ -17,7 +17,7 @@ from __future__ import annotations
 REASONS: dict[str, dict[str, str]] = {
     "en": {
         "link.shortener": "A shortened link hides where it really goes. Never open one from a message you did not expect.",
-        "link.brand_lookalike": "This is not a {brand} website. The real one is {real}.",
+        "link.brand_lookalike": "This is not the real {brand} website. The real one is {real}.",
         "link.punycode": "This address uses look-alike letters from another alphabet to imitate a real site.",
         "link.risky_tld": "Addresses ending in .{tld} are cheap to buy and are used for scams far more than anything else.",
         "link.raw_ip": "A real company never sends you a bare numeric address instead of a website name.",

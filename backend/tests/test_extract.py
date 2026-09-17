@@ -1,3 +1,5 @@
+import pytest
+
 from ruko.extract import (
     extract_all,
     extract_amounts,
@@ -111,3 +113,40 @@ def test_extract_all_shape():
     assert got["upi_ids"] == ["scam@ybl"]
     assert got["phone_numbers"] == ["9876543210"]
     assert got["domains"] == ["kyc-sbi.xyz"]
+
+
+class TestPhoneFormatsPeopleActuallyUse:
+    """Found by lookup mode: "+91 98765 43210" was not recognised as a number.
+    That five-and-five split is how Indian mobiles are usually written, so a
+    scam SMS saying "call 98765 43210" never matched the community counts."""
+
+    @pytest.mark.parametrize(
+        "written",
+        [
+            "98765 43210",
+            "98765-43210",
+            "+91 98765 43210",
+            "+91-98765-43210",
+            "+919876543210",
+            "0 98765 43210",
+            "987 654 3210",
+            "9876543210",
+        ],
+    )
+    def test_recognised_and_normalised(self, written):
+        assert extract_phone_numbers(f"call {written} now") == ["9876543210"]
+
+    def test_two_numbers_in_one_message(self):
+        found = extract_phone_numbers("call 98765 43210 or 91234 56780")
+        assert found == ["9876543210", "9123456780"]
+
+    def test_long_reference_numbers_still_ignored(self):
+        assert extract_phone_numbers("UTR 402398765432101") == []
+
+    def test_known_tradeoff_spaced_digit_groups(self):
+        """A reference written as spaced groups ("12345 67890 12345") can yield
+        a phantom number. Accepted on purpose: guarding against it also breaks
+        two real numbers separated by a space, and a phantom number has no
+        community reports, so it can never raise the risk score. Missing real
+        spaced numbers was the harm worth fixing."""
+        assert extract_phone_numbers("ref 12345 67890 12345") == ["6789012345"]

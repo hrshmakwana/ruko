@@ -264,3 +264,13 @@ class TestNoFalseAlarms:
         """Stating an OTP and warning you not to share it is the opposite of a scam."""
         text = "123456 is your OTP. Do not share this OTP with anyone. -HDFC Bank"
         assert "payment.otp_request" not in check(text).ids
+
+
+class TestBrandMessageGrammar:
+    @pytest.mark.parametrize("domain", ["axis-kyc.xyz", "icici-login.xyz", "amazon-prize.xyz", "irctc-refund.xyz", "airtel-kyc.xyz"])
+    def test_no_a_before_a_vowel_brand(self, domain):
+        """"This is not a AXIS website" reads as broken to exactly the people
+        whose trust Ruko needs. The phrasing now needs no article at all."""
+        reasons = [h.reason for h in check(f"go to http://{domain}").hits if h.id == "link.brand_lookalike"]
+        assert reasons, f"expected a lookalike hit for {domain}"
+        assert " a A" not in reasons[0] and " a I" not in reasons[0], reasons[0]

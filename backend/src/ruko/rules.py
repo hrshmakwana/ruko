@@ -363,7 +363,7 @@ def run_rules(
                 RuleHit(
                     "link.brand_lookalike",
                     "high" if baited else "medium",
-                    f"This is not a {brand.upper()} website. The real one is {real}.",
+                    f"This is not the real {brand.upper()} website. The real one is {real}.",
                     domain,
                     scam_type=(
                         "kyc_update"

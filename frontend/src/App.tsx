@@ -4,12 +4,14 @@ import { DirectiveOverlay } from "./components/DirectiveOverlay";
 import { FamilyPanel } from "./components/FamilyPanel";
 import { GoldenHourScreen } from "./components/GoldenHourScreen";
 import { LanguageSelect } from "./components/LanguageSelect";
+import { LookupPanel } from "./components/LookupPanel";
 import { Loading } from "./components/Loading";
 import { PanicButton } from "./components/PanicButton";
 import { ScamIcon } from "./components/Icons";
 import { VerdictScreen } from "./components/VerdictScreen";
 import { applyLanguage, dictionaries, loadLanguage, saveLanguage } from "./i18n";
 import { familyFor } from "./i18n/family";
+import { lookupFor } from "./i18n/lookup";
 import { ApiError, checkMessage, reportScam, uploadImage } from "./lib/api";
 import { loadFamilyCode } from "./lib/guardian";
 import { useDirective } from "./lib/useDirective";
@@ -28,9 +30,15 @@ export default function App() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [reported, setReported] = useState(false);
   const [familyCode, setFamilyCode] = useState<string | null>(loadFamilyCode);
+  // /check?mode=lookup opens straight into lookup, so a link can say "check a
+  // number" and land on the right tab.
+  const [mode, setMode] = useState<"message" | "lookup">(() =>
+    new URLSearchParams(window.location.search).get("mode") === "lookup" ? "lookup" : "message",
+  );
 
   const t = dictionaries[language];
   const f = familyFor(language);
+  const l = lookupFor(language);
   const { directive, dismiss } = useDirective(familyCode);
 
   function changeLanguage(next: Language) {
@@ -130,7 +138,40 @@ export default function App() {
           />
         ) : (
           <div className="space-y-5">
-            <CheckScreen t={t} busy={busy} error={error} onCheck={handleCheck} onError={setError} />
+            {/* Two questions people actually bring: "is this message a scam?"
+                and "is it safe to call this number back?" */}
+            <div
+              role="tablist"
+              aria-label={l.modeMessage + " / " + l.modeLookup}
+              className="grid grid-cols-2 gap-1 rounded-2xl bg-sunken p-1 ring-1 ring-line"
+            >
+              {(["message", "lookup"] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  role="tab"
+                  aria-selected={mode === option}
+                  onClick={() => setMode(option)}
+                  className={`min-h-[48px] rounded-xl px-3 text-[0.98rem] font-bold transition-colors ${
+                    mode === option ? "bg-surface text-ink shadow-sm" : "text-muted"
+                  }`}
+                >
+                  {option === "message" ? l.modeMessage : l.modeLookup}
+                </button>
+              ))}
+            </div>
+
+            {mode === "message" ? (
+              <CheckScreen
+                t={t}
+                busy={busy}
+                error={error}
+                onCheck={handleCheck}
+                onError={setError}
+              />
+            ) : (
+              <LookupPanel t={t} l={l} language={language} />
+            )}
             {familyCode && <PanicButton f={f} code={familyCode} language={language} />}
             <FamilyPanel f={f} code={familyCode} onChange={setFamilyCode} />
           </div>

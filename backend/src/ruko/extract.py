@@ -56,8 +56,12 @@ _UPI_RE = re.compile(r"(?i)\b([a-z0-9][a-z0-9._-]{1,63})@([a-z][a-z0-9]{1,31})\b
 _PHONE_RE = re.compile(
     r"""(?x)
     (?<![0-9])
-    (?:\+?91[\s-]?|0)?          # optional country code or trunk 0
-    ([6-9]\d{9})                # Indian mobile numbers start 6-9
+    (?:\+?91[\s-]?|0[\s-]?)?     # optional country code or trunk 0
+    (                            # Indian mobiles start 6-9, and are written
+      [6-9]\d{4}[\s-]?\d{5}       #   98765 43210   (the usual way)
+      |[6-9]\d{2}[\s-]?\d{3}[\s-]?\d{4}  #   987 654 3210
+      |[6-9]\d{9}                #   9876543210
+    )
     (?![0-9])
     """
 )
@@ -145,7 +149,8 @@ def extract_phone_numbers(text: str) -> list[str]:
     """Indian mobile numbers, normalised to the last 10 digits."""
     found: list[str] = []
     for match in _PHONE_RE.finditer(text):
-        number = match.group(1)
+        # "98765 43210" and "98765-43210" are the same number as "9876543210".
+        number = re.sub(r"\D", "", match.group(1))
         if number not in found:
             found.append(number)
     return found

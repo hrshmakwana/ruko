@@ -13,7 +13,9 @@
  *                               [--type=<selector>:<text>] [--wait=<ms>]
  */
 import { spawn } from "node:child_process";
-import { writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const CHROME =
   process.env.CHROME_PATH ??
@@ -35,6 +37,8 @@ const width = Number(flag("width", 360));
 const height = Number(flag("height", 800));
 const waitMs = Number(flag("wait", 1200));
 
+const profileDir = mkdtempSync(join(tmpdir(), "ruko-shot-"));
+
 const chrome = spawn(
   CHROME,
   [
@@ -43,7 +47,9 @@ const chrome = spawn(
     "--hide-scrollbars",
     "--no-first-run",
     `--remote-debugging-port=${PORT}`,
-    "--user-data-dir=/tmp/ruko-shot-profile",
+    // A fresh profile per run: a shared one races when shots run back to back
+    // and the previous Chrome has not finished letting go of it.
+    `--user-data-dir=${profileDir}`,
     "about:blank",
   ],
   { stdio: "ignore" },
@@ -156,6 +162,18 @@ if (clickArg) {
   }
 }
 
+// --wait-gone="Looking it up" polls until that text has left the page, so a
+// slow or cold API response is waited for rather than photographed mid-flight.
+const waitGone = flag("wait-gone", null);
+if (waitGone) {
+  for (let i = 0; i < 60; i++) {
+    const r = await evaluate(`document.body.innerText.includes(${JSON.stringify(waitGone)})`);
+    if (r.result?.value === false) break;
+    await sleep(250);
+  }
+  await sleep(400);
+}
+
 // Ruko staggers sections in with animation-delay and fill-mode: both, so a
 // section whose delay has not elapsed is still at opacity 0. Capturing mid-
 // stagger silently drops half the page, which looks like a rendering bug.
@@ -204,4 +222,11 @@ console.log(`${out}  ${audit.result?.value ?? ""}`);
 
 ws.close();
 chrome.kill();
+// Give Chrome a moment to release the profile before removing it.
+await sleep(300);
+try {
+  rmSync(profileDir, { recursive: true, force: true });
+} catch {
+  /* best effort */
+}
 process.exit(0);
