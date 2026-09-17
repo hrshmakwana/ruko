@@ -227,5 +227,5 @@ scripts/deploy-frontend.sh --dry-run  # inspect without creating anything
   SAM, and SNS for the guardian alerts
 - **React, Vite, TypeScript, Tailwind CSS v4**, Anek (one type family covering Latin, Devanagari and
   Gujarati)
-- **Claude Code** (Claude Opus 5) — used as the build partner throughout: backend, rules engine,
-  prompts, UI, tests and tooling, pair-programmed from a phone.
+- **Claude Code** (AI coding assistant) — wrote code under Harsh's direction. The idea, the features
+  and the design decisions are Harsh's.

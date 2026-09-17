@@ -3,7 +3,7 @@
 # Deploy the Ruko PWA to AWS Amplify Hosting by uploading a zip.
 #
 # Manual deployment on purpose: it needs no GitHub OAuth and no console clicks,
-# so the whole thing runs from a laptop (or from Claude Code on a phone).
+# so the whole thing runs from a laptop.
 #
 #   scripts/deploy-frontend.sh --api https://xxxx.execute-api.us-east-1.amazonaws.com/prod
 #   scripts/deploy-frontend.sh --dry-run        # show what it would do, touch nothing
