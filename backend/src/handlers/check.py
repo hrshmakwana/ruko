@@ -1,135 +1,40 @@
 """POST /check - the verdict endpoint.
 
-Day 1: a stub that validates the request properly and returns a fixed verdict in
-the real schema, so the frontend can be built against the contract straight away.
-The rules engine and the Bedrock call replace the stubbed body on Day 2.
+The pipeline, and the one rule that matters:
+
+    final_score = max(model_score, rules_floor)
+
+The rules can push the score up. Nothing the model says - and so nothing a
+scammer can write into their own message - can push it back down.
 """
 
 from __future__ import annotations
 
+import os
 import time
 import uuid
 
-from ruko.http import LOG, ApiError, handler_wrapper, parse_json_body, response
-from ruko.verdict import MAX_TEXT_CHARS, build_verdict, normalise_language
+import boto3
 
-# A fixed sample verdict, written out per language. Replaced by the model on Day 2.
-_STUB = {
-    "en": {
-        "headline": "This looks like a fake KYC message trying to steal your bank login.",
-        "red_flags": [
-            {
-                "evidence": "your account will be blocked today",
-                "why": "Real banks do not threaten to block an account the same day over SMS.",
-                "source": "rule",
-            },
-            {
-                "evidence": "sbi-kyc-verify.in",
-                "why": "This is not an SBI website. The real one is onlinesbi.sbi",
-                "source": "rule",
-            },
-        ],
-        "do_now": [
-            "Do not open the link.",
-            "Call the number printed on the back of your bank card.",
-            "Delete the message and block the sender.",
-        ],
-        "dont_do": [
-            "Never share an OTP, PIN or password, not even with a bank employee.",
-            "Do not install any app the message asks you to install.",
-        ],
-        "consequence_chain": [
-            {"step": "You tap the link because the message says today."},
-            {"step": "A page opens that looks exactly like SBI netbanking."},
-            {"step": "You type your username, password and the OTP that arrives."},
-            {"step": "They log in as you and empty the account in under 4 minutes.", "is_loss": True},
-        ],
-        "callback_script": (
-            "I do not discuss my account on calls I did not make. "
-            "I will call my bank on the number printed on my card."
-        ),
-        "teach_me": (
-            "A bank will never send you a link to fix your KYC. "
-            "Real KYC is done in the branch or in the bank's own app."
-        ),
-    },
-    "hi": {
-        "headline": "यह नकली KYC संदेश लगता है जो आपका बैंक लॉगिन चुराना चाहता है।",
-        "red_flags": [
-            {
-                "evidence": "आज आपका खाता बंद हो जाएगा",
-                "why": "असली बैंक SMS पर उसी दिन खाता बंद करने की धमकी नहीं देते।",
-                "source": "rule",
-            },
-            {
-                "evidence": "sbi-kyc-verify.in",
-                "why": "यह SBI की वेबसाइट नहीं है। असली वेबसाइट onlinesbi.sbi है।",
-                "source": "rule",
-            },
-        ],
-        "do_now": [
-            "लिंक बिल्कुल न खोलें।",
-            "अपने बैंक कार्ड के पीछे लिखे नंबर पर फ़ोन करें।",
-            "संदेश हटा दें और भेजने वाले को ब्लॉक करें।",
-        ],
-        "dont_do": [
-            "OTP, PIN या पासवर्ड किसी को न बताएं, बैंक कर्मचारी को भी नहीं।",
-            "संदेश में बताया गया कोई ऐप इंस्टॉल न करें।",
-        ],
-        "consequence_chain": [
-            {"step": "संदेश में “आज” लिखा है, इसलिए आप घबराकर लिंक खोल देते हैं।"},
-            {"step": "बिल्कुल SBI नेटबैंकिंग जैसा दिखने वाला पेज खुलता है।"},
-            {"step": "आप यूज़रनेम, पासवर्ड और आया हुआ OTP भर देते हैं।"},
-            {"step": "वे आपके नाम से लॉगिन करके 4 मिनट में खाता खाली कर देते हैं।", "is_loss": True},
-        ],
-        "callback_script": (
-            "जो कॉल मैंने नहीं की, उस पर मैं अपने खाते की बात नहीं करता। "
-            "मैं अपने कार्ड पर लिखे नंबर पर बैंक को खुद फ़ोन करूँगा।"
-        ),
-        "teach_me": (
-            "बैंक कभी KYC ठीक करने के लिए लिंक नहीं भेजता। "
-            "असली KYC शाखा में या बैंक के अपने ऐप में होता है।"
-        ),
-    },
-    "gu": {
-        "headline": "આ નકલી KYC સંદેશ લાગે છે જે તમારું બેંક લૉગિન ચોરવા માગે છે.",
-        "red_flags": [
-            {
-                "evidence": "આજે તમારું ખાતું બંધ થઈ જશે",
-                "why": "સાચી બેંક SMS પર એ જ દિવસે ખાતું બંધ કરવાની ધમકી આપતી નથી.",
-                "source": "rule",
-            },
-            {
-                "evidence": "sbi-kyc-verify.in",
-                "why": "આ SBI ની વેબસાઇટ નથી. સાચી વેબસાઇટ onlinesbi.sbi છે.",
-                "source": "rule",
-            },
-        ],
-        "do_now": [
-            "લિંક બિલકુલ ન ખોલો.",
-            "તમારા બેંક કાર્ડની પાછળ લખેલા નંબર પર ફોન કરો.",
-            "સંદેશ કાઢી નાખો અને મોકલનારને બ્લોક કરો.",
-        ],
-        "dont_do": [
-            "OTP, PIN કે પાસવર્ડ કોઈને ન આપો, બેંક કર્મચારીને પણ નહીં.",
-            "સંદેશમાં કહેલી કોઈ એપ ઇન્સ્ટોલ ન કરો.",
-        ],
-        "consequence_chain": [
-            {"step": "સંદેશમાં “આજે” લખ્યું છે, એટલે તમે ગભરાઈને લિંક ખોલો છો."},
-            {"step": "બિલકુલ SBI નેટબેંકિંગ જેવું દેખાતું પેજ ખૂલે છે."},
-            {"step": "તમે યુઝરનેમ, પાસવર્ડ અને આવેલો OTP ભરી દો છો."},
-            {"step": "તેઓ તમારા નામે લૉગિન કરીને 4 મિનિટમાં ખાતું ખાલી કરી દે છે.", "is_loss": True},
-        ],
-        "callback_script": (
-            "જે કૉલ મેં કર્યો નથી તેના પર હું મારા ખાતાની વાત કરતો નથી. "
-            "હું મારા કાર્ડ પર લખેલા નંબર પર બેંકને જાતે ફોન કરીશ."
-        ),
-        "teach_me": (
-            "બેંક ક્યારેય KYC સુધારવા માટે લિંક મોકલતી નથી. "
-            "સાચું KYC શાખામાં કે બેંકની પોતાની એપમાં થાય છે."
-        ),
-    },
-}
+from ruko import store
+from ruko.extract import extract_all
+from ruko.fallback import text as fallback_text
+from ruko.http import LOG, ApiError, handler_wrapper, parse_json_body, response
+from ruko.model import ModelUnavailable, analyse
+from ruko.rule_text import reason_for
+from ruko.rules import SEVERITY_FLOOR, RuleHit, run_rules
+from ruko.verdict import MAX_TEXT_CHARS, build_verdict, level_from_score, normalise_language
+
+MAX_IMAGE_BYTES = 5 * 1024 * 1024
+
+_s3 = None
+
+
+def _s3_client():
+    global _s3
+    if _s3 is None:
+        _s3 = boto3.client("s3")
+    return _s3
 
 
 def _read_request(event: dict) -> tuple[str, str | None, str, str | None]:
@@ -144,7 +49,11 @@ def _read_request(event: dict) -> tuple[str, str | None, str, str | None]:
 
     image_key = body.get("image_key")
     if image_key is not None:
-        if not isinstance(image_key, str) or not image_key.startswith("uploads/"):
+        if (
+            not isinstance(image_key, str)
+            or not image_key.startswith("uploads/")
+            or ".." in image_key
+        ):
             raise ApiError(400, "bad_image_key", "image_key is not a valid upload key.")
 
     if not text and not image_key:
@@ -157,37 +66,184 @@ def _read_request(event: dict) -> tuple[str, str | None, str, str | None]:
     return text, image_key, normalise_language(body.get("language")), family_code
 
 
+def _load_image(image_key: str) -> tuple[bytes, str] | None:
+    """Fetch the screenshot the browser uploaded. Never logged, never stored."""
+    try:
+        obj = _s3_client().get_object(Bucket=os.environ["UPLOADS_BUCKET"], Key=image_key)
+        if obj.get("ContentLength", 0) > MAX_IMAGE_BYTES:
+            raise ApiError(400, "too_large", "Screenshot must be under 5 MB.")
+        body = obj["Body"].read(MAX_IMAGE_BYTES + 1)
+        if len(body) > MAX_IMAGE_BYTES:
+            raise ApiError(400, "too_large", "Screenshot must be under 5 MB.")
+        fmt = "png" if image_key.endswith(".png") else "jpeg"
+        return body, fmt
+    except ApiError:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        LOG.warning("image_fetch_failed type=%s", type(exc).__name__)
+        return None
+
+
+def _merge_extracted(from_text: dict, from_model: dict | None) -> dict:
+    """Text extraction is authoritative; the model fills in what only it can see.
+
+    For a screenshot with no pasted text, everything comes from the model — so
+    the rules are then re-run over what the model read out of the image.
+    """
+    merged = {k: list(v) if isinstance(v, list) else v for k, v in from_text.items()}
+    if not from_model:
+        return merged
+
+    for key in ("urls", "upi_ids", "phone_numbers", "amounts", "transaction_ids"):
+        for value in from_model.get(key, []):
+            if value not in merged.get(key, []):
+                merged.setdefault(key, []).append(value)
+
+    # Domains are derived, so recompute them from any urls the model added.
+    from ruko.extract import extract_urls
+
+    for url in merged.get("urls", []):
+        _, domains = extract_urls(url)
+        for domain in domains:
+            if domain not in merged.setdefault("domains", []):
+                merged["domains"].append(domain)
+
+    merged["sender_name"] = merged.get("sender_name") or from_model.get("sender_name")
+    merged["platform"] = merged.get("platform") or from_model.get("platform")
+    return merged
+
+
+def _rule_red_flags(hits: list[RuleHit], language: str, limit: int) -> list[dict]:
+    """Rule hits as red flags, most severe first, translated."""
+    ranked = sorted(hits, key=lambda h: SEVERITY_FLOOR.get(h.severity, 0), reverse=True)
+    return [
+        {
+            "evidence": hit.evidence,
+            "why": reason_for(hit.id, language, hit.reason, hit.params),
+            "source": "rule",
+        }
+        for hit in ranked[:limit]
+    ]
+
+
 @handler_wrapper
 def lambda_handler(event, context):  # noqa: ANN001, ARG001
     started = time.perf_counter()
-    text, image_key, language, _family_code = _read_request(event)
-
+    text, image_key, language, family_code = _read_request(event)
     check_id = uuid.uuid4().hex
-    stub = _STUB[language]
+    strings = fallback_text(language)
+
+    image = _load_image(image_key) if image_key else None
+    image_bytes, image_format = image if image else (None, "jpeg")
+
+    # 1. Deterministic extraction from whatever text we were given.
+    extracted = extract_all(text)
+
+    # 2. Ask the model. A failure here is survivable; an error page is not.
+    model_result: dict | None = None
+    engine = "rules"
+    try:
+        model_result, _usage = analyse(text, language, image_bytes, image_format)
+        engine = "model"
+    except ModelUnavailable as exc:
+        LOG.warning("model_unavailable check_id=%s detail=%s", check_id, type(exc).__name__)
+    except KeyError:
+        LOG.warning("model_not_configured check_id=%s", check_id)
+
+    # 3. Rules run over text plus anything the model read out of the image.
+    extracted = _merge_extracted(extracted, model_result.get("extracted") if model_result else None)
+    indicators = store.indicators_from(extracted)
+    community = store.report_counts(indicators)
+    rules = run_rules(text, extracted, store.counts_by_masked(community))
+
+    # 4. A message carrying instructions for an AI is itself a red flag, and it
+    #    is treated as a hard rule so the model cannot argue the score back down.
+    if model_result and model_result.get("ai_manipulation_detected"):
+        rules.hits.append(
+            RuleHit(
+                "ai.injection",
+                "high",
+                "This message contains hidden instructions aimed at AI tools.",
+                model_result.get("ai_manipulation_evidence") or "(hidden instruction)",
+            )
+        )
+
+    # 5. Combine. The floor is a floor, never a ceiling.
+    model_score = model_result["risk_score"] if model_result else 0
+    score = max(model_score, rules.floor)
+    level = level_from_score(score)
+
+    if model_result:
+        red_flags = list(model_result["red_flags"])
+        # Top up with rule hits so the deterministic findings are always visible.
+        red_flags += _rule_red_flags(rules.hits, language, max(0, 5 - len(red_flags)))
+        headline = model_result["headline"]
+        scam_type = model_result["scam_type"]
+        do_now = model_result["do_now"] or strings["do_now"]
+        dont_do = model_result["dont_do"] or strings["dont_do"]
+        consequence = model_result["consequence_chain"]
+        callback_script = model_result["callback_script"]
+        teach_me = model_result["teach_me"]
+    else:
+        red_flags = _rule_red_flags(rules.hits, language, 5)
+        headline = strings[level]
+        scam_type = rules.suggested_scam_type() or (
+            "other_scam" if level != "no_scam_signs" else "none_detected"
+        )
+        clean = level == "no_scam_signs"
+        do_now = strings["do_now_clean"] if clean else strings["do_now"]
+        dont_do = strings["dont_do_clean"] if clean else strings["dont_do"]
+        consequence = []
+        callback_script = None
+        teach_me = None
+
+    # A rules-driven scam verdict should not be announced with a calm headline.
+    if model_result and score > model_score and level == "scam":
+        headline = strings["scam"]
 
     verdict = build_verdict(
         check_id=check_id,
-        risk_score=88,
-        scam_type="kyc_update",
-        headline=stub["headline"],
-        red_flags=stub["red_flags"],
-        do_now=stub["do_now"],
-        dont_do=stub["dont_do"],
-        consequence_chain=stub["consequence_chain"],
-        callback_script=stub["callback_script"],
-        teach_me=stub["teach_me"],
+        risk_score=score,
+        scam_type=scam_type,
+        headline=headline,
+        red_flags=red_flags,
+        do_now=do_now,
+        dont_do=dont_do,
+        consequence_chain=consequence,
+        callback_script=callback_script,
+        teach_me=teach_me,
         language=language,
-        rule_hits=["stub.fixed_verdict"],
-        engine="stub",
+        extracted={
+            "urls": extracted.get("urls", []),
+            "upi_ids": extracted.get("upi_ids", []),
+            "phone_numbers": extracted.get("phone_numbers", []),
+            "amounts": extracted.get("amounts", []),
+            "transaction_ids": extracted.get("transaction_ids", []),
+            "sender_name": extracted.get("sender_name"),
+            "platform": extracted.get("platform"),
+        },
+        community=community,
+        rule_hits=rules.ids,
+        partial=model_result is None,
+        engine=engine,
     )
 
-    # Log identifiers and timings only - never the message text or the image.
+    store.save_check(check_id, verdict, indicators, family_code)
+
+    # Identifiers, timings and rule ids only. Never the text, never the image.
     LOG.info(
-        "check_done check_id=%s lang=%s has_text=%s has_image=%s ms=%d engine=stub",
+        "check_done check_id=%s lang=%s has_text=%s has_image=%s level=%s score=%d "
+        "model_score=%d floor=%d engine=%s rules=%s ms=%d",
         check_id,
         language,
         bool(text),
-        bool(image_key),
+        bool(image_bytes),
+        verdict["risk_level"],
+        score,
+        model_score,
+        rules.floor,
+        engine,
+        ",".join(rules.ids) or "-",
         int((time.perf_counter() - started) * 1000),
     )
 

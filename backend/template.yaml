@@ -164,6 +164,25 @@ Resources:
             Path: /check
             Method: POST
 
+  ReportFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "ruko-${Stage}-report"
+      CodeUri: src/
+      Handler: handlers.report.lambda_handler
+      Timeout: 10
+      MemorySize: 256
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RukoTable
+      Events:
+        Post:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RukoApi
+            Path: /report
+            Method: POST
+
   UploadUrlFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -208,6 +227,13 @@ Resources:
     DeletionPolicy: Delete
     Properties:
       LogGroupName: !Sub "/aws/lambda/ruko-${Stage}-upload-url"
+      RetentionInDays: 7
+
+  ReportLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/ruko-${Stage}-report"
       RetentionInDays: 7
 
 Outputs:

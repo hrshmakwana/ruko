@@ -33,9 +33,12 @@ COMMUNITY_REPORT_THRESHOLD = 3
 class RuleHit:
     id: str
     severity: str
+    #: English, always. Used for logs and the eval table.
     reason: str
     evidence: str
     scam_type: str | None = None
+    #: Values for the translated reason template, e.g. {"brand": "SBI"}.
+    params: dict = field(default_factory=dict)
 
 
 @dataclass
@@ -327,6 +330,7 @@ def run_rules(
                         if baited and brand in {"sbi", "hdfc", "icici", "axis", "kotak"}
                         else None
                     ),
+                    params={"brand": brand.upper(), "real": real},
                 )
             )
 
@@ -348,6 +352,7 @@ def run_rules(
                     "medium",
                     f"Addresses ending in .{tld} are cheap to buy and are used for scams far more than anything else.",
                     domain,
+                    params={"tld": tld},
                 )
             )
 
@@ -411,6 +416,7 @@ def run_rules(
                     "high",
                     f"Other people have reported this {count} times.",
                     indicator,
+                    params={"count": count},
                 )
             )
 
