@@ -85,6 +85,11 @@ REASONS: dict[str, dict[str, str]] = {
         "hi": "जिस लॉटरी में आपने हिस्सा ही नहीं लिया, वह जीती नहीं जा सकती। असली इनाम के लिए पहले पैसे नहीं लगते।",
         "gu": "જે લોટરીમાં તમે ભાગ જ લીધો નથી તે જીતાય નહીં. સાચા ઇનામ માટે પહેલાં પૈસા ભરવાના હોતા નથી.",
     },
+    "phrase.advance_fee": {
+        "en": "A real prize, refund or loan never requires you to pay a fee first.",
+        "hi": "असली इनाम, रिफंड या लोन के लिए पहले कोई फ़ीस नहीं भरनी पड़ती।",
+        "gu": "સાચા ઇનામ, રિફંડ કે લોન માટે પહેલાં કોઈ ફી ભરવાની હોતી નથી.",
+    },
     "phrase.relative_trouble": {
         "en": "Check by calling the relative directly on the number you already have.",
         "hi": "जिस रिश्तेदार की बात हो रही है, उसे अपने पास पहले से मौजूद नंबर पर खुद फ़ोन करके पक्का करें।",

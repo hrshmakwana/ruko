@@ -158,12 +158,33 @@ _PHRASE_RULES: list[tuple[str, str, str, str, list[str]]] = [
         "phrase.lottery_prize",
         "medium",
         "lottery_prize",
-        "You cannot win a lottery you never entered, and real prizes never need a fee first.",
+        "You cannot win a lottery you never entered.",
         [
             r"(?:won|winner|congratulations)[^.\n]{0,40}(?:lottery|lucky\s*draw|prize|kbc)",
-            r"claim[^.\n]{0,20}(?:prize|reward)[^.\n]{0,30}(?:fee|charge|tax)",
+            r"\bkbc\b[^.\n]{0,40}(?:draw|winner|won|लकी|લકી)",
             r"लॉटरी[^।\n]{0,25}(?:जीत|इनाम)",
+            r"(?:लकी\s*ड्रॉ|लकी\s*ड्रा)[^।\n]{0,40}(?:चुन|जीत|पसंद)",
             r"લોટરી[^.\n]{0,25}(?:જીત|ઇનામ)",
+            r"લકી\s*ડ્રો[^.\n]{0,40}(?:પસંદ|જીત)",
+            r"(?:રૂપિયા|રુપિયા)\s*જીત્યા",
+            r"रुपये\s*जीत",
+        ],
+    ),
+    (
+        # Split out from the lottery rule because "pay a fee to receive your
+        # winnings" is the actual crime, and it is never ambiguous.
+        "phrase.advance_fee",
+        "high",
+        "lottery_prize",
+        "A real prize, refund or loan never requires you to pay a fee first.",
+        [
+            r"(?:claim|receive|get|release)[^.\n]{0,30}(?:prize|reward|amount|winning)"
+            r"[^.\n]{0,40}(?:fee|charge|tax|deposit)",
+            r"(?:processing|registration|clearance|gst)\s*fee[^.\n]{0,40}(?:pay|deposit|transfer|₹|rs)",
+            r"(?:प्रोसेसिंग|रजिस्ट्रेशन)\s*फ(?:ी|़ी)",
+            r"(?:પ્રોસેસિંગ|રજિસ્ટ્રેશન)\s*ફી",
+            r"(?:इनाम|पुरस्कार)[^।\n]{0,40}(?:फ(?:ी|़ी)|शुल्क|जमा)",
+            r"(?:ઇનામ)[^.\n]{0,40}(?:ફી|ભરો|જમા)",
         ],
     ),
     (
@@ -174,7 +195,11 @@ _PHRASE_RULES: list[tuple[str, str, str, str, list[str]]] = [
         [
             r"(?:your\s*)?(?:son|daughter|brother|nephew|grandson)[^.\n]{0,40}"
             r"(?:accident|arrest|police|hospital|trouble)",
-            r"(?:बेटा|बेटी|भाई|पोता)[^।\n]{0,30}(?:दुर्घटना|पुलिस|अस्पताल|गिरफ्तार)",
+            r"(?:lost|changed)\s*my\s*phone[^.\n]{0,40}(?:new\s*number|send|money|urgent)",
+            r"(?:बेटा|बेटी|भाई|पोता|भतीजा)[^।\n]{0,30}(?:दुर्घटना|पुलिस|अस्पताल|गिरफ्तार)",
+            r"(?:फ़ोन|फोन)\s*(?:खो|गुम)[^।\n]{0,40}(?:नए|नये)\s*नंबर",
+            r"(?:અકસ્માત|હોસ્પિટલ|પોલીસ\s*કેસ)[^.\n]{0,60}(?:મોકલો|રૂપિયા|પૈસા)",
+            r"ફોન\s*ખોવાઈ[^.\n]{0,40}(?:નવા|નંબર)",
         ],
     ),
     (
@@ -197,7 +222,10 @@ _PHRASE_RULES: list[tuple[str, str, str, str, list[str]]] = [
             r"do\s*not\s*(?:tell|inform|share\s*with)[^.\n]{0,30}(?:anyone|family|police)",
             r"keep\s*this\s*confidential",
             r"किसी\s*को\s*(?:मत|ना|न)\s*बता",
+            r"किसी\s*को\s*(?:बताना|बताइए|बताएं)\s*(?:मत|नहीं|ना)",
             r"કોઈને\s*(?:ન|નહીં)\s*કહે",
+            # Gujarati and Hindi put the negation after the verb as often as before.
+            r"કોઈને\s*કહે(?:શો|જો|વું)?\s*નહીં",
         ],
     ),
     (
@@ -242,9 +270,19 @@ _UPI_COLLECT_TRAP = re.compile(
       |
       (?:receive|get)[^.\n]{0,20}(?:money|refund)[^.\n]{0,30}(?:pin|password)
       |
+      # Hinglish, which is how most of these actually arrive:
+      # "request accept karke apna UPI PIN daal dijiye"
+      (?:accept|approve)[^.\n]{0,40}(?:pin\s*(?:daal|dal|enter)|upi\s*pin)
+      |
+      (?:pin)\s*(?:daal|dal|daliye|dijiye|dalo|enter\s*kar)
+      |
       रिफंड[^।\n]{0,40}पिन
       |
+      (?:पिन|पासवर्ड)[^।\n]{0,25}(?:डाल|डालि|डालो)
+      |
       રિફંડ[^.\n]{0,40}પિન
+      |
+      પિન[^.\n]{0,25}(?:નાખ|નાંખ)
     )
     """
 )

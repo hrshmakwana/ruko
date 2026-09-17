@@ -149,6 +149,11 @@ class TestPaymentTraps:
     def test_receiving_money_never_needs_a_pin(self):
         assert "payment.upi_collect_trap" in check("get money, enter pin to receive").ids
 
+    def test_upi_collect_trap_in_hinglish(self):
+        """Caught by the eval: this is how the refund trap actually arrives."""
+        text = "Request bhej raha hoon, usse accept karke apna UPI PIN daal dijiye"
+        assert "payment.upi_collect_trap" in check(text).ids
+
 
 # --- phrase rules ----------------------------------------------------------
 
@@ -186,6 +191,24 @@ class TestPhraseRules:
 
     def test_relative_in_trouble(self):
         assert "phrase.relative_trouble" in check("Your son had an accident, send money").ids
+
+    def test_relative_in_trouble_gujarati(self):
+        text = "મારો મિત્ર અકસ્માતમાં હોસ્પિટલમાં છે, તાત્કાલિક 45,000 રૂપિયા મોકલો"
+        assert "phrase.relative_trouble" in check(text).ids
+
+    def test_secrecy_gujarati_negation_after_the_verb(self):
+        """Gujarati puts the negation after the verb as often as before it."""
+        assert "phrase.secrecy" in check("કોઈને કહેશો નહીં, આ ગુપ્ત તપાસ છે").ids
+
+    def test_advance_fee_is_high_severity(self):
+        """A prize that needs a fee first is the crime, not just a red flag."""
+        result = check("To claim your prize pay processing fee of Rs 6,500")
+        assert "phrase.advance_fee" in result.ids
+        assert result.floor >= 80
+
+    def test_lottery_gujarati_lucky_draw(self):
+        text = "તમારો નંબર KBC લકી ડ્રોમાં પસંદ થયો છે, તમે 25,00,000 રૂપિયા જીત્યા છો"
+        assert "phrase.lottery_prize" in check(text).ids
 
 
 # --- severity floors -------------------------------------------------------
