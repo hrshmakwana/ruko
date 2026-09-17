@@ -1,10 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import Landing from "./pages/Landing.tsx";
-import { loadLanguage } from "./i18n";
+import { applyLanguage, loadLanguage } from "./i18n";
 import "./index.css";
 
-document.documentElement.lang = loadLanguage();
+applyLanguage(loadLanguage());
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

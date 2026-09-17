@@ -105,6 +105,16 @@ await send("Emulation.setEmulatedMedia", {
 await send("Page.navigate", { url });
 await sleep(waitMs);
 
+// Ruko remembers the chosen language in localStorage, so setting it and
+// reloading is the honest way to screenshot a language — it exercises the same
+// path a returning user takes.
+const langArg = flag("lang", null);
+if (langArg) {
+  await evaluate(`try { localStorage.setItem("ruko.language", ${JSON.stringify(langArg)}); } catch {}`);
+  await send("Page.reload");
+  await sleep(waitMs);
+}
+
 const typeArg = flag("type", null);
 if (typeArg) {
   const split = typeArg.indexOf(":");
@@ -137,8 +147,17 @@ if (clickArg) {
   }
 }
 
-// Let any CSS transition settle before capture.
-await sleep(400);
+// Ruko staggers sections in with animation-delay and fill-mode: both, so a
+// section whose delay has not elapsed is still at opacity 0. Capturing mid-
+// stagger silently drops half the page, which looks like a rendering bug.
+// Cancelling the animations leaves every element in its settled state.
+await evaluate(`(() => {
+  document.querySelectorAll(".ruko-rise, .ruko-slam").forEach((el) => {
+    el.style.animation = "none";
+  });
+  return document.querySelectorAll(".ruko-rise, .ruko-slam").length;
+})()`);
+await sleep(300);
 
 let clip;
 if (has("full")) {

@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { CheckScreen } from "./components/CheckScreen";
 import { GoldenHourScreen } from "./components/GoldenHourScreen";
-import { LanguageToggle } from "./components/LanguageToggle";
+import { LanguageSelect } from "./components/LanguageSelect";
 import { Loading } from "./components/Loading";
 import { ScamIcon } from "./components/Icons";
 import { VerdictScreen } from "./components/VerdictScreen";
-import { dictionaries, loadLanguage, saveLanguage } from "./i18n";
+import { applyLanguage, dictionaries, loadLanguage, saveLanguage } from "./i18n";
 import { ApiError, checkMessage, reportScam, uploadImage } from "./lib/api";
 import type { PreparedImage } from "./lib/image";
 import type { Language, Verdict } from "./types";
@@ -27,7 +27,7 @@ export default function App() {
   function changeLanguage(next: Language) {
     setLanguage(next);
     saveLanguage(next);
-    document.documentElement.lang = next;
+    applyLanguage(next);
   }
 
   async function handleCheck({ text, image }: { text: string; image: PreparedImage | null }) {
@@ -77,7 +77,7 @@ export default function App() {
             <ScamIcon className="h-8 w-8 text-red" />
             <span className="text-[1.35rem] font-extrabold tracking-tight">{t.appName}</span>
           </button>
-          <LanguageToggle value={language} onChange={changeLanguage} label={t.languageLabel} />
+          <LanguageSelect value={language} onChange={changeLanguage} label={t.languageLabel} />
         </div>
       </header>
 

@@ -189,4 +189,13 @@ const gu: LandingStrings = {
   openApp: "રુકો ખોલો",
 };
 
-export const landingStrings: Record<Language, LandingStrings> = { en, hi, gu };
+/** The landing page is marketing copy rather than safety instructions, so it is
+ *  translated as we go and falls back to English. The app itself — where the
+ *  advice actually lives — is translated into every supported language. */
+const translated: Partial<Record<Language, LandingStrings>> = { en, hi, gu };
+
+export function landingFor(language: Language): LandingStrings {
+  return translated[language] ?? en;
+}
+
+export const landingStrings = translated;

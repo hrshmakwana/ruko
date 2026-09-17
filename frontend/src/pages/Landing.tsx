@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { LanguageToggle } from "../components/LanguageToggle";
+import { LanguageSelect } from "../components/LanguageSelect";
 import { ScamIcon, OkIcon, SuspiciousIcon, ShieldIcon } from "../components/Icons";
-import { dictionaries, loadLanguage, saveLanguage } from "../i18n";
-import { landingStrings } from "../i18n/landing";
+import { applyLanguage, dictionaries, loadLanguage, saveLanguage } from "../i18n";
+import { landingFor } from "../i18n/landing";
 import type { Language } from "../types";
 
 // Normally the app lives at /check. A preview build (one that is not served from
@@ -14,12 +14,12 @@ const APP_PATH = import.meta.env.VITE_APP_PATH ?? "/check";
 export default function Landing() {
   const [language, setLanguage] = useState<Language>(loadLanguage);
   const t = dictionaries[language];
-  const l = landingStrings[language];
+  const l = landingFor(language);
 
   function changeLanguage(next: Language) {
     setLanguage(next);
     saveLanguage(next);
-    document.documentElement.lang = next;
+    applyLanguage(next);
   }
 
   const doesIcons = [SuspiciousIcon, ScamIcon, OkIcon];
@@ -33,9 +33,12 @@ export default function Landing() {
             <ScamIcon className="h-8 w-8 text-[#ff5069]" />
             <span className="text-[1.35rem] font-extrabold tracking-tight">{t.appName}</span>
           </span>
-          <div className="[&_[aria-checked='false']]:!text-white/70 [&_[aria-checked='true']]:!bg-white [&_[aria-checked='true']]:!text-[#101d2b] [&>div]:!bg-white/10 [&>div]:!ring-white/20">
-            <LanguageToggle value={language} onChange={changeLanguage} label={t.languageLabel} />
-          </div>
+          <LanguageSelect
+            value={language}
+            onChange={changeLanguage}
+            label={t.languageLabel}
+            tone="dark"
+          />
         </header>
 
         <div className="mx-auto max-w-3xl px-4 pt-6 pb-12">

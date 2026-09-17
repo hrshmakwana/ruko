@@ -17,7 +17,19 @@ from .verdict import SCAM_TYPES
 LANGUAGE_NAMES = {
     "en": "English",
     "hi": "Hindi (हिंदी, Devanagari script)",
+    "bn": "Bengali (বাংলা, Bengali script)",
+    "mr": "Marathi (मराठी, Devanagari script)",
+    "te": "Telugu (తెలుగు, Telugu script)",
+    "ta": "Tamil (தமிழ், Tamil script)",
     "gu": "Gujarati (ગુજરાતી, Gujarati script)",
+    "ur": "Urdu (اردو, Nastaliq/Arabic script, written right to left)",
+    "kn": "Kannada (ಕನ್ನಡ, Kannada script)",
+    "or": "Odia (ଓଡ଼ିଆ, Odia script)",
+    "ml": "Malayalam (മലയാളം, Malayalam script)",
+    "pa": "Punjabi (ਪੰਜਾਬੀ, Gurmukhi script)",
+    "as": "Assamese (অসমীয়া, Assamese script)",
+    "mai": "Maithili (मैथिली, Devanagari script)",
+    "ne": "Nepali (नेपाली, Devanagari script)",
 }
 
 SCAM_PLAYBOOK = """\

@@ -8,7 +8,24 @@ from __future__ import annotations
 
 from typing import Any
 
-LANGUAGES = ("en", "hi", "gu")
+# The 15 languages Ruko speaks. Kept in step with frontend/src/i18n/languages.ts.
+LANGUAGES = (
+    "en",
+    "hi",
+    "bn",
+    "mr",
+    "te",
+    "ta",
+    "gu",
+    "ur",
+    "kn",
+    "or",
+    "ml",
+    "pa",
+    "as",
+    "mai",
+    "ne",
+)
 
 # Never the word "safe" - the strongest thing Ruko will say is "no scam signs".
 RISK_LEVELS = ("no_scam_signs", "suspicious", "scam")
@@ -60,7 +77,8 @@ def empty_extracted() -> dict[str, Any]:
 
 def normalise_language(value: Any) -> str:
     lang = (value or "en") if isinstance(value, str) else "en"
-    lang = lang.strip().lower()[:2]
+    # "ta-IN" -> "ta". Split rather than truncate, so "mai" survives.
+    lang = lang.strip().lower().split("-")[0]
     return lang if lang in LANGUAGES else "en"
 
 

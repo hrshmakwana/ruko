@@ -1,4 +1,5 @@
-export type Language = "en" | "hi" | "gu";
+export type { Language } from "./i18n/languages";
+import type { Language } from "./i18n/languages";
 
 export type RiskLevel = "no_scam_signs" | "suspicious" | "scam";
 
