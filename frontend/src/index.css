@@ -1,104 +1,126 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------------------------
-   Semantic palette. Defined as plain custom properties so they can flip with
-   dark mode in one place, then registered with Tailwind so `bg-surface`,
-   `text-muted` and friends work everywhere.
+   Ruko's visual language is the Indian road sign.
 
-   Contrast is checked against WCAG AA at 18px body text. Risk is never carried
-   by colour alone - every risk banner also has an icon and a word.
+   "Ruko" means stop, so risk is spoken in traffic-signal terms: a three-lamp
+   signal head, a red octagon, marigold for caution. That reads instantly to
+   someone who cannot read English, and it means risk is never carried by colour
+   alone - there is always a shape and a position too.
+
+   Paper-warm surfaces in light mode so documents (the complaint pack) feel like
+   documents. Deep ink navy in dark mode, the colour of a road at night.
 --------------------------------------------------------------------------- */
 :root {
-  --page: #f6f7f9;
-  --surface: #ffffff;
-  --surface-sunken: #eef1f5;
-  --border: #d3dae3;
-  --ink: #15202b;
-  --ink-muted: #56606d;
+  --page: #f4efe7;
+  --surface: #fffdfa;
+  --sunken: #ece4d8;
+  --line: #d8ccba;
+  --ink: #101d2b;
+  --muted: #5a6776;
 
-  --brand: #0b6b63;
-  --brand-strong: #075049;
-  --brand-tint: #e4f2f0;
-  --on-brand: #ffffff;
+  /* Signal colours. Text-safe variants are used for type on tinted panels. */
+  --red: #c00d24;
+  --red-panel: #c00d24;
+  --red-ink: #8d0518;
+  --red-tint: #fbe7ea;
+  --red-line: #eeb3bc;
 
-  --scam: #a1160f;
-  --scam-tint: #fdecea;
-  --scam-border: #f0b4ad;
+  --amber: #d98207;
+  --amber-ink: #7d4a00;
+  --amber-tint: #fdf0d9;
+  --amber-line: #eccb8c;
 
-  --suspicious: #7a4a00;
-  --suspicious-tint: #fff3d9;
-  --suspicious-border: #e9c583;
+  --green: #12784a;
+  --green-ink: #0b5433;
+  --green-tint: #e2f2e9;
+  --green-line: #9fd1b6;
 
-  --ok: #14603a;
-  --ok-tint: #e3f5ea;
-  --ok-border: #a5d8ba;
+  /* Primary action. Navy on paper; marigold on night. */
+  --action: #101d2b;
+  --on-action: #fffdfa;
+  --action-soft: #e6e0d5;
 
-  --focus: #0b6b63;
+  --signal-housing: #101d2b;
+  --focus: #c00d24;
+  --paper: #fffdf7;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --page: #0e1418;
-    --surface: #161e24;
-    --surface-sunken: #1e282f;
-    --border: #2e3a44;
-    --ink: #eaf0f4;
-    --ink-muted: #a3b1bd;
+    --page: #0a141f;
+    --surface: #10202f;
+    --sunken: #17293a;
+    --line: #27405a;
+    --ink: #eef3f8;
+    --muted: #9cb0c4;
 
-    --brand: #4fd1c5;
-    --brand-strong: #7fe3da;
-    --brand-tint: #123b38;
-    --on-brand: #06231f;
+    --red: #ff7085;
+    --red-panel: #9e0d22;
+    --red-ink: #ff9aa8;
+    --red-tint: #3b0f18;
+    --red-line: #7d2233;
 
-    --scam: #ff9d94;
-    --scam-tint: #3a1512;
-    --scam-border: #7d2a22;
+    --amber: #f5b53d;
+    --amber-ink: #ffcd6b;
+    --amber-tint: #3a2708;
+    --amber-line: #7d5814;
 
-    --suspicious: #ffd28a;
-    --suspicious-tint: #33240a;
-    --suspicious-border: #7a5715;
+    --green: #4fd493;
+    --green-ink: #7fe4b1;
+    --green-tint: #0d3324;
+    --green-line: #1f6647;
 
-    --ok: #83e0a8;
-    --ok-tint: #10301f;
-    --ok-border: #2c6142;
+    --action: #f0b429;
+    --on-action: #101d2b;
+    --action-soft: #1d3346;
 
-    --focus: #7fe3da;
+    --signal-housing: #061019;
+    --focus: #f0b429;
+    --paper: #16283a;
   }
 }
 
 @theme inline {
   --color-page: var(--page);
   --color-surface: var(--surface);
-  --color-sunken: var(--surface-sunken);
-  --color-line: var(--border);
+  --color-sunken: var(--sunken);
+  --color-line: var(--line);
   --color-ink: var(--ink);
-  --color-muted: var(--ink-muted);
+  --color-muted: var(--muted);
+  --color-paper: var(--paper);
 
-  --color-brand: var(--brand);
-  --color-brand-strong: var(--brand-strong);
-  --color-brand-tint: var(--brand-tint);
-  --color-on-brand: var(--on-brand);
+  --color-red: var(--red);
+  --color-red-panel: var(--red-panel);
+  --color-red-ink: var(--red-ink);
+  --color-red-tint: var(--red-tint);
+  --color-red-line: var(--red-line);
 
-  --color-scam: var(--scam);
-  --color-scam-tint: var(--scam-tint);
-  --color-scam-border: var(--scam-border);
+  --color-amber: var(--amber);
+  --color-amber-ink: var(--amber-ink);
+  --color-amber-tint: var(--amber-tint);
+  --color-amber-line: var(--amber-line);
 
-  --color-suspicious: var(--suspicious);
-  --color-suspicious-tint: var(--suspicious-tint);
-  --color-suspicious-border: var(--suspicious-border);
+  --color-green: var(--green);
+  --color-green-ink: var(--green-ink);
+  --color-green-tint: var(--green-tint);
+  --color-green-line: var(--green-line);
 
-  --color-ok: var(--ok);
-  --color-ok-tint: var(--ok-tint);
-  --color-ok-border: var(--ok-border);
+  --color-action: var(--action);
+  --color-on-action: var(--on-action);
+  --color-action-soft: var(--action-soft);
+  --color-housing: var(--signal-housing);
 
+  /* One family covers Latin, Devanagari and Gujarati, so the three languages
+     sit at the same optical weight instead of looking like three products. */
   --font-sans:
-    "Noto Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, "Noto Sans Devanagari", "Noto Sans Gujarati", sans-serif;
+    "Anek Latin", "Anek Devanagari", "Anek Gujarati", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 html {
-  /* Body copy starts at 18px, per the brief: this app is for a 60-year-old
-     reading a 360px phone in daylight. */
+  /* 18px base: this app is read by a 60-year-old on a 360px phone in daylight. */
   font-size: 18px;
   -webkit-text-size-adjust: 100%;
   color-scheme: light dark;
@@ -106,19 +128,82 @@ html {
 
 body {
   margin: 0;
+  /* The stop panel scales past 100% for a moment as it lands; clip so that
+     never shows up as a horizontal scrollbar on a phone. */
+  overflow-x: clip;
   background: var(--page);
   color: var(--ink);
   font-family: var(--font-sans);
+  font-optical-sizing: auto;
   line-height: 1.55;
   min-height: 100dvh;
 }
 
-/* A visible, high-contrast focus ring everywhere - keyboard and switch users
-   need to see where they are. */
 :where(a, button, input, textarea, select, [tabindex]):focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 2px;
   border-radius: 6px;
+}
+
+/* --- the Ruko moment -------------------------------------------------------
+   On a scam verdict the stop panel lands hard and everything else waits, then
+   slides up underneath it. The product does what its name says. */
+@keyframes ruko-slam {
+  0% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(0.94);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes ruko-rise {
+  from {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes ruko-lamp {
+  0%,
+  100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.35);
+  }
+}
+
+.ruko-slam {
+  animation: ruko-slam 520ms cubic-bezier(0.2, 1.2, 0.3, 1) both;
+}
+
+.ruko-rise {
+  animation: ruko-rise 420ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  animation-delay: var(--rise-delay, 0ms);
+}
+
+.ruko-lamp-live {
+  animation: ruko-lamp 2.2s ease-in-out infinite;
+}
+
+/* A marker pen underline for scam evidence inside the message bubble. */
+.ruko-mark {
+  background: linear-gradient(transparent 58%, var(--amber-tint) 58%);
+  box-shadow: inset 0 -0.18em 0 var(--amber-line);
+  border-radius: 2px;
+  padding: 0 0.08em;
+  font-weight: 600;
 }
 
 @media (prefers-reduced-motion: reduce) {

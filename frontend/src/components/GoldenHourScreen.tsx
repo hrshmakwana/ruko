@@ -29,7 +29,7 @@ export function GoldenHourScreen({ t, onBack }: Props) {
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex min-h-[44px] items-center gap-2 text-[0.95rem] font-semibold text-brand"
+        className="inline-flex min-h-[44px] items-center gap-2 text-[0.95rem] font-semibold text-action"
       >
         <ArrowLeftIcon className="h-5 w-5" />
         {t.backButton}
@@ -44,7 +44,7 @@ export function GoldenHourScreen({ t, onBack }: Props) {
         {steps.map((step, i) => (
           <li key={i} className="rounded-2xl border border-line bg-surface p-4">
             <div className="flex gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-[1rem] font-bold text-on-brand">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-action text-[1rem] font-bold text-on-action">
                 {i + 1}
               </span>
               <div className="min-w-0 flex-1">
@@ -55,7 +55,7 @@ export function GoldenHourScreen({ t, onBack }: Props) {
                     href={step.action.href}
                     target={step.action.href.startsWith("http") ? "_blank" : undefined}
                     rel="noreferrer"
-                    className="mt-3 flex min-h-[52px] w-full items-center justify-center rounded-xl bg-brand px-4 text-[1.05rem] font-bold text-on-brand"
+                    className="mt-3 flex min-h-[52px] w-full items-center justify-center rounded-xl bg-action px-4 text-[1.05rem] font-bold text-on-action"
                   >
                     {step.action.label}
                   </a>

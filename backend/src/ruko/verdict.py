@@ -34,6 +34,7 @@ RED_FLAG_SOURCES = ("rule", "model")
 
 MAX_TEXT_CHARS = 4000
 MAX_RED_FLAGS = 5
+MAX_CONSEQUENCE_STEPS = 5
 
 
 def level_from_score(score: int) -> str:
@@ -73,6 +74,10 @@ def build_verdict(
     do_now: list[str],
     dont_do: list[str],
     language: str,
+    consequence_chain: list[dict] | None = None,
+    callback_script: str | None = None,
+    teach_me: str | None = None,
+    complaint: dict | None = None,
     extracted: dict | None = None,
     community: list[dict] | None = None,
     rule_hits: list[str] | None = None,
@@ -97,6 +102,18 @@ def build_verdict(
         ],
         "do_now": [str(s)[:200] for s in (do_now or [])[:4]],
         "dont_do": [str(s)[:200] for s in (dont_do or [])[:3]],
+        # What the scammer is trying to make happen. The last step is the loss,
+        # which is what actually lands with someone who shrugs off a score.
+        "consequence_chain": [
+            {
+                "step": str(s.get("step", ""))[:200],
+                "is_loss": bool(s.get("is_loss", False)),
+            }
+            for s in (consequence_chain or [])[:MAX_CONSEQUENCE_STEPS]
+        ],
+        "callback_script": str(callback_script)[:400] if callback_script else None,
+        "teach_me": str(teach_me)[:240] if teach_me else None,
+        "complaint": complaint,
         "extracted": extracted or empty_extracted(),
         "community": community or [],
         "language": normalise_language(language),

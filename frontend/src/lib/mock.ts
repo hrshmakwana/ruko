@@ -18,20 +18,25 @@ export async function mockCheck(req: CheckRequest): Promise<Verdict> {
     risk_score: score,
     scam_type: scammy ? "kyc_update" : linky ? "other_scam" : "none_detected",
     headline: scammy
-      ? "This looks like a fake KYC message trying to steal your bank login."
+      ? "This is a fake SBI message built to steal your netbanking password."
       : linky
         ? "This message contains a link we cannot verify."
         : "We found no scam signs in this message.",
     red_flags: scammy
       ? [
           {
-            evidence: "your account will be blocked today",
-            why: "Real banks do not threaten to block an account the same day over SMS.",
+            evidence: "blocked today",
+            why: "Real banks never threaten to block an account the same day over SMS.",
             source: "rule",
           },
           {
             evidence: "sbi-kyc-verify.in",
-            why: "This is not an SBI website. The real one is onlinesbi.sbi",
+            why: "Not an SBI website. SBI only uses onlinesbi.sbi and sbi.co.in.",
+            source: "rule",
+          },
+          {
+            evidence: "9876543210",
+            why: "A personal mobile number. SBI calls from a short code, never a 10-digit mobile.",
             source: "rule",
           },
         ]
@@ -44,6 +49,14 @@ export async function mockCheck(req: CheckRequest): Promise<Verdict> {
             },
           ]
         : [],
+    consequence_chain: scammy
+      ? [
+          { step: "You tap the link because the message says today." },
+          { step: "A page opens that looks exactly like SBI netbanking." },
+          { step: "You type your username, password and the OTP that arrives." },
+          { step: "They log in as you and empty the account in under 4 minutes.", is_loss: true },
+        ]
+      : [],
     do_now: scammy
       ? [
           "Do not open the link.",
@@ -51,17 +64,34 @@ export async function mockCheck(req: CheckRequest): Promise<Verdict> {
           "Delete the message and block the sender.",
         ]
       : ["If you did not expect this message, verify with the sender on a number you already have."],
-    dont_do: ["Never share an OTP, PIN or password, not even with a bank employee."],
+    dont_do: scammy
+      ? [
+          "Never share an OTP, PIN or password, not even with a bank employee.",
+          "Do not install any app this message asks you to install.",
+        ]
+      : ["Never share an OTP, PIN or password, not even with a bank employee."],
+    callback_script: scammy
+      ? "I do not discuss my account on calls I did not make. I will call my bank on the number printed on my card."
+      : null,
+    teach_me: scammy
+      ? "A bank will never send you a link to fix your KYC. Real KYC is done in the branch or in the bank's own app."
+      : null,
+    complaint: null,
     extracted: {
       urls: linky ? ["sbi-kyc-verify.in"] : [],
       upi_ids: [],
-      phone_numbers: [],
+      phone_numbers: scammy ? ["9876543210"] : [],
       amounts: [],
       transaction_ids: [],
       sender_name: null,
-      platform: null,
+      platform: "SMS",
     },
-    community: scammy ? [{ masked: "sbi-kyc-xxxx.in", report_count: 7 }] : [],
+    community: scammy
+      ? [
+          { masked: "sbi-kyc-xxxx.in", report_count: 7 },
+          { masked: "98xxxxxx10", report_count: 3 },
+        ]
+      : [],
     language: req.language,
     rule_hits: ["mock.local"],
     partial: false,

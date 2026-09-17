@@ -74,7 +74,7 @@ export function CheckScreen({ t, busy, error, onCheck, onError }: Props) {
           placeholder={t.pastePlaceholder}
           rows={6}
           maxLength={4000}
-          className="mt-2 w-full resize-y rounded-xl border border-line bg-sunken p-3 text-[1rem] leading-relaxed text-ink placeholder:text-muted focus:border-brand focus:outline-none"
+          className="mt-2 w-full resize-y rounded-xl border border-line bg-sunken p-3 text-[1rem] leading-relaxed text-ink placeholder:text-muted focus:border-action focus:outline-none"
         />
 
         {image ? (
@@ -111,7 +111,7 @@ export function CheckScreen({ t, busy, error, onCheck, onError }: Props) {
             onClick={() => fileInput.current?.click()}
             className="mt-3 flex min-h-[56px] w-full items-center justify-center gap-2.5 rounded-xl border-2 border-dashed border-line bg-sunken px-4 text-[1rem] font-semibold text-ink"
           >
-            <UploadIcon className="h-6 w-6 text-brand" />
+            <UploadIcon className="h-6 w-6 text-action" />
             {t.uploadButton}
           </button>
         )}
@@ -131,7 +131,7 @@ export function CheckScreen({ t, busy, error, onCheck, onError }: Props) {
       {error && (
         <p
           role="alert"
-          className="rounded-xl border border-scam-border bg-scam-tint px-4 py-3 text-[0.95rem] font-medium text-scam"
+          className="rounded-xl border border-red-line bg-red-tint px-4 py-3 text-[0.95rem] font-medium text-red-ink"
         >
           {error}
         </p>
@@ -141,13 +141,13 @@ export function CheckScreen({ t, busy, error, onCheck, onError }: Props) {
         type="button"
         onClick={submit}
         disabled={busy}
-        className="min-h-[60px] w-full rounded-2xl bg-brand px-5 text-[1.15rem] font-bold text-on-brand shadow-sm transition-opacity disabled:opacity-60"
+        className="min-h-[60px] w-full rounded-2xl bg-action px-5 text-[1.15rem] font-bold text-on-action shadow-sm transition-opacity disabled:opacity-60"
       >
         {busy ? t.checkingButton : t.checkButton}
       </button>
 
       <p className="flex items-start justify-center gap-2 text-center text-[0.9rem] text-muted">
-        <ShieldIcon className="mt-0.5 h-5 w-5 shrink-0 text-brand" />
+        <ShieldIcon className="mt-0.5 h-5 w-5 shrink-0 text-action" />
         <span>{t.privacyNote}</span>
       </p>
 

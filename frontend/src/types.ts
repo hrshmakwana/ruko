@@ -40,6 +40,24 @@ export interface CommunityHit {
   report_count: number;
 }
 
+/** One step in "what they are trying to do to you". The last step is the loss. */
+export interface ConsequenceStep {
+  step: string;
+  /** Set on the final step so the UI can render it as the outcome. */
+  is_loss?: boolean;
+}
+
+export interface ComplaintPack {
+  date_time: string;
+  amount: string | null;
+  transaction_id: string | null;
+  scammer_contact: string | null;
+  platform: string | null;
+  description: string;
+  /** Pre-rendered plain text, ready to paste into cybercrime.gov.in. */
+  text: string;
+}
+
 export interface Verdict {
   check_id: string;
   risk_level: RiskLevel;
@@ -51,6 +69,14 @@ export interface Verdict {
   dont_do: string[];
   extracted: Extracted;
   community: CommunityHit[];
+  /** What the scammer is trying to make happen, step by step. */
+  consequence_chain: ConsequenceStep[];
+  /** Two lines to say if they ring back, in the chosen language. */
+  callback_script: string | null;
+  /** One line: how to spot this kind of message next time. */
+  teach_me: string | null;
+  /** Only present once the person says they already paid. */
+  complaint: ComplaintPack | null;
   language: Language;
   /** Debug only, never rendered. */
   rule_hits: string[];

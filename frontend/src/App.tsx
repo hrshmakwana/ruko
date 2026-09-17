@@ -3,7 +3,7 @@ import { CheckScreen } from "./components/CheckScreen";
 import { GoldenHourScreen } from "./components/GoldenHourScreen";
 import { LanguageToggle } from "./components/LanguageToggle";
 import { Loading } from "./components/Loading";
-import { ShieldIcon } from "./components/Icons";
+import { ScamIcon } from "./components/Icons";
 import { VerdictScreen } from "./components/VerdictScreen";
 import { dictionaries, loadLanguage, saveLanguage } from "./i18n";
 import { ApiError, checkMessage, reportScam, uploadImage } from "./lib/api";
@@ -74,8 +74,8 @@ export default function App() {
             onClick={() => setScreen("check")}
             className="flex min-h-[44px] items-center gap-2"
           >
-            <ShieldIcon className="h-8 w-8 text-brand" />
-            <span className="text-[1.3rem] font-extrabold tracking-tight">{t.appName}</span>
+            <ScamIcon className="h-8 w-8 text-red" />
+            <span className="text-[1.35rem] font-extrabold tracking-tight">{t.appName}</span>
           </button>
           <LanguageToggle value={language} onChange={changeLanguage} label={t.languageLabel} />
         </div>
@@ -111,7 +111,7 @@ export default function App() {
           <p className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
             <a
               href="tel:1930"
-              className="inline-flex min-h-[44px] items-center font-semibold text-brand"
+              className="inline-flex min-h-[44px] items-center font-semibold text-action"
             >
               {t.footerHelpline}
             </a>
@@ -119,7 +119,7 @@ export default function App() {
               href="https://cybercrime.gov.in"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex min-h-[44px] items-center font-semibold text-brand"
+              className="inline-flex min-h-[44px] items-center font-semibold text-action"
             >
               {t.footerPortal}
             </a>

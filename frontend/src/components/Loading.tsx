@@ -14,8 +14,8 @@ export function Loading({ t }: { t: Strings }) {
   return (
     <div className="flex flex-col items-center gap-4 py-16" role="status" aria-live="polite">
       <div className="relative h-14 w-14">
-        <span className="absolute inset-0 animate-ping rounded-full bg-brand/30" />
-        <span className="absolute inset-2 rounded-full bg-brand" />
+        <span className="absolute inset-0 animate-ping rounded-full bg-action/30" />
+        <span className="absolute inset-2 rounded-full bg-action" />
       </div>
       <ul className="space-y-1.5 text-center">
         {lines.map((line, i) => (

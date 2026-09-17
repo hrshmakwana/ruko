@@ -38,6 +38,20 @@ _STUB = {
             "Never share an OTP, PIN or password, not even with a bank employee.",
             "Do not install any app the message asks you to install.",
         ],
+        "consequence_chain": [
+            {"step": "You tap the link because the message says today."},
+            {"step": "A page opens that looks exactly like SBI netbanking."},
+            {"step": "You type your username, password and the OTP that arrives."},
+            {"step": "They log in as you and empty the account in under 4 minutes.", "is_loss": True},
+        ],
+        "callback_script": (
+            "I do not discuss my account on calls I did not make. "
+            "I will call my bank on the number printed on my card."
+        ),
+        "teach_me": (
+            "A bank will never send you a link to fix your KYC. "
+            "Real KYC is done in the branch or in the bank's own app."
+        ),
     },
     "hi": {
         "headline": "यह नकली KYC संदेश लगता है जो आपका बैंक लॉगिन चुराना चाहता है।",
@@ -62,6 +76,20 @@ _STUB = {
             "OTP, PIN या पासवर्ड किसी को न बताएं, बैंक कर्मचारी को भी नहीं।",
             "संदेश में बताया गया कोई ऐप इंस्टॉल न करें।",
         ],
+        "consequence_chain": [
+            {"step": "संदेश में “आज” लिखा है, इसलिए आप घबराकर लिंक खोल देते हैं।"},
+            {"step": "बिल्कुल SBI नेटबैंकिंग जैसा दिखने वाला पेज खुलता है।"},
+            {"step": "आप यूज़रनेम, पासवर्ड और आया हुआ OTP भर देते हैं।"},
+            {"step": "वे आपके नाम से लॉगिन करके 4 मिनट में खाता खाली कर देते हैं।", "is_loss": True},
+        ],
+        "callback_script": (
+            "जो कॉल मैंने नहीं की, उस पर मैं अपने खाते की बात नहीं करता। "
+            "मैं अपने कार्ड पर लिखे नंबर पर बैंक को खुद फ़ोन करूँगा।"
+        ),
+        "teach_me": (
+            "बैंक कभी KYC ठीक करने के लिए लिंक नहीं भेजता। "
+            "असली KYC शाखा में या बैंक के अपने ऐप में होता है।"
+        ),
     },
     "gu": {
         "headline": "આ નકલી KYC સંદેશ લાગે છે જે તમારું બેંક લૉગિન ચોરવા માગે છે.",
@@ -86,6 +114,20 @@ _STUB = {
             "OTP, PIN કે પાસવર્ડ કોઈને ન આપો, બેંક કર્મચારીને પણ નહીં.",
             "સંદેશમાં કહેલી કોઈ એપ ઇન્સ્ટોલ ન કરો.",
         ],
+        "consequence_chain": [
+            {"step": "સંદેશમાં “આજે” લખ્યું છે, એટલે તમે ગભરાઈને લિંક ખોલો છો."},
+            {"step": "બિલકુલ SBI નેટબેંકિંગ જેવું દેખાતું પેજ ખૂલે છે."},
+            {"step": "તમે યુઝરનેમ, પાસવર્ડ અને આવેલો OTP ભરી દો છો."},
+            {"step": "તેઓ તમારા નામે લૉગિન કરીને 4 મિનિટમાં ખાતું ખાલી કરી દે છે.", "is_loss": True},
+        ],
+        "callback_script": (
+            "જે કૉલ મેં કર્યો નથી તેના પર હું મારા ખાતાની વાત કરતો નથી. "
+            "હું મારા કાર્ડ પર લખેલા નંબર પર બેંકને જાતે ફોન કરીશ."
+        ),
+        "teach_me": (
+            "બેંક ક્યારેય KYC સુધારવા માટે લિંક મોકલતી નથી. "
+            "સાચું KYC શાખામાં કે બેંકની પોતાની એપમાં થાય છે."
+        ),
     },
 }
 
@@ -131,6 +173,9 @@ def lambda_handler(event, context):  # noqa: ANN001, ARG001
         red_flags=stub["red_flags"],
         do_now=stub["do_now"],
         dont_do=stub["dont_do"],
+        consequence_chain=stub["consequence_chain"],
+        callback_script=stub["callback_script"],
+        teach_me=stub["teach_me"],
         language=language,
         rule_hits=["stub.fixed_verdict"],
         engine="stub",
