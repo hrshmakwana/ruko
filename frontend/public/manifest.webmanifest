@@ -1,0 +1,19 @@
+{
+  "name": "Ruko — is this a scam?",
+  "short_name": "Ruko",
+  "description": "Check a message, link, UPI ID or screenshot for scam signs, in English, Hindi or Gujarati.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6f7f9",
+  "theme_color": "#0b6b63",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

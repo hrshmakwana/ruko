@@ -1,0 +1,132 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Semantic palette. Defined as plain custom properties so they can flip with
+   dark mode in one place, then registered with Tailwind so `bg-surface`,
+   `text-muted` and friends work everywhere.
+
+   Contrast is checked against WCAG AA at 18px body text. Risk is never carried
+   by colour alone - every risk banner also has an icon and a word.
+--------------------------------------------------------------------------- */
+:root {
+  --page: #f6f7f9;
+  --surface: #ffffff;
+  --surface-sunken: #eef1f5;
+  --border: #d3dae3;
+  --ink: #15202b;
+  --ink-muted: #56606d;
+
+  --brand: #0b6b63;
+  --brand-strong: #075049;
+  --brand-tint: #e4f2f0;
+  --on-brand: #ffffff;
+
+  --scam: #a1160f;
+  --scam-tint: #fdecea;
+  --scam-border: #f0b4ad;
+
+  --suspicious: #7a4a00;
+  --suspicious-tint: #fff3d9;
+  --suspicious-border: #e9c583;
+
+  --ok: #14603a;
+  --ok-tint: #e3f5ea;
+  --ok-border: #a5d8ba;
+
+  --focus: #0b6b63;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: #0e1418;
+    --surface: #161e24;
+    --surface-sunken: #1e282f;
+    --border: #2e3a44;
+    --ink: #eaf0f4;
+    --ink-muted: #a3b1bd;
+
+    --brand: #4fd1c5;
+    --brand-strong: #7fe3da;
+    --brand-tint: #123b38;
+    --on-brand: #06231f;
+
+    --scam: #ff9d94;
+    --scam-tint: #3a1512;
+    --scam-border: #7d2a22;
+
+    --suspicious: #ffd28a;
+    --suspicious-tint: #33240a;
+    --suspicious-border: #7a5715;
+
+    --ok: #83e0a8;
+    --ok-tint: #10301f;
+    --ok-border: #2c6142;
+
+    --focus: #7fe3da;
+  }
+}
+
+@theme inline {
+  --color-page: var(--page);
+  --color-surface: var(--surface);
+  --color-sunken: var(--surface-sunken);
+  --color-line: var(--border);
+  --color-ink: var(--ink);
+  --color-muted: var(--ink-muted);
+
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-tint: var(--brand-tint);
+  --color-on-brand: var(--on-brand);
+
+  --color-scam: var(--scam);
+  --color-scam-tint: var(--scam-tint);
+  --color-scam-border: var(--scam-border);
+
+  --color-suspicious: var(--suspicious);
+  --color-suspicious-tint: var(--suspicious-tint);
+  --color-suspicious-border: var(--suspicious-border);
+
+  --color-ok: var(--ok);
+  --color-ok-tint: var(--ok-tint);
+  --color-ok-border: var(--ok-border);
+
+  --font-sans:
+    "Noto Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans Devanagari", "Noto Sans Gujarati", sans-serif;
+}
+
+html {
+  /* Body copy starts at 18px, per the brief: this app is for a 60-year-old
+     reading a 360px phone in daylight. */
+  font-size: 18px;
+  -webkit-text-size-adjust: 100%;
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  line-height: 1.55;
+  min-height: 100dvh;
+}
+
+/* A visible, high-contrast focus ring everywhere - keyboard and switch users
+   need to see where they are. */
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
