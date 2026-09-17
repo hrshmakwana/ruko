@@ -181,3 +181,33 @@ it safe", never as safe.
 **Bedrock:** still blocked. Ireland finally gave the real reason — the account is stuck in AWS's new-
 account verification, and after 2+ hours the documented fix is emailing aws-verification@amazon.com.
 Hackathon credits pay the bill but do not grant model access.
+
+## Day 1 evening — catching scams in every language, not just three
+
+**What was new:** 18 harder samples written to break Ruko on purpose: scams in Tamil, Bengali,
+Marathi, Telugu, Kannada, Malayalam, Punjabi, Urdu and Odia with no link, no number and no UPI ID,
+plus six genuine messages built as false-alarm traps. First run: **26/37**, 9 scams missed, 1 false
+alarm. Every missed scam was a regional-language message, because the phrase rules only knew English,
+Hindi and Gujarati.
+
+**What broke, and how it was fixed:**
+- No regional phrases → `regional.py`: word lists per concept (block/update, bill + power cut, lottery +
+  "you won", hospital + "send money") in each language, combined into "word A near word B" patterns.
+- Negation position: Tamil, Telugu and Bengali say "OTP share don't" (negation after the verb); Urdu and
+  Punjabi say "don't tell" (before). The bank's own "never share your OTP" was read as a request until
+  both directions were checked.
+- "Dad is in hospital, I sent money" was called a scam in Bengali and Urdu, because "send" matched "sent".
+  Now only the command form ("send!") counts. Found by writing genuine near-misses, not scams.
+- `ed` (Enforcement Directorate) matched inside "recorded"; a Flipkart delivery OTP looked like an OTP
+  request; `pgvcl.co.in` was allowlisted by mistake (the real boards are on .com — checked with dig).
+- A new test now reads rule ids from the engine itself, so a rule with no translation fails the build.
+
+**Result:** 37/37 locally and against the live API, 0 missed scams, 0 false alarms, scam type 37/37.
+442 tests.
+
+**How it works, plainly:** with the AI model offline, rules are the whole verdict, so they must cover
+the way people actually write. Each regional rule needs *two* ideas in the same sentence — a lottery
+word *and* "you have won", a hospital *and* "send money now" — because one word on its own shows up in
+ordinary messages (Kerala runs a real state lottery). Every pattern has a scam it must catch and a
+genuine message it must not, in `tests/test_regional.py`. These patterns were not written by native
+speakers; a native speaker should review each language before anyone relies on them.

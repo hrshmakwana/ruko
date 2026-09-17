@@ -102,10 +102,15 @@ BRAND_DOMAINS: dict[str, frozenset[str]] = {
     "bescom": frozenset({"bescom.co.in", "bescom.org"}),
     "pspcl": frozenset({"pspcl.in"}),
     "kseb": frozenset({"kseb.in"}),
-    "dgvcl": frozenset({"dgvcl.co.in"}),
-    "mgvcl": frozenset({"mgvcl.co.in"}),
-    "pgvcl": frozenset({"pgvcl.co.in"}),
-    "ugvcl": frozenset({"ugvcl.co.in"}),
+    # Gujarat's four boards run on .com, all on the same state hosting block
+    # (103.160.190.x, checked with dig on 17 Sept). The .co.in look-alikes resolve
+    # to parking and unrelated hosts. They were in this list by mistake, which
+    # would have handed a squatter a free pass, so they are deliberately absent.
+    "dgvcl": frozenset({"dgvcl.com"}),
+    "mgvcl": frozenset({"mgvcl.com"}),
+    "pgvcl": frozenset({"pgvcl.com"}),
+    "ugvcl": frozenset({"ugvcl.com"}),
+    "guvnl": frozenset({"guvnl.com"}),
 }
 
 BRAND_TOKENS = tuple(BRAND_DOMAINS)

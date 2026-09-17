@@ -14,6 +14,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
+from . import regional
 from .allowlist import (
     BRAND_DOMAINS,
     RISKY_TLDS,
@@ -55,13 +56,25 @@ class RulesResult:
         return [h.id for h in self.hits]
 
     def suggested_scam_type(self) -> str | None:
-        """The scam type from the most severe rule that named one."""
+        """The scam type from the most severe rule that named one.
+
+        On a tie, a rule that describes *how* the theft happens beats the story
+        wrapped around it: "install AnyDesk so we can fix your KYC" is a remote
+        access scam, and the advice that matters is about AnyDesk, not KYC.
+        """
         ranked = sorted(
             (h for h in self.hits if h.scam_type),
-            key=lambda h: SEVERITY_FLOOR.get(h.severity, 0),
+            key=lambda h: (SEVERITY_FLOOR.get(h.severity, 0), h.id in _DEFINING_RULES),
             reverse=True,
         )
         return ranked[0].scam_type if ranked else None
+
+
+# Rules that name the mechanism of the theft, so they decide the scam type when
+# another rule of the same severity also fired.
+_DEFINING_RULES = frozenset(
+    {"phrase.remote_access", "payment.upi_collect_trap", "phrase.digital_arrest", "phrase.blackmail"}
+)
 
 
 # --- phrase rules ----------------------------------------------------------
@@ -78,9 +91,9 @@ _PHRASE_RULES: list[tuple[str, str, str, str, list[str]]] = [
         "Real police never arrest anyone over a video call, and never ask for money to close a case.",
         [
             r"digital\s*arrest",
-            r"(?:cbi|ed|ncb|narcotics|customs|cyber\s*cell|crime\s*branch)[^.\n]{0,40}"
+            r"\b(?:cbi|ed|ncb|narcotics|customs|cyber\s*cell|crime\s*branch)\b[^.\n]{0,40}"
             r"(?:video\s*call|skype|whatsapp\s*call)",
-            r"(?:video\s*call|skype)[^.\n]{0,40}(?:cbi|ed|ncb|police|customs|officer)",
+            r"(?:video\s*call|skype)[^.\n]{0,40}\b(?:cbi|ed|ncb|police|customs|officer)\b",
             r"non[- ]?bailable\s*warrant",
             r"arrest\s*warrant",
             r"डिजिटल\s*अरेस्ट",
@@ -172,6 +185,31 @@ _PHRASE_RULES: list[tuple[str, str, str, str, list[str]]] = [
         ],
     ),
     (
+        # Before advance_fee on purpose: a loan scam asks for a processing fee
+        # too, and on a severity tie the earlier rule names the scam type.
+        "phrase.loan_trap",
+        "high",
+        "loan_app",
+        "No real lender approves a loan with no credit check and asks for a fee first.",
+        [
+            r"\b(?:without|no)\s*cibil\b",
+            r"\b(?:instant|urgent)\s*loan\b[^.\n]{0,40}\b(?:fee|charge|deposit|without)\b",
+            r"\bloan\s*(?:is\s*)?approved\b[^.\n]{0,40}\b(?:fee|charge|deposit)\b",
+        ],
+    ),
+    (
+        # "Download AnyDesk and read me the code" is the single most common way
+        # a fake customer-care call empties an account.
+        "phrase.remote_access",
+        "high",
+        "fake_customer_care",
+        "Screen-sharing apps like AnyDesk let a stranger see and use your phone, including your banking app.",
+        [
+            r"\b(?:any\s*desk|team\s*viewer|quick\s*support|rust\s*desk|air\s*droid|ammyy|ultra\s*viewer)\b",
+            r"\bscreen\s*shar(?:e|ing)\b[^.\n]{0,40}\b(?:bank|upi|otp|account|app)\b",
+        ],
+    ),
+    (
         # Split out from the lottery rule because "pay a fee to receive your
         # winnings" is the actual crime, and it is never ambiguous.
         "phrase.advance_fee",
@@ -199,7 +237,9 @@ _PHRASE_RULES: list[tuple[str, str, str, str, list[str]]] = [
             r"(?:lost|changed)\s*my\s*phone[^.\n]{0,40}(?:new\s*number|send|money|urgent)",
             r"(?:बेटा|बेटी|भाई|पोता|भतीजा)[^।\n]{0,30}(?:दुर्घटना|पुलिस|अस्पताल|गिरफ्तार)",
             r"(?:फ़ोन|फोन)\s*(?:खो|गुम)[^।\n]{0,40}(?:नए|नये)\s*नंबर",
-            r"(?:અકસ્માત|હોસ્પિટલ|પોલીસ\s*કેસ)[^.\n]{0,60}(?:મોકલો|રૂપિયા|પૈસા)",
+            # The request, not the amount: "Papa is in hospital, the bill came to 5,000
+            # rupees" is a normal family update.
+            r"(?:અકસ્માત|હોસ્પિટલ|પોલીસ\s*કેસ)[^.\n]{0,60}(?:મોકલો|મોકલી\s*આપો|મોકલજો|ટ્રાન્સફર\s*કરો)",
             r"ફોન\s*ખોવાઈ[^.\n]{0,40}(?:નવા|નંબર)",
         ],
     ),
@@ -301,21 +341,59 @@ _NEGATION_RE = re.compile(
 _NEGATION_WINDOW = 28
 
 
+_REGIONAL_OTP_REQUEST = re.compile("|".join(regional.OTP_REQUEST_PATTERNS), re.IGNORECASE)
+
+# In Tamil, Telugu, Kannada, Bengali, Urdu and the rest the negation follows the
+# verb ("OTP ... share don't"), so a short look *after* the match is needed too.
+_POST_NEGATION_RE = re.compile(regional.POST_NEGATION)
+_POST_NEGATION_WINDOW = 18
+
+# A message that states the code ("OTP 5821", "482913 is your OTP") is delivering
+# one, not asking for one: a scammer does not know your OTP, that is the point.
+# The digit boundaries stop a 10-digit phone number from counting as a code.
+_STATED_OTP_RE = re.compile(
+    r"(?i)\botp\D{0,12}(?<!\d)\d{4,8}(?!\d)|(?<!\d)\d{4,8}(?!\d)\D{0,12}\botp\b"
+)
+
+
+_PRE_NEGATION_RE = re.compile(regional.PRE_NEGATION)
+
+
 def _search_unnegated(pattern: re.Pattern[str], text: str) -> re.Match[str] | None:
-    """First match that is not preceded (or covered) by a negation."""
+    """First match that is not negated before it, or right after it."""
     for match in pattern.finditer(text):
-        window = text[max(0, match.start() - _NEGATION_WINDOW) : match.end()]
-        if not _NEGATION_RE.search(window):
+        before = text[max(0, match.start() - _NEGATION_WINDOW) : match.end()]
+        after = text[match.end() : match.end() + _POST_NEGATION_WINDOW]
+        if (
+            _NEGATION_RE.search(before)
+            or _PRE_NEGATION_RE.search(before)
+            or _POST_NEGATION_RE.search(after)
+        ):
+            continue
+        return match
+    return None
+
+
+def _find(patterns: list[str], text: str) -> re.Match[str] | None:
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
             return match
     return None
 
 
-def _find(patterns: list[str], text: str) -> str | None:
-    for pattern in patterns:
-        match = re.search(pattern, text, re.IGNORECASE)
-        if match:
-            return match.group(0).strip()
-    return None
+# "Do not tell anyone" is the tell of a digital arrest — and also, word for word,
+# what every bank SMS says about an OTP. A secrecy phrase right after OTP/PIN
+# talk is the bank's warning, not the scammer's.
+_SECRECY_GUARD = re.compile(r"(?i)\b(?:otp|pin|cvv|password)\b|ओटीपी|पिन|पासवर्ड|ଓଟିପି|ওটিপি")
+_SECRECY_GUARD_WINDOW = 50
+
+
+# Merge the regional patterns into the rule list once, at import.
+_PHRASE_RULES = [
+    (rule_id, severity, scam_type, reason, [*patterns, *regional.PATTERNS.get(rule_id, [])])
+    for rule_id, severity, scam_type, reason, patterns in _PHRASE_RULES
+]
 
 
 def run_rules(
@@ -418,7 +496,11 @@ def run_rules(
             )
 
     # --- payment traps -----------------------------------------------------
-    otp = _search_unnegated(_OTP_REQUEST, text)
+    otp = None
+    if not _STATED_OTP_RE.search(text):
+        otp = _search_unnegated(_OTP_REQUEST, text) or _search_unnegated(
+            _REGIONAL_OTP_REQUEST, text
+        )
     if otp:
         add(
             RuleHit(
@@ -443,9 +525,14 @@ def run_rules(
 
     # --- phrase rules ------------------------------------------------------
     for rule_id, severity, scam_type, reason, patterns in _PHRASE_RULES:
-        evidence = _find(patterns, text)
-        if evidence:
-            add(RuleHit(rule_id, severity, reason, evidence, scam_type=scam_type))
+        match = _find(patterns, text)
+        if not match:
+            continue
+        if rule_id == "phrase.secrecy":
+            preceding = text[max(0, match.start() - _SECRECY_GUARD_WINDOW) : match.start()]
+            if _SECRECY_GUARD.search(preceding):
+                continue
+        add(RuleHit(rule_id, severity, reason, match.group(0).strip(), scam_type=scam_type))
 
     # --- community ---------------------------------------------------------
     for indicator, count in community_counts.items():

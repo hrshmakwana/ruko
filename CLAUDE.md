@@ -347,13 +347,13 @@ Evening:
 
 ## Status
 
-Last updated: Thu 17 Sept, Day 1 afternoon.
+Last updated: Thu 17 Sept, Day 1 evening.
 
 **Live**
 - Site: https://main.d1qvcci82uzrvx.amplifyapp.com (app at `/check`, guardian at `/guardian`)
 - API: https://ep3lukybhg.execute-api.us-east-1.amazonaws.com/prod
 
-**Done (18 local commits, nothing pushed to GitHub)**
+**Done (local commits only, nothing pushed to GitHub)**
 - Check: text + screenshot. Screenshots are OCR'd with Textract so the rules run on them
 - Rules engine + allowlist; `final_score = max(model_score, rules_floor)`
 - 15 languages end to end (dropdown, Urdu RTL), incl. rule reasons and fallback text
@@ -362,14 +362,16 @@ Last updated: Thu 17 Sept, Day 1 afternoon.
 - Guardian side: login, family code, auto-alerts, press-and-hold panic button,
   STOP/"it is fine" pushed to the parent's screen, alarm, SNS email alerts
 - Warn my family (WhatsApp share); landing page; README + Mermaid diagram
-- 323 tests; eval 19/19, 0 missed scams, 0 false alarms (rules only)
+- Lookup mode (bare number / UPI ID / website)
+- Regional phrase rules for 12 more languages, loan-trap and AnyDesk rules
+- 442 tests; eval 37/37 live (incl. 18 cross-language samples), 0 missed scams, 0 false alarms (rules only)
 
 **Blocked on Harsh (evening)**
 - Bedrock: account not authorised; needs a support case or hackathon credits check
 - GitHub: create the public repo and push
 
 **Next**
-1. Lookup mode (check a bare number/UPI before calling back)
+1. Screenshot samples in the eval, incl. an injection screenshot
 2. Read it aloud; proper PWA install (PNG icons + service worker); Web Share Target
 3. Landing page in all 15 languages
 4. Roadmap slide for the native-only parts (call screening, SMS filtering)

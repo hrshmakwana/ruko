@@ -15,8 +15,17 @@ from ruko.extract import extract_all
 from ruko.verdict import LANGUAGES, normalise_language
 
 # Every rule that can reach the screen must have a translation in every
-# language. Collected from the engine itself so a new rule fails this test.
-ALL_RULE_IDS = sorted(set(REASONS["en"]))
+# language. Collected from the *engine*, not from the translations file: reading
+# it from REASONS["en"] let two new rules ship with no translation at all,
+# because a rule missing from English was never asked about.
+from ruko.rules import _PHRASE_RULES  # noqa: E402
+
+_ENGINE_RULE_IDS = {rule_id for rule_id, *_ in _PHRASE_RULES} | {
+    "link.shortener", "link.brand_lookalike", "link.punycode", "link.risky_tld",
+    "link.raw_ip", "link.apk_download", "payment.otp_request",
+    "payment.upi_collect_trap", "community.reported", "ai.injection",
+}
+ALL_RULE_IDS = sorted(_ENGINE_RULE_IDS | set(REASONS["en"]))
 
 REQUIRED_FALLBACK_KEYS = {
     "scam",
