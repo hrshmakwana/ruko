@@ -109,8 +109,17 @@ await sleep(waitMs);
 // reloading is the honest way to screenshot a language — it exercises the same
 // path a returning user takes.
 const langArg = flag("lang", null);
-if (langArg) {
-  await evaluate(`try { localStorage.setItem("ruko.language", ${JSON.stringify(langArg)}); } catch {}`);
+// --seed='{"ruko.family.code":"ABC123"}' puts the app into a given state before
+// the shot, which is how the signed-in and linked screens get captured without
+// driving a whole sign-up flow each time.
+const seedArg = flag("seed", null);
+if (langArg || seedArg) {
+  const seed = { ...(seedArg ? JSON.parse(seedArg) : {}) };
+  if (langArg) seed["ruko.language"] = langArg;
+  await evaluate(`try {
+    const seed = ${JSON.stringify(seed)};
+    for (const [k, v] of Object.entries(seed)) localStorage.setItem(k, v);
+  } catch {}`);
   await send("Page.reload");
   await sleep(waitMs);
 }

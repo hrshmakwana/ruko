@@ -1,12 +1,18 @@
 import { useState } from "react";
 import { CheckScreen } from "./components/CheckScreen";
+import { DirectiveOverlay } from "./components/DirectiveOverlay";
+import { FamilyPanel } from "./components/FamilyPanel";
 import { GoldenHourScreen } from "./components/GoldenHourScreen";
 import { LanguageSelect } from "./components/LanguageSelect";
 import { Loading } from "./components/Loading";
+import { PanicButton } from "./components/PanicButton";
 import { ScamIcon } from "./components/Icons";
 import { VerdictScreen } from "./components/VerdictScreen";
 import { applyLanguage, dictionaries, loadLanguage, saveLanguage } from "./i18n";
+import { familyFor } from "./i18n/family";
 import { ApiError, checkMessage, reportScam, uploadImage } from "./lib/api";
+import { loadFamilyCode } from "./lib/guardian";
+import { useDirective } from "./lib/useDirective";
 import type { PreparedImage } from "./lib/image";
 import type { Language, Verdict } from "./types";
 
@@ -21,8 +27,11 @@ export default function App() {
   const [checkedText, setCheckedText] = useState("");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [reported, setReported] = useState(false);
+  const [familyCode, setFamilyCode] = useState<string | null>(loadFamilyCode);
 
   const t = dictionaries[language];
+  const f = familyFor(language);
+  const { directive, dismiss } = useDirective(familyCode);
 
   function changeLanguage(next: Language) {
     setLanguage(next);
@@ -35,7 +44,12 @@ export default function App() {
     setError(null);
     try {
       const imageKey = image ? await uploadImage(image.blob, image.contentType) : undefined;
-      const result = await checkMessage({ text: text || undefined, image_key: imageKey, language });
+      const result = await checkMessage({
+        text: text || undefined,
+        image_key: imageKey,
+        language,
+        family_code: familyCode ?? undefined,
+      });
       setVerdict(result);
       setCheckedText(text);
       setImagePreview(image?.previewUrl ?? null);
@@ -67,6 +81,9 @@ export default function App() {
 
   return (
     <div className="flex min-h-dvh flex-col">
+      {/* The guardian's answer beats everything else on screen. */}
+      {directive && <DirectiveOverlay f={f} directive={directive} onDismiss={dismiss} />}
+
       <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-2xl flex-wrap items-center justify-between gap-3 px-4 py-3">
           <button
@@ -85,19 +102,26 @@ export default function App() {
         {busy ? (
           <Loading t={t} />
         ) : screen === "verdict" && verdict ? (
-          <VerdictScreen
-            t={t}
-            verdict={verdict}
-            checkedText={checkedText}
-            imagePreview={imagePreview}
-            reported={reported}
-            onReport={handleReport}
-            onAlreadyPaid={() => {
-              setScreen("golden-hour");
-              window.scrollTo({ top: 0 });
-            }}
-            onBack={() => setScreen("check")}
-          />
+          <div className="space-y-4">
+            <VerdictScreen
+              t={t}
+              verdict={verdict}
+              checkedText={checkedText}
+              imagePreview={imagePreview}
+              reported={reported}
+              onReport={handleReport}
+              onAlreadyPaid={() => {
+                setScreen("golden-hour");
+                window.scrollTo({ top: 0 });
+              }}
+              onBack={() => setScreen("check")}
+            />
+            {/* Right where it is needed: the verdict says scam, and the person
+                is still on the phone to them. */}
+            {familyCode && verdict.risk_level !== "no_scam_signs" && (
+              <PanicButton f={f} code={familyCode} language={language} />
+            )}
+          </div>
         ) : screen === "golden-hour" ? (
           <GoldenHourScreen
             t={t}
@@ -105,7 +129,11 @@ export default function App() {
             onBack={() => setScreen(verdict ? "verdict" : "check")}
           />
         ) : (
-          <CheckScreen t={t} busy={busy} error={error} onCheck={handleCheck} onError={setError} />
+          <div className="space-y-5">
+            <CheckScreen t={t} busy={busy} error={error} onCheck={handleCheck} onError={setError} />
+            {familyCode && <PanicButton f={f} code={familyCode} language={language} />}
+            <FamilyPanel f={f} code={familyCode} onChange={setFamilyCode} />
+          </div>
         )}
       </main>
 
@@ -126,6 +154,12 @@ export default function App() {
               className="inline-flex min-h-[44px] items-center font-semibold text-action"
             >
               {t.footerPortal}
+            </a>
+            <a
+              href="/guardian"
+              className="inline-flex min-h-[44px] items-center font-semibold text-action"
+            >
+              {f.familyTitle}
             </a>
           </p>
         </div>

@@ -54,6 +54,14 @@ fi
 
 # --- 2. find or create the Amplify app --------------------------------------
 
+# Each page is a real file; these rewrites only cover the extensionless paths.
+# Anything unknown falls back to the landing page rather than an Amplify error.
+CUSTOM_RULES='[
+  {"source":"/check","target":"/check/index.html","status":"200"},
+  {"source":"/guardian","target":"/guardian/index.html","status":"200"},
+  {"source":"/<*>","target":"/index.html","status":"404-200"}
+]'
+
 say "2. Amplify app"
 APP_ID="$(aws amplify list-apps --region "$REGION" \
   --query "apps[?name=='$APP_NAME'].appId | [0]" --output text 2>/dev/null || echo "None")"
@@ -71,10 +79,7 @@ if [[ "$APP_ID" == "None" || -z "$APP_ID" ]]; then
     --name "$APP_NAME" \
     --platform WEB \
     --description "Ruko — before you pay, click, or call back" \
-    --custom-rules '[
-      {"source":"/check","target":"/check/index.html","status":"200"},
-      {"source":"/<*>","target":"/index.html","status":"404-200"}
-    ]' \
+    --custom-rules "$CUSTOM_RULES" \
     --query 'app.appId' --output text)"
   note "created app $APP_ID"
 else
@@ -83,6 +88,10 @@ else
     note "(dry run: stopping here, nothing changed)"
     exit 0
   fi
+  # Keep the rewrites in step with the pages that exist now.
+  aws amplify update-app --region "$REGION" --app-id "$APP_ID" \
+    --custom-rules "$CUSTOM_RULES" --no-cli-pager >/dev/null
+  note "rewrite rules refreshed"
 fi
 
 if ! aws amplify get-branch --region "$REGION" --app-id "$APP_ID" --branch-name "$BRANCH" \

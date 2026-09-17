@@ -59,7 +59,7 @@ Resources:
       StageName: !Ref Stage
       CorsConfiguration:
         AllowOrigins: !Ref AllowedOrigins
-        AllowHeaders: [content-type]
+        AllowHeaders: [content-type, authorization]
         AllowMethods: [GET, POST, OPTIONS]
         MaxAge: 300
       DefaultRouteSettings:
@@ -206,6 +206,144 @@ Resources:
             Path: /upload-url
             Method: POST
 
+  # ---------------------------------------------------------- guardian ----
+  # One function for the whole guardian side: signup, login, the alert feed and
+  # the directive. They share a code path and a table, and one warm Lambda
+  # answers all four faster than four cold ones.
+  GuardianFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "ruko-${Stage}-guardian"
+      CodeUri: src/
+      Handler: handlers.guardian.signup
+      Timeout: 15
+      MemorySize: 512
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RukoTable
+      Events:
+        Signup:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RukoApi
+            Path: /guardian/signup
+            Method: POST
+
+  GuardianLoginFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "ruko-${Stage}-guardian-login"
+      CodeUri: src/
+      Handler: handlers.guardian.login
+      Timeout: 15
+      MemorySize: 512
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RukoTable
+      Events:
+        Login:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RukoApi
+            Path: /guardian/login
+            Method: POST
+
+  GuardianAlertsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "ruko-${Stage}-guardian-alerts"
+      CodeUri: src/
+      Handler: handlers.guardian.alerts
+      Timeout: 10
+      MemorySize: 256
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RukoTable
+      Events:
+        Get:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RukoApi
+            Path: /guardian/alerts
+            Method: GET
+
+  GuardianDirectiveFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "ruko-${Stage}-guardian-directive"
+      CodeUri: src/
+      Handler: handlers.guardian.directive
+      Timeout: 10
+      MemorySize: 256
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RukoTable
+      Events:
+        Post:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RukoApi
+            Path: /guardian/directive
+            Method: POST
+
+  # ------------------------------------------------------ parent side ----
+  FamilyStatusFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "ruko-${Stage}-family-status"
+      CodeUri: src/
+      Handler: handlers.family_status.status
+      Timeout: 10
+      MemorySize: 256
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref RukoTable
+      Events:
+        Get:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RukoApi
+            Path: /family/status
+            Method: GET
+
+  FamilyLinkFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "ruko-${Stage}-family-link"
+      CodeUri: src/
+      Handler: handlers.family_status.link
+      Timeout: 10
+      MemorySize: 256
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref RukoTable
+      Events:
+        Post:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RukoApi
+            Path: /family/link
+            Method: POST
+
+  PanicFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "ruko-${Stage}-panic"
+      CodeUri: src/
+      Handler: handlers.family_status.panic
+      Timeout: 10
+      MemorySize: 256
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RukoTable
+      Events:
+        Post:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RukoApi
+            Path: /panic
+            Method: POST
+
   # ----------------------------------------------------------- logging ----
   # Declared explicitly so retention is 7 days instead of "never expire".
   HealthLogGroup:
@@ -234,6 +372,55 @@ Resources:
     DeletionPolicy: Delete
     Properties:
       LogGroupName: !Sub "/aws/lambda/ruko-${Stage}-report"
+      RetentionInDays: 7
+
+  GuardianLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/ruko-${Stage}-guardian"
+      RetentionInDays: 7
+
+  GuardianLoginLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/ruko-${Stage}-guardian-login"
+      RetentionInDays: 7
+
+  GuardianAlertsLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/ruko-${Stage}-guardian-alerts"
+      RetentionInDays: 7
+
+  GuardianDirectiveLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/ruko-${Stage}-guardian-directive"
+      RetentionInDays: 7
+
+  FamilyStatusLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/ruko-${Stage}-family-status"
+      RetentionInDays: 7
+
+  FamilyLinkLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/ruko-${Stage}-family-link"
+      RetentionInDays: 7
+
+  PanicLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/ruko-${Stage}-panic"
       RetentionInDays: 7
 
 Outputs:

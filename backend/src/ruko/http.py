@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+from decimal import Decimal
 from typing import Any
 
 LOG = logging.getLogger("ruko")
@@ -30,11 +31,28 @@ class ApiError(Exception):
         self.message = message
 
 
+def _json_safe(value: Any) -> Any:
+    """DynamoDB hands back Decimal for every number, which json cannot encode.
+
+    Without this a single stored integer turns a working endpoint into a 500,
+    and only on the path where that field happens to be set.
+    """
+    if isinstance(value, Decimal):
+        return int(value) if value == value.to_integral_value() else float(value)
+    if isinstance(value, set):
+        return sorted(value)
+    if isinstance(value, bytes):
+        return value.decode("utf-8", errors="replace")
+    raise TypeError(f"cannot serialise {type(value).__name__}")
+
+
 def response(status: int, body: Any) -> dict:
     return {
         "statusCode": status,
         "headers": dict(_BASE_HEADERS),
-        "body": json.dumps(body, ensure_ascii=False, separators=(",", ":")),
+        "body": json.dumps(
+            body, ensure_ascii=False, separators=(",", ":"), default=_json_safe
+        ),
     }
 
 

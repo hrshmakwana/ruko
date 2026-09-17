@@ -16,7 +16,7 @@ import uuid
 
 import boto3
 
-from ruko import store
+from ruko import family, store
 from ruko.extract import extract_all
 from ruko.fallback import text as fallback_text
 from ruko.http import LOG, ApiError, handler_wrapper, parse_json_body, response
@@ -229,6 +229,22 @@ def lambda_handler(event, context):  # noqa: ANN001, ARG001
     )
 
     store.save_check(check_id, verdict, indicators, family_code)
+
+    # If this person has a guardian linked and it is a scam, tell the guardian.
+    # Only the headline travels - never the message they checked.
+    if family_code and verdict["risk_level"] == "scam":
+        family.add_alert(
+            family.normalise_code(family_code),
+            {
+                "kind": "scam",
+                "risk_level": verdict["risk_level"],
+                "risk_score": verdict["risk_score"],
+                "scam_type": verdict["scam_type"],
+                "headline": verdict["headline"],
+                "language": language,
+                "check_id": check_id,
+            },
+        )
 
     # Identifiers, timings and rule ids only. Never the text, never the image.
     LOG.info(
