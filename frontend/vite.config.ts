@@ -5,6 +5,9 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // Relative asset paths for preview builds that are not served from a domain
+  // root; Amplify serves from the root, so it keeps the default.
+  base: process.env.RUKO_RELATIVE_BASE ? "./" : "/",
   build: {
     // Amplify serves these straight from S3+CloudFront; keep the bundle honest.
     target: "es2020",

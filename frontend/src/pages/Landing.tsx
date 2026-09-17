@@ -5,7 +5,9 @@ import { dictionaries, loadLanguage, saveLanguage } from "../i18n";
 import { landingStrings } from "../i18n/landing";
 import type { Language } from "../types";
 
-const APP_PATH = "/check";
+// Normally the app lives at /check. A preview build (one that is not served from
+// a domain root) overrides this with a relative path.
+const APP_PATH = import.meta.env.VITE_APP_PATH ?? "/check";
 
 /** A dark "signal at night" hero, then paper-warm sections below it. The switch
  *  in surface is deliberate: the hero is the road, the rest is the explanation. */
