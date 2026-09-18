@@ -59,6 +59,7 @@ fi
 CUSTOM_RULES='[
   {"source":"/check","target":"/check/index.html","status":"200"},
   {"source":"/guardian","target":"/guardian/index.html","status":"200"},
+  {"source":"/attack","target":"/attack/index.html","status":"200"},
   {"source":"/<*>","target":"/index.html","status":"404-200"}
 ]'
 

@@ -284,6 +284,41 @@ _PHRASE_RULES: list[tuple[str, str, str, str, list[str]]] = [
     ),
 ]
 
+# --- instructions planted for an AI ----------------------------------------
+#
+# Scammers have started writing lines at an AI inside the message itself, because
+# they expect the person to paste it into a chatbot. The model is told never to
+# obey them, but the model is also the part that can be offline — so this is a
+# rule too, and a rule can only push the risk up.
+#
+# Every pattern here is something no ordinary message contains. A person writing
+# "ignore my previous message" is not caught: the phrase has to address the tool,
+# name a verdict field, or claim the message was already cleared.
+_AI_INJECTION = re.compile(
+    r"""(?xi)
+    (?: (?:note|message|instruction)s?\s*(?:to|for)\s*(?:the\s*)?(?:ai|assistant|chatbot|bot|llm|model)
+      | (?:ignore|disregard|forget)\s*(?:all\s*|any\s*)?(?:previous|prior|above|earlier|system)\s*
+        (?:instruction|prompt|rule|message|context)s?
+      | (?:you\s*are|act)\s*(?:now\s*)?(?:an?\s*)?(?:ai|assistant|in\s*developer\s*mode|jailbroken)
+      | (?:as\s*an\s*ai|system\s*prompt|developer\s*mode|dan\s*mode)
+      | (?:risk[_\s]*score|risk[_\s]*level|no[_\s]*scam[_\s]*signs|scam[_\s]*type)\s*[:=]
+      | (?:return|reply|respond|output|answer)\s*(?:with\s*)?
+        (?:that\s*)?(?:this\s*is\s*)?(?:"|')?(?:safe|no[_\s]*scam|legitimate|genuine|not\s*a\s*scam)
+      | (?:mark|classify|treat|rate)\s*(?:this|it|the\s*message)?\s*(?:as\s*)?
+        (?:safe|legitimate|genuine|verified|trusted)
+      # "flag" is screening vocabulary, not family vocabulary. "Do not warn
+      # mummy" and "don't report me to the teacher" are ordinary messages, so
+      # only the words aimed at a checking tool count here.
+      | (?:do\s*not|don'?t)\s*flag\b
+      | (?:do\s*not|don'?t)\s*(?:report|block)\s*(?:this\s*)?(?:message|sms|link|number)
+      | verified\s*(?:as\s*)?safe
+      | (?:this|it)\s*(?:is|has\s*been)\s*(?:already\s*)?(?:verified|approved|cleared|whitelisted)
+        \s*(?:by|as)?\s*(?:the\s*)?(?:bank|ai|system|security|rbi|government)
+    )
+    """
+)
+
+
 # --- payment traps ---------------------------------------------------------
 
 _OTP_REQUEST = re.compile(
@@ -524,6 +559,21 @@ def run_rules(
         )
 
     # --- phrase rules ------------------------------------------------------
+    # Planted instructions are checked before the phrase rules so the reason
+    # reads first on the screen: it is the most surprising thing in the message.
+    injection = _AI_INJECTION.search(text)
+    if injection:
+        add(
+            RuleHit(
+                "ai.injection",
+                "high",
+                "This message contains hidden instructions aimed at AI tools, telling them to call "
+                "it safe. Only a scam needs to do that.",
+                injection.group(0).strip(),
+                scam_type=None,
+            )
+        )
+
     for rule_id, severity, scam_type, reason, patterns in _PHRASE_RULES:
         match = _find(patterns, text)
         if not match:

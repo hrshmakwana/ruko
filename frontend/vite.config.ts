@@ -19,6 +19,7 @@ export default defineConfig({
         landing: resolve(import.meta.dirname, "index.html"),
         check: resolve(import.meta.dirname, "check/index.html"),
         guardian: resolve(import.meta.dirname, "guardian/index.html"),
+        attack: resolve(import.meta.dirname, "attack/index.html"),
       },
     },
   },

@@ -157,6 +157,11 @@ export default function Landing() {
             >
               {t.footerPortal}
             </a>
+            {/* For the curious and for judges: the one page that invites you to
+                break the product instead of watching it work. */}
+            <a href="/attack" className="inline-flex min-h-[44px] items-center font-bold text-ink">
+              Attack Ruko
+            </a>
           </p>
         </div>
       </footer>
