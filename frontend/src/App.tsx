@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckScreen } from "./components/CheckScreen";
 import { DirectiveOverlay } from "./components/DirectiveOverlay";
 import { FamilyPanel } from "./components/FamilyPanel";
 import { GoldenHourScreen } from "./components/GoldenHourScreen";
 import { LanguageSelect } from "./components/LanguageSelect";
+import { InstallCard } from "./components/InstallCard";
 import { ListenScreen } from "./components/ListenScreen";
 import { LookupPanel } from "./components/LookupPanel";
 import { Loading } from "./components/Loading";
@@ -12,10 +13,12 @@ import { ScamIcon } from "./components/Icons";
 import { VerdictScreen } from "./components/VerdictScreen";
 import { applyLanguage, dictionaries, loadLanguage, saveLanguage } from "./i18n";
 import { familyFor } from "./i18n/family";
+import { installFor } from "./i18n/install";
 import { listenFor } from "./i18n/listen";
 import { lookupFor } from "./i18n/lookup";
 import { ApiError, checkMessage, reportScam, uploadImage } from "./lib/api";
 import { loadFamilyCode } from "./lib/guardian";
+import { takeSharedPayload, type SharedPayload } from "./lib/install";
 import { useDirective } from "./lib/useDirective";
 import type { PreparedImage } from "./lib/image";
 import type { Language, Verdict } from "./types";
@@ -37,11 +40,28 @@ export default function App() {
   const [mode, setMode] = useState<"message" | "lookup">(() =>
     new URLSearchParams(window.location.search).get("mode") === "lookup" ? "lookup" : "message",
   );
+  const [shared, setShared] = useState<SharedPayload | null>(null);
+
+  // A screenshot shared from WhatsApp arrives through the service worker, so it
+  // is collected once on load rather than read from the address bar.
+  useEffect(() => {
+    void takeSharedPayload().then((payload) => {
+      if (payload) setShared(payload);
+    });
+  }, []);
+
+  // The home-screen shortcut for "someone is on the phone" opens call mode.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("mode") === "listen") {
+      setScreen("listen");
+    }
+  }, []);
 
   const t = dictionaries[language];
   const f = familyFor(language);
   const l = lookupFor(language);
   const listen = listenFor(language);
+  const install = installFor(language);
   const { directive, dismiss } = useDirective(familyCode);
 
   function changeLanguage(next: Language) {
@@ -191,12 +211,14 @@ export default function App() {
                 error={error}
                 onCheck={handleCheck}
                 onError={setError}
+                shared={shared}
               />
             ) : (
               <LookupPanel t={t} l={l} language={language} />
             )}
             {familyCode && <PanicButton f={f} code={familyCode} language={language} />}
             <FamilyPanel f={f} code={familyCode} onChange={setFamilyCode} />
+            <InstallCard s={install} />
           </div>
         )}
       </main>

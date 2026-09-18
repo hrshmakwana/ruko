@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { InstallCard } from "../components/InstallCard";
 import { LanguageSelect } from "../components/LanguageSelect";
 import { ScamIcon, OkIcon, SuspiciousIcon, ShieldIcon } from "../components/Icons";
 import { applyLanguage, dictionaries, loadLanguage, saveLanguage } from "../i18n";
+import { installFor } from "../i18n/install";
 import { landingFor } from "../i18n/landing";
 import type { Language } from "../types";
 
@@ -15,6 +17,7 @@ export default function Landing() {
   const [language, setLanguage] = useState<Language>(loadLanguage);
   const t = dictionaries[language];
   const l = landingFor(language);
+  const s = installFor(language);
 
   function changeLanguage(next: Language) {
     setLanguage(next);
@@ -66,6 +69,23 @@ export default function Landing() {
             {l.heroCta}
           </a>
           <p className="mt-3 text-center text-[0.88rem] text-white/60">{l.heroNote}</p>
+
+          <div className="mt-7">
+            <InstallCard s={s} tone="dark" />
+          </div>
+
+          {/* For a room, not a browser: someone can point a phone at this and be
+              in the app before the sentence explaining it has finished. */}
+          <div className="mt-7 flex items-center gap-4 rounded-3xl border border-white/15 bg-white/5 p-4">
+            <img
+              src="/install-qr.svg"
+              alt="QR code that opens Ruko"
+              className="h-24 w-24 shrink-0 rounded-xl bg-white p-1.5"
+            />
+            <p className="text-[0.92rem] leading-relaxed text-white/75">
+              {s.title}. {s.body}
+            </p>
+          </div>
         </div>
       </div>
 

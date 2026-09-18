@@ -253,3 +253,32 @@ Ruko runs the same rules it runs on a pasted message and puts any red flag on th
 call is still going. If the signed connection cannot be opened, the phone's own speech recognition
 takes over so the feature degrades instead of vanishing — and the screen says which one is listening,
 because one sends audio to AWS and the other does not.
+
+## Day 2 evening — Ruko as an app on the judge's phone
+
+**What was new:** Ruko is now installable. Scan a QR on the landing page, tap Install, and it sits on
+the home screen with its own icon, opens full screen with no browser bars, and appears in Android's
+share sheet — so a screenshot goes from WhatsApp straight into a check. No Play Store, no APK, no
+"unknown sources" warning.
+
+**The decision behind it:** a sideloaded APK would look more impressive for about ten seconds, then
+cost a day of work and hand every judge a scary install warning. The things an APK would genuinely
+unlock — call screening, SMS filtering — Android does not grant to apps outside the Play Store
+anyway, so they stay on the roadmap slide rather than being half-built.
+
+**What broke, and how it was fixed:**
+- A shared file arrives as a POST, and a page cannot receive a POST. Only a service worker can, so
+  the worker catches `/check/share`, puts the file in a cache and redirects to the app, which picks
+  it up once and clears it — otherwise a reload would silently re-check yesterday's screenshot.
+- Icons had to be real PNGs at 192 and 512, plus a maskable one with padding, or Android crops the
+  mark. They are rendered from the existing SVG with headless Chrome, so there is one source.
+- Chrome fires `beforeinstallprompt` and then shows its own bar at a moment we do not choose, so
+  Ruko catches the event and offers the install where it makes sense. iPhones have no such event at
+  all, so on Safari the card turns into the two steps Add to Home Screen actually needs.
+
+**Tested:** manifest parses with no errors, worker active, shell cached, the app still opens with the
+network switched off, and a simulated share POST landed both the screenshot and the text in the check
+screen.
+
+**Not cached on purpose:** verdicts. A check is about a message someone received, and keeping it on
+the device after the 24-hour expiry would break the promise the rest of Ruko makes.

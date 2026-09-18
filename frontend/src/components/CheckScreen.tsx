@@ -10,14 +10,26 @@ interface Props {
   error: string | null;
   onCheck: (input: { text: string; image: PreparedImage | null }) => void;
   onError: (message: string | null) => void;
+  /** A screenshot or text shared into Ruko from another app's share sheet. */
+  shared?: { file: File | null; text: string } | null;
 }
 
 const MAX_SOURCE_BYTES = 12 * 1024 * 1024; // before we resize it down to <5 MB
 
-export function CheckScreen({ t, busy, error, onCheck, onError }: Props) {
+export function CheckScreen({ t, busy, error, onCheck, onError, shared }: Props) {
   const [text, setText] = useState("");
   const [image, setImage] = useState<PreparedImage | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+
+  // Something shared in from WhatsApp or the gallery lands here, filled in and
+  // ready, so the person only has to press the one button they came for.
+  useEffect(() => {
+    if (!shared) return;
+    if (shared.text) setText((current) => current || shared.text);
+    if (shared.file) void handleFile(shared.file);
+    // handleFile is stable enough for this one-shot import.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shared]);
 
   // Revoke the object URL when the preview goes away, so we don't leak blobs.
   useEffect(() => {
