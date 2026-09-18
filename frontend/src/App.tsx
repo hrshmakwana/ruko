@@ -4,6 +4,7 @@ import { DirectiveOverlay } from "./components/DirectiveOverlay";
 import { FamilyPanel } from "./components/FamilyPanel";
 import { GoldenHourScreen } from "./components/GoldenHourScreen";
 import { LanguageSelect } from "./components/LanguageSelect";
+import { ApkScreen } from "./components/ApkScreen";
 import { InstallCard } from "./components/InstallCard";
 import { ListenScreen } from "./components/ListenScreen";
 import { LookupPanel } from "./components/LookupPanel";
@@ -13,6 +14,7 @@ import { ScamIcon } from "./components/Icons";
 import { VerdictScreen } from "./components/VerdictScreen";
 import { applyLanguage, dictionaries, loadLanguage, saveLanguage } from "./i18n";
 import { familyFor } from "./i18n/family";
+import { apkFor } from "./i18n/apk";
 import { installFor } from "./i18n/install";
 import { listenFor } from "./i18n/listen";
 import { lookupFor } from "./i18n/lookup";
@@ -23,7 +25,7 @@ import { useDirective } from "./lib/useDirective";
 import type { PreparedImage } from "./lib/image";
 import type { Language, Verdict } from "./types";
 
-type Screen = "check" | "verdict" | "golden-hour" | "listen";
+type Screen = "check" | "verdict" | "golden-hour" | "listen" | "apk";
 
 export default function App() {
   const [language, setLanguage] = useState<Language>(loadLanguage);
@@ -41,12 +43,20 @@ export default function App() {
     new URLSearchParams(window.location.search).get("mode") === "lookup" ? "lookup" : "message",
   );
   const [shared, setShared] = useState<SharedPayload | null>(null);
+  const [sharedApk, setSharedApk] = useState<File | null>(null);
 
   // A screenshot shared from WhatsApp arrives through the service worker, so it
   // is collected once on load rather than read from the address bar.
   useEffect(() => {
     void takeSharedPayload().then((payload) => {
-      if (payload) setShared(payload);
+      if (!payload) return;
+      const file = payload.file;
+      if (file && /\.apk$/i.test(file.name)) {
+        setSharedApk(file);
+        setScreen("apk");
+        return;
+      }
+      setShared(payload);
     });
   }, []);
 
@@ -62,6 +72,7 @@ export default function App() {
   const l = lookupFor(language);
   const listen = listenFor(language);
   const install = installFor(language);
+  const apk = apkFor(language);
   const { directive, dismiss } = useDirective(familyCode);
 
   function changeLanguage(next: Language) {
@@ -153,6 +164,8 @@ export default function App() {
               <PanicButton f={f} code={familyCode} language={language} />
             )}
           </div>
+        ) : screen === "apk" ? (
+          <ApkScreen s={apk} initialFile={sharedApk} onBack={() => setScreen("check")} />
         ) : screen === "listen" ? (
           <ListenScreen l={listen} language={language} onBack={() => setScreen("check")} />
         ) : screen === "golden-hour" ? (
@@ -200,6 +213,23 @@ export default function App() {
                 </span>
                 <span className="mt-0.5 block text-[0.88rem] text-red-ink/85">
                   {listen.entryHint}
+                </span>
+              </span>
+            </button>
+
+            {/* The other thing arriving on WhatsApp: an app file. Installing it
+                is the single fastest way to lose everything in the account. */}
+            <button
+              type="button"
+              onClick={() => setScreen("apk")}
+              className="flex w-full items-center gap-3 rounded-3xl border-2 border-amber-line bg-amber-tint px-4 py-3.5 text-left"
+            >
+              <span className="min-w-0">
+                <span className="block text-[1.02rem] font-extrabold text-amber-ink">
+                  {apk.entry}
+                </span>
+                <span className="mt-0.5 block text-[0.88rem] text-amber-ink/85">
+                  {apk.entryHint}
                 </span>
               </span>
             </button>

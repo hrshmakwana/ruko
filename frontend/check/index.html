@@ -16,9 +16,14 @@
     />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <!-- iOS ignores the manifest icons; without this the home screen shows a
+         screenshot of the page instead of the Ruko mark. -->
+    <link rel="apple-touch-icon" href="/icon-192.png" />
     <meta name="theme-color" content="#f4efe7" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0a141f" media="(prefers-color-scheme: dark)" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Ruko" />
   </head>
   <body>

@@ -282,3 +282,32 @@ screen.
 
 **Not cached on purpose:** verdicts. A check is about a message someone received, and keeping it on
 the device after the 24-hour expiry would break the promise the rest of Ruko makes.
+
+## Day 2 night — checking an app file before it is installed
+
+**The scam this answers:** a stranger sends an APK on WhatsApp — "install this for your refund / your
+loan / your prize". Installing it is the fastest way to lose an account, and Android only shows what
+the app may do *after* it is installed, one permission at a time.
+
+**What Ruko does now:** pick the APK and Ruko reads the app's own manifest on the phone, without
+installing it, and says in plain language what it would be allowed to do: *"Read your SMS — including
+the OTP your bank sends"*, *"See everything on your screen and tap for you"*. When an app can both
+reach the OTP and control the screen, it says so directly: that combination is how accounts are
+emptied.
+
+**The file never leaves the phone.** No upload, no S3, no cost, and it works with no signal.
+
+**What was new:** an APK is a zip whose AndroidManifest.xml is Android's binary XML, not text. The
+reader finds the entry through the zip's central directory (a few kilobytes of reading even for a
+100 MB app), inflates it with the browser's own `DecompressionStream`, then walks the chunks.
+
+**What broke:** attribute offsets inside an element are measured from the element header, not from
+the start of the chunk. Measuring from the chunk finds zero permissions — silently, on every app,
+with no error. It was caught because the parser was tested against two real apps (F-Droid and
+NewPipe) rather than against a fixture written to match the code.
+
+**Why not a native app:** Harsh asked for a sideloaded APK on Android and iOS. iOS cannot be
+sideloaded at all — Apple allows only the App Store, TestFlight (paid account plus review) or
+ad-hoc builds signed per device id. And the machine has no Android toolchain, with no Android phone
+to test on. The installable PWA reaches both platforms today, and the one thing a native app would
+genuinely add — reading SMS — stays on the roadmap slide instead of half-built.
