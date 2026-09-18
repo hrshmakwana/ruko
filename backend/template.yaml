@@ -30,6 +30,28 @@ Parameters:
       The underlying foundation model behind BedrockModelId. Used only to scope the
       IAM policy. Must be kept in step with BedrockModelId.
 
+  ModelProvider:
+    Type: String
+    Default: bedrock
+    AllowedValues: [bedrock, gemini, none]
+    Description: >
+      Which inference provider the check uses. bedrock keeps the message inside
+      AWS and is preferred. gemini is the fallback while Bedrock access is being
+      granted - with it, the message leaves AWS and is sent to Google, which the
+      README and the app both say out loud. none runs the rules alone.
+
+  GeminiModelId:
+    Type: String
+    Default: gemini-2.5-flash
+    Description: Model name used when ModelProvider is gemini.
+
+  GeminiKeyParam:
+    Type: String
+    Default: /ruko/prod/gemini-api-key
+    Description: >
+      SSM Parameter Store name (SecureString) holding the Gemini API key. The key
+      is never in this template, in the repo, or in a log line.
+
   AppUrl:
     Type: String
     Default: "https://main.d1qvcci82uzrvx.amplifyapp.com"
@@ -54,6 +76,9 @@ Globals:
         UPLOADS_BUCKET: !Ref UploadsBucket
         BEDROCK_REGION: !Ref BedrockRegion
         BEDROCK_MODEL_ID: !Ref BedrockModelId
+        MODEL_PROVIDER: !Ref ModelProvider
+        GEMINI_MODEL_ID: !Ref GeminiModelId
+        GEMINI_KEY_PARAM: !Ref GeminiKeyParam
         ALERT_TOPIC_ARN: !Ref AlertTopic
         APP_URL: !Ref AppUrl
         LOG_LEVEL: INFO
@@ -164,6 +189,21 @@ Resources:
               Resource:
                 - !Sub "arn:aws:bedrock:*::foundation-model/${BedrockFoundationModelId}"
                 - !Sub "arn:aws:bedrock:${BedrockRegion}:${AWS::AccountId}:inference-profile/${BedrockModelId}"
+        - Statement:
+            # Only the one parameter, and only decryption through SSM itself.
+            - Sid: ReadGeminiKey
+              Effect: Allow
+              Action:
+                - ssm:GetParameter
+              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GeminiKeyParam}"
+            - Sid: DecryptGeminiKey
+              Effect: Allow
+              Action:
+                - kms:Decrypt
+              Resource: "*"
+              Condition:
+                StringEquals:
+                  kms:ViaService: !Sub "ssm.${AWS::Region}.amazonaws.com"
         - Statement:
             - Sid: ReadUploadedScreenshot
               Effect: Allow

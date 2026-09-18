@@ -1,4 +1,14 @@
-"""The Bedrock Converse call, and getting a trustworthy object back out of it."""
+"""The model call, and getting a trustworthy object back out of it.
+
+Two providers sit behind one function. Bedrock is the default and keeps the
+message inside AWS; Gemini is there because Bedrock access can take days to be
+granted and the organisers confirmed any inference provider is allowed as long
+as the project is deployed on AWS. Whichever answers, the reply is validated by
+`_clean` and can only ever raise the risk score — a rule hit is a floor.
+
+Set MODEL_PROVIDER to "bedrock", "gemini" or "none". "none" is honest rather than
+broken: the check falls back to the rules, which is what runs today anyway.
+"""
 
 from __future__ import annotations
 
@@ -8,6 +18,7 @@ from typing import Any
 import boto3
 from botocore.config import Config
 
+from . import gemini
 from .http import LOG
 from .prompt import VERDICT_TOOL, build_messages, system_prompt
 from .verdict import SCAM_TYPES
@@ -134,18 +145,61 @@ def _clean(payload: dict) -> dict | None:
     }
 
 
+def provider() -> str:
+    return os.environ.get("MODEL_PROVIDER", "bedrock").strip().lower()
+
+
 def analyse(
     text: str,
     language: str,
     image_bytes: bytes | None = None,
     image_format: str = "jpeg",
 ) -> tuple[dict, dict[str, Any]]:
-    """Ask the model to analyse the evidence.
+    """Ask the configured provider to analyse the evidence.
 
-    Returns (verdict fields, usage). Raises ModelUnavailable if two attempts
-    produce nothing usable - the caller then falls back to a rules-only verdict
-    rather than showing an error.
+    Returns (verdict fields, usage). Raises ModelUnavailable if nothing usable
+    comes back - the caller then falls back to a rules-only verdict rather than
+    showing an error.
     """
+    chosen = provider()
+    if chosen == "none":
+        raise ModelUnavailable("no model configured")
+    if chosen == "gemini":
+        return _analyse_with_gemini(text, language, image_bytes, image_format)
+    return _analyse_with_bedrock(text, language, image_bytes, image_format)
+
+
+def _analyse_with_gemini(
+    text: str, language: str, image_bytes: bytes | None, image_format: str
+) -> tuple[dict, dict[str, Any]]:
+    last_error: Exception | None = None
+    for attempt in (1, 2):
+        try:
+            payload, usage = gemini.analyse(text, language, image_bytes, image_format)
+        except gemini.GeminiError as exc:
+            last_error = exc
+            LOG.warning("gemini_call_failed attempt=%d detail=%s", attempt, exc)
+            continue
+        cleaned = _clean(payload)
+        if cleaned:
+            LOG.info(
+                "gemini_ok attempt=%d in_tokens=%s out_tokens=%s",
+                attempt,
+                usage.get("inputTokens"),
+                usage.get("outputTokens"),
+            )
+            return cleaned, usage
+        LOG.warning("gemini_bad_output attempt=%d", attempt)
+
+    raise ModelUnavailable(str(last_error) if last_error else "invalid model output")
+
+
+def _analyse_with_bedrock(
+    text: str,
+    language: str,
+    image_bytes: bytes | None = None,
+    image_format: str = "jpeg",
+) -> tuple[dict, dict[str, Any]]:
     messages = build_messages(text, image_bytes, image_format)
     request = {
         "modelId": os.environ["BEDROCK_MODEL_ID"],
