@@ -195,6 +195,36 @@ Resources:
             Path: /check
             Method: POST
 
+  # Live call mode: a presigned Transcribe WebSocket for the browser, and the
+  # rules engine over whatever Transcribe sends back. No audio reaches Lambda.
+  LiveFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "ruko-${Stage}-live"
+      CodeUri: src/
+      Handler: handlers.live.lambda_handler
+      Timeout: 10
+      Policies:
+        - Statement:
+            - Sid: StreamCallAudioToTranscribe
+              Effect: Allow
+              Action:
+                - transcribe:StartStreamTranscriptionWebSocket
+              Resource: "*"
+      Events:
+        Token:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RukoApi
+            Path: /live/token
+            Method: POST
+        Analyse:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RukoApi
+            Path: /live/analyse
+            Method: POST
+
   ReportFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -408,6 +438,13 @@ Resources:
     DeletionPolicy: Delete
     Properties:
       LogGroupName: !Sub "/aws/lambda/ruko-${Stage}-upload-url"
+      RetentionInDays: 7
+
+  LiveLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/ruko-${Stage}-live"
       RetentionInDays: 7
 
   ReportLogGroup:

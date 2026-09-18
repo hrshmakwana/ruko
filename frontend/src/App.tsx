@@ -4,6 +4,7 @@ import { DirectiveOverlay } from "./components/DirectiveOverlay";
 import { FamilyPanel } from "./components/FamilyPanel";
 import { GoldenHourScreen } from "./components/GoldenHourScreen";
 import { LanguageSelect } from "./components/LanguageSelect";
+import { ListenScreen } from "./components/ListenScreen";
 import { LookupPanel } from "./components/LookupPanel";
 import { Loading } from "./components/Loading";
 import { PanicButton } from "./components/PanicButton";
@@ -11,6 +12,7 @@ import { ScamIcon } from "./components/Icons";
 import { VerdictScreen } from "./components/VerdictScreen";
 import { applyLanguage, dictionaries, loadLanguage, saveLanguage } from "./i18n";
 import { familyFor } from "./i18n/family";
+import { listenFor } from "./i18n/listen";
 import { lookupFor } from "./i18n/lookup";
 import { ApiError, checkMessage, reportScam, uploadImage } from "./lib/api";
 import { loadFamilyCode } from "./lib/guardian";
@@ -18,7 +20,7 @@ import { useDirective } from "./lib/useDirective";
 import type { PreparedImage } from "./lib/image";
 import type { Language, Verdict } from "./types";
 
-type Screen = "check" | "verdict" | "golden-hour";
+type Screen = "check" | "verdict" | "golden-hour" | "listen";
 
 export default function App() {
   const [language, setLanguage] = useState<Language>(loadLanguage);
@@ -39,6 +41,7 @@ export default function App() {
   const t = dictionaries[language];
   const f = familyFor(language);
   const l = lookupFor(language);
+  const listen = listenFor(language);
   const { directive, dismiss } = useDirective(familyCode);
 
   function changeLanguage(next: Language) {
@@ -130,6 +133,8 @@ export default function App() {
               <PanicButton f={f} code={familyCode} language={language} />
             )}
           </div>
+        ) : screen === "listen" ? (
+          <ListenScreen l={listen} language={language} onBack={() => setScreen("check")} />
         ) : screen === "golden-hour" ? (
           <GoldenHourScreen
             t={t}
@@ -160,6 +165,24 @@ export default function App() {
                 </button>
               ))}
             </div>
+
+            {/* A call in progress beats everything else on this screen: the
+                money is leaving while they are still talking. */}
+            <button
+              type="button"
+              onClick={() => setScreen("listen")}
+              className="flex w-full items-center gap-3 rounded-3xl border-2 border-red-line bg-red-tint px-4 py-3.5 text-left"
+            >
+              <span className="ruko-lamp-live inline-block h-3 w-3 shrink-0 rounded-full bg-red" />
+              <span className="min-w-0">
+                <span className="block text-[1.02rem] font-extrabold text-red-ink">
+                  {listen.entry}
+                </span>
+                <span className="mt-0.5 block text-[0.88rem] text-red-ink/85">
+                  {listen.entryHint}
+                </span>
+              </span>
+            </button>
 
             {mode === "message" ? (
               <CheckScreen

@@ -211,3 +211,45 @@ word *and* "you have won", a hospital *and* "send money now" — because one wor
 ordinary messages (Kerala runs a real state lottery). Every pattern has a scam it must catch and a
 genuine message it must not, in `tests/test_regional.py`. These patterns were not written by native
 speakers; a native speaker should review each language before anyone relies on them.
+
+## Day 2 — two features nobody else will demo
+
+**Attack Ruko (`/attack`).** A page that hands the visitor the phone: pick a real scam, add any
+instruction you like aimed at the AI, and watch it stay flagged. Building it exposed a hole — with
+Bedrock switched off, the injection text itself was invisible, because only the model was looking for
+it. Planted instructions are now a **rule**, so the demo holds with no model at all. It needed
+narrowing twice: "don't warn mummy" and "don't report me to the teacher" are ordinary family
+messages, while "do not flag this" is screening vocabulary nobody uses at home.
+
+**Live call mode.** Calls are where the money actually goes, and a web page cannot touch call audio.
+So Ruko listens through the microphone while the call is on speaker, like a relative sitting next to
+you. The browser streams microphone audio straight to **Amazon Transcribe** over a WebSocket that a
+Lambda signs; the audio never passes through Ruko, and nothing is recorded or stored. The text comes
+back, the same rules engine reads it, and red flags appear while the scammer is still talking.
+
+**What was new, and what broke:**
+- A WebSocket handshake cannot carry an Authorization header, so the URL itself is signed (SigV4 in
+  the query string) by `/live/token`, using the Lambda role's own short-lived credentials.
+- Transcribe will not take plain audio on a socket: every message is an AWS *event stream* frame —
+  prelude, two lengths, a CRC, headers, payload, another CRC. Ruko writes that by hand in ~80 lines
+  rather than shipping the AWS SDK to a phone. A wrong byte does not throw; the socket just closes
+  and the screen looks like it is listening to nothing. `scripts/check-eventstream.mjs` locks the
+  bytes against a frame that a live stream accepted.
+- Which languages actually stream had to be measured, not assumed: twelve of Ruko's fifteen have a
+  model, `ur-IN` and `as-IN` do not, and Maithili has none. Those three borrow their nearest
+  neighbour and the screen says so.
+- Spoken Hindi broke the OTP rule. "अभी जो OTP आया है वो बता दीजिए" is what a caller says; every
+  pattern so far was written from SMS, where people write "batao". Added the spoken imperatives.
+- Headless Chrome's fake microphone hangs on this machine, so the end-to-end test feeds a WAV of a
+  spoken scam (made with macOS `say`) through Ruko's own encoder into the real service. Transcribe
+  returned the sentence and the rules flagged both the OTP request and the KYC threat.
+
+**Cost:** Transcribe streaming is about ₹2 a minute, and the free tier covers 60 minutes a month for
+the first year. Listening stops itself after five minutes, which is a cost guard as much as a promise.
+
+**How it works, plainly:** the phone's microphone hears the speakerphone. Chunks of audio, a tenth of
+a second each, go to Amazon Transcribe over a signed connection. Transcribe sends back the words.
+Ruko runs the same rules it runs on a pasted message and puts any red flag on the screen while the
+call is still going. If the signed connection cannot be opened, the phone's own speech recognition
+takes over so the feature degrades instead of vanishing — and the screen says which one is listening,
+because one sends audio to AWS and the other does not.

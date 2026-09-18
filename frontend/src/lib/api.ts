@@ -77,3 +77,59 @@ export async function health(): Promise<unknown> {
 }
 
 export type { Language };
+
+export interface LiveToken {
+  url: string;
+  language: Language;
+  stream_language: string;
+  borrowed: boolean;
+  sample_rate: number;
+  expires_in: number;
+  max_seconds: number;
+}
+
+/** A short-lived signed WebSocket URL for Amazon Transcribe streaming. The audio
+ *  goes from the phone straight to Transcribe; it never passes through Ruko. */
+export async function liveToken(language: Language): Promise<LiveToken> {
+  return post<LiveToken>("/live/token", { language });
+}
+
+export interface LiveAlert {
+  rule: string;
+  evidence: string;
+  why: string;
+  severity: "high" | "medium" | "low";
+}
+
+export interface LiveVerdict {
+  risk_level: "no_scam_signs" | "suspicious" | "scam";
+  risk_score: number;
+  scam_type: string;
+  alerts: LiveAlert[];
+  language: Language;
+}
+
+/** Run the rules over what has been heard so far. Nothing is stored. */
+export async function liveAnalyse(text: string, language: Language): Promise<LiveVerdict> {
+  if (IS_MOCK) {
+    const lower = text.toLowerCase();
+    const hit = /otp|digital arrest|anydesk|upi pin/.test(lower);
+    return {
+      risk_level: hit ? "scam" : "no_scam_signs",
+      risk_score: hit ? 80 : 0,
+      scam_type: hit ? "other_scam" : "none_detected",
+      alerts: hit
+        ? [
+            {
+              rule: "payment.otp_request",
+              evidence: "OTP",
+              why: "Nobody legitimate ever needs your OTP — not even your bank.",
+              severity: "high",
+            },
+          ]
+        : [],
+      language,
+    };
+  }
+  return post<LiveVerdict>("/live/analyse", { text, language });
+}
