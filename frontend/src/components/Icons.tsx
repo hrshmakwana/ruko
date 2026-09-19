@@ -167,3 +167,64 @@ export function ShareIosIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function MessageIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <path
+        d="M20.5 12c0 4.1-3.8 7.4-8.5 7.4a9.7 9.7 0 0 1-2.6-.35L4.8 20.5l1.2-3.3A7 7 0 0 1 3.5 12c0-4.1 3.8-7.4 8.5-7.4s8.5 3.3 8.5 7.4Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function PhoneIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <path
+        d="M7.2 3.8 9 3.5l1.7 4-2 1.4a11 11 0 0 0 5.4 5.4l1.4-2 4 1.7-.3 1.8a2 2 0 0 1-2.2 1.7C11.4 17.6 6.4 12.6 5.5 6a2 2 0 0 1 1.7-2.2Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function AppFileIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <rect x="4.5" y="3.5" width="15" height="17" rx="3" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M9 9h6M9 12.5h6M9 16h3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function DialIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <g fill="currentColor">
+        <circle cx="7" cy="6.5" r="1.5" />
+        <circle cx="12" cy="6.5" r="1.5" />
+        <circle cx="17" cy="6.5" r="1.5" />
+        <circle cx="7" cy="12" r="1.5" />
+        <circle cx="12" cy="12" r="1.5" />
+        <circle cx="17" cy="12" r="1.5" />
+        <circle cx="7" cy="17.5" r="1.5" />
+        <circle cx="12" cy="17.5" r="1.5" />
+        <circle cx="17" cy="17.5" r="1.5" />
+      </g>
+    </svg>
+  );
+}
+
+export function MenuIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" />
+    </svg>
+  );
+}

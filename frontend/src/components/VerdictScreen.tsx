@@ -20,9 +20,21 @@ interface Props {
 
 /** Sections rise in one after another so the eye is led down the argument
  *  instead of meeting a wall of cards. */
-function Rise({ delay, children }: { delay: number; children: React.ReactNode }) {
+function Rise({
+  delay,
+  span,
+  children,
+}: {
+  delay: number;
+  /** Full width on a laptop: the banner, the headline and the message itself. */
+  span?: boolean;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="ruko-rise" style={{ "--rise-delay": `${delay}ms` } as React.CSSProperties}>
+    <div
+      className={`ruko-rise ${span ? "lg:col-span-2" : ""}`}
+      style={{ "--rise-delay": `${delay}ms` } as React.CSSProperties}
+    >
       {children}
     </div>
   );
@@ -43,18 +55,21 @@ export function VerdictScreen({
   const next = () => (delay += 90);
 
   return (
-    <div className="space-y-4">
+    // On a laptop the verdict reads as two columns — the argument on the left,
+    // what to do on the right — with the banner and the message across the top.
+    // On a phone the grid collapses and nothing moves.
+    <div className="space-y-4 lg:grid lg:grid-cols-2 lg:items-start lg:gap-4 lg:space-y-0 [&>*]:min-w-0">
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex min-h-[44px] items-center gap-2 text-[0.95rem] font-bold text-muted"
+        className="inline-flex min-h-[44px] items-center gap-2 text-[0.95rem] font-bold text-muted lg:col-span-2"
       >
         <ArrowLeftIcon className="h-5 w-5" />
         {t.checkAnotherButton}
       </button>
 
       {verdict.image_unread ? (
-        <section className="ruko-slam rounded-3xl border-2 border-amber-line bg-amber-tint p-5">
+        <section className="ruko-slam rounded-3xl border-2 border-amber-line bg-amber-tint p-5 lg:col-span-2">
           <div className="flex items-start gap-3">
             <SuspiciousIcon className="h-10 w-10 shrink-0 text-amber" />
             <div>
@@ -68,10 +83,12 @@ export function VerdictScreen({
           </div>
         </section>
       ) : (
-        <SignalBanner level={verdict.risk_level} score={verdict.risk_score} t={t} />
+        <div className="lg:col-span-2">
+          <SignalBanner level={verdict.risk_level} score={verdict.risk_score} t={t} />
+        </div>
       )}
 
-      <Rise delay={next()}>
+      <Rise delay={next()} span>
         <div className={`space-y-2 ${verdict.image_unread ? "hidden" : ""}`}>
           {verdict.scam_type !== "none_detected" && (
             <span className="inline-block rounded-full border border-line bg-sunken px-3 py-1 text-[0.78rem] font-bold uppercase tracking-wider text-muted">
@@ -91,7 +108,7 @@ export function VerdictScreen({
       </Rise>
 
       {(checkedText || imagePreview) && (
-        <Rise delay={next()}>
+        <Rise delay={next()} span>
           <MessageBubble
             text={checkedText}
             imagePreview={imagePreview}

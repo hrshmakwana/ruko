@@ -3,6 +3,10 @@ import type { Language } from "../types";
 /** Landing-page copy. Kept in one file because it is short and it helps to read
  *  the three languages side by side — they have to make the same promise. */
 export interface LandingStrings {
+  /** Two-word versions of the section titles, for the bar across the top. */
+  navDoes: string;
+  navHow: string;
+  navPrivacy: string;
   heroKicker: string;
   heroTitle: string;
   heroBody: string;
@@ -25,10 +29,13 @@ export interface LandingStrings {
 }
 
 const en: LandingStrings = {
+  navDoes: "What it does",
+  navHow: "How it works",
+  navPrivacy: "Privacy",
   heroKicker: "Ruko means stop",
   heroTitle: "Before you pay, click, or call back — ask Ruko.",
   heroBody:
-    "Paste a message, a link, a UPI ID, or upload a screenshot. Ruko tells you whether it is a scam, shows you exactly which words gave it away, and tells you what to do next — in English, Hindi or Gujarati.",
+    "Paste a message, a link, a UPI ID, or upload a screenshot. Ruko tells you whether it is a scam, shows you exactly which words gave it away, and tells you what to do next — in fifteen Indian languages.",
   heroCta: "Check a message",
   heroNote: "No account. No OTP. Nothing to install.",
 
@@ -52,11 +59,11 @@ const en: LandingStrings = {
   how: [
     {
       title: "Fixed rules run first",
-      body: "Lookalike bank domains, URL shorteners, .apk links, UPI collect traps, and known scam phrases in four languages.",
+      body: "Lookalike bank domains, URL shorteners, .apk links, UPI collect traps, and known scam phrases in fifteen languages.",
     },
     {
       title: "Then an AI reads it",
-      body: "Amazon Nova on AWS Bedrock reads the message and the screenshot, and explains it in your language.",
+      body: "An AI reads the message and the screenshot and explains it in your language. When it is unavailable, the rules answer on their own.",
     },
     {
       title: "Rules win ties",
@@ -80,10 +87,13 @@ const en: LandingStrings = {
 };
 
 const hi: LandingStrings = {
+  navDoes: "क्या करता है",
+  navHow: "कैसे काम करता है",
+  navPrivacy: "निजता",
   heroKicker: "रुको यानी ठहरो",
   heroTitle: "पैसे भेजने, लिंक खोलने या कॉल वापस करने से पहले — रुको से पूछो।",
   heroBody:
-    "कोई संदेश, लिंक या UPI ID चिपकाएँ, या स्क्रीनशॉट डालें। रुको बताएगा कि यह धोखा है या नहीं, कौन से शब्दों से पता चला, और अब आपको क्या करना चाहिए — हिंदी, गुजराती या अंग्रेज़ी में।",
+    "कोई संदेश, लिंक या UPI ID चिपकाएँ, या स्क्रीनशॉट डालें। रुको बताएगा कि यह धोखा है या नहीं, कौन से शब्दों से पता चला, और अब आपको क्या करना चाहिए — पंद्रह भारतीय भाषाओं में।",
   heroCta: "संदेश जाँचें",
   heroNote: "कोई खाता नहीं। कोई OTP नहीं। कुछ इंस्टॉल करने की ज़रूरत नहीं।",
 
@@ -107,7 +117,7 @@ const hi: LandingStrings = {
   how: [
     {
       title: "पहले पक्के नियम",
-      body: "बैंक जैसी दिखने वाली नकली वेबसाइट, छोटे किए हुए लिंक, .apk फ़ाइलें, UPI कलेक्ट का जाल, और चार भाषाओं के जाने-पहचाने ठगी वाले वाक्य।",
+      body: "बैंक जैसी दिखने वाली नकली वेबसाइट, छोटे किए हुए लिंक, .apk फ़ाइलें, UPI कलेक्ट का जाल, और पंद्रह भाषाओं के जाने-पहचाने ठगी वाले वाक्य।",
     },
     {
       title: "फिर AI पढ़ता है",
@@ -135,6 +145,9 @@ const hi: LandingStrings = {
 };
 
 const gu: LandingStrings = {
+  navDoes: "શું કરે છે",
+  navHow: "કેવી રીતે કામ કરે",
+  navPrivacy: "ગોપનીયતા",
   heroKicker: "રુકો એટલે થોભો",
   heroTitle: "પૈસા મોકલતાં, લિંક ખોલતાં કે સામે ફોન કરતાં પહેલાં — રુકોને પૂછો.",
   heroBody:
@@ -162,7 +175,7 @@ const gu: LandingStrings = {
   how: [
     {
       title: "પહેલાં પાકા નિયમો",
-      body: "બેંક જેવી દેખાતી નકલી વેબસાઇટ, ટૂંકી કરેલી લિંક, .apk ફાઇલો, UPI કલેક્ટનો ફાંદો, અને ચાર ભાષાના જાણીતા છેતરપિંડીના વાક્યો.",
+      body: "બેંક જેવી દેખાતી નકલી વેબસાઇટ, ટૂંકી કરેલી લિંક, .apk ફાઇલો, UPI કલેક્ટનો ફાંદો, અને પંદર ભાષાના જાણીતા છેતરપિંડીના વાક્યો.",
     },
     {
       title: "પછી AI વાંચે છે",
