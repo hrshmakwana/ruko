@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ApkScreen } from "./components/ApkScreen";
 import { CheckScreen } from "./components/CheckScreen";
 import { DirectiveOverlay } from "./components/DirectiveOverlay";
@@ -8,38 +8,51 @@ import { ListenScreen } from "./components/ListenScreen";
 import { Loading } from "./components/Loading";
 import { LookupPanel } from "./components/LookupPanel";
 import { PanicButton } from "./components/PanicButton";
+import { ScanHub, type HubTarget } from "./components/ScanHub";
+import { SettingsScreen } from "./components/SettingsScreen";
 import { Shell, type Destination } from "./components/Shell";
 import { VerdictScreen } from "./components/VerdictScreen";
 import { applyLanguage, dictionaries, loadLanguage, saveLanguage } from "./i18n";
 import { apkFor } from "./i18n/apk";
 import { familyFor } from "./i18n/family";
 import { installFor } from "./i18n/install";
+import { languageInfo } from "./i18n/languages";
 import { listenFor } from "./i18n/listen";
 import { lookupFor } from "./i18n/lookup";
 import { navFor } from "./i18n/nav";
 import { ApiError, checkMessage, reportScam, uploadImage } from "./lib/api";
 import { loadFamilyCode } from "./lib/guardian";
 import { takeSharedPayload, type SharedPayload } from "./lib/install";
+import { applyParentMode, loadParentMode } from "./lib/parentMode";
+import { rememberCheck } from "./lib/recent";
 import { useDirective } from "./lib/useDirective";
 import type { PreparedImage } from "./lib/image";
 import type { Language, Verdict } from "./types";
 
-/** A verdict and the golden-hour checklist are answers, not places: they take
- *  over the screen and then hand it back to wherever the person was. */
-type Answer = "verdict" | "golden-hour" | null;
+/** What is on screen inside the current tab. The hub is a tab's home; the rest
+ *  are places you went into, and come back from. */
+type View =
+  | { kind: "hub" }
+  | { kind: "message"; screenshot?: boolean }
+  | { kind: "number" }
+  | { kind: "app" }
+  | { kind: "verdict" }
+  | { kind: "golden-hour" };
 
-function startingDestination(): Destination {
+function startingPoint(): { destination: Destination; view: View } {
   const mode = new URLSearchParams(window.location.search).get("mode");
-  if (mode === "lookup") return "number";
-  if (mode === "listen") return "call";
-  if (mode === "apk") return "app";
-  return "message";
+  if (mode === "listen") return { destination: "call", view: { kind: "hub" } };
+  if (mode === "lookup") return { destination: "check", view: { kind: "number" } };
+  if (mode === "apk") return { destination: "check", view: { kind: "app" } };
+  return { destination: "check", view: { kind: "hub" } };
 }
 
 export default function App() {
+  const [start] = useState(startingPoint);
   const [language, setLanguage] = useState<Language>(loadLanguage);
-  const [destination, setDestination] = useState<Destination>(startingDestination);
-  const [answer, setAnswer] = useState<Answer>(null);
+  const [destination, setDestination] = useState<Destination>(start.destination);
+  const [view, setView] = useState<View>(start.view);
+  const [parentMode, setParentMode] = useState<boolean>(loadParentMode);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [verdict, setVerdict] = useState<Verdict | null>(null);
@@ -49,6 +62,8 @@ export default function App() {
   const [familyCode, setFamilyCode] = useState<string | null>(loadFamilyCode);
   const [shared, setShared] = useState<SharedPayload | null>(null);
   const [sharedApk, setSharedApk] = useState<File | null>(null);
+  const [prefill, setPrefill] = useState<string | null>(null);
+  const [mic, setMic] = useState<"unknown" | "granted" | "denied">("unknown");
 
   const t = dictionaries[language];
   const f = familyFor(language);
@@ -59,18 +74,31 @@ export default function App() {
   const nav = navFor(language);
   const { directive, dismiss } = useDirective(familyCode);
 
+  useEffect(() => applyParentMode(parentMode), [parentMode]);
+
+  useEffect(() => {
+    navigator.permissions
+      ?.query({ name: "microphone" as PermissionName })
+      .then((status) => {
+        if (status.state === "granted") setMic("granted");
+        if (status.state === "denied") setMic("denied");
+      })
+      .catch(() => undefined);
+  }, []);
+
   // Anything shared in from another app arrives through the service worker. An
   // app file goes to the app checker; a screenshot goes to the message check.
   useEffect(() => {
     void takeSharedPayload().then((payload) => {
       if (!payload) return;
+      setDestination("check");
       if (payload.file && /\.apk$/i.test(payload.file.name)) {
         setSharedApk(payload.file);
-        setDestination("app");
+        setView({ kind: "app" });
         return;
       }
       setShared(payload);
-      setDestination("message");
+      setView({ kind: "message" });
     });
   }, []);
 
@@ -80,11 +108,36 @@ export default function App() {
     applyLanguage(next);
   }
 
-  function go(next: Destination) {
+  const go = useCallback((next: Destination) => {
     setDestination(next);
-    setAnswer(null);
+    setView({ kind: "hub" });
     setError(null);
     window.scrollTo({ top: 0 });
+  }, []);
+
+  function open(target: HubTarget) {
+    setError(null);
+    window.scrollTo({ top: 0 });
+    if (target === "call") {
+      setDestination("call");
+      setView({ kind: "hub" });
+      return;
+    }
+    if (target === "screenshot") return setView({ kind: "message", screenshot: true });
+    if (target === "message") return setView({ kind: "message" });
+    if (target === "number") return setView({ kind: "number" });
+    setView({ kind: "app" });
+  }
+
+  async function askForMic() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // The permission was the point, not the audio: let the microphone go.
+      stream.getTracks().forEach((track) => track.stop());
+      setMic("granted");
+    } catch {
+      setMic("denied");
+    }
   }
 
   async function handleCheck({ text, image }: { text: string; image: PreparedImage | null }) {
@@ -102,7 +155,8 @@ export default function App() {
       setCheckedText(text);
       setImagePreview(image?.previewUrl ?? null);
       setReported(false);
-      setAnswer("verdict");
+      rememberCheck(result);
+      setView({ kind: "verdict" });
       window.scrollTo({ top: 0 });
     } catch (err) {
       const code = err instanceof ApiError ? err.code : "network";
@@ -130,7 +184,7 @@ export default function App() {
   function content() {
     if (busy) return <Loading t={t} />;
 
-    if (answer === "verdict" && verdict) {
+    if (view.kind === "verdict" && verdict) {
       return (
         <div className="space-y-4">
           <VerdictScreen
@@ -141,10 +195,10 @@ export default function App() {
             reported={reported}
             onReport={handleReport}
             onAlreadyPaid={() => {
-              setAnswer("golden-hour");
+              setView({ kind: "golden-hour" });
               window.scrollTo({ top: 0 });
             }}
-            onBack={() => setAnswer(null)}
+            onBack={() => setView({ kind: "hub" })}
           />
           {/* Right where it is needed: the verdict says scam, and the person is
               still on the phone to them. */}
@@ -155,81 +209,101 @@ export default function App() {
       );
     }
 
-    if (answer === "golden-hour") {
+    if (view.kind === "golden-hour") {
       return (
         <GoldenHourScreen
           t={t}
           verdict={verdict}
-          onBack={() => setAnswer(verdict ? "verdict" : null)}
+          onBack={() => setView(verdict ? { kind: "verdict" } : { kind: "hub" })}
         />
       );
     }
 
-    switch (destination) {
-      case "call":
+    if (destination === "call") {
+      return (
+        <ListenScreen
+          l={listen}
+          language={language}
+          onBack={() => go("check")}
+          familyCode={familyCode}
+          familyToldLabel={f.familyToldLive}
+        />
+      );
+    }
+
+    if (destination === "family") {
+      return (
+        <FamilyScreen
+          f={f}
+          install={install}
+          code={familyCode}
+          onChange={setFamilyCode}
+          language={language}
+        />
+      );
+    }
+
+    if (destination === "settings") {
+      return (
+        <SettingsScreen
+          t={t}
+          nav={nav}
+          f={f}
+          install={install}
+          language={language}
+          onLanguage={changeLanguage}
+          parentMode={parentMode}
+          onParentMode={setParentMode}
+          micState={mic}
+          onAskMic={() => void askForMic()}
+        />
+      );
+    }
+
+    switch (view.kind) {
+      case "message":
         return (
-          <ListenScreen
-            l={listen}
-            language={language}
-            onBack={() => go("message")}
-            familyCode={familyCode}
-            familyToldLabel={f.familyToldLive}
+          <CheckScreen
+            t={t}
+            busy={busy}
+            error={error}
+            onCheck={handleCheck}
+            onError={setError}
+            shared={shared}
+            prefill={prefill}
+            openPicker={view.screenshot}
+            onBack={() => setView({ kind: "hub" })}
           />
+        );
+      case "number":
+        return (
+          <div className="space-y-4">
+            <BackLink label={t.backButton} onClick={() => setView({ kind: "hub" })} />
+            <LookupPanel t={t} l={l} language={language} />
+          </div>
         );
       case "app":
-        return <ApkScreen s={apk} initialFile={sharedApk} onBack={() => go("message")} />;
-      case "number":
-        return <LookupPanel t={t} l={l} language={language} />;
-      case "family":
-        return (
-          <FamilyScreen
-            f={f}
-            install={install}
-            code={familyCode}
-            onChange={setFamilyCode}
-            language={language}
-          />
-        );
+        return <ApkScreen s={apk} initialFile={sharedApk} onBack={() => setView({ kind: "hub" })} />;
       default:
         return (
-          <div className="space-y-5">
-            <CheckScreen
-              t={t}
-              busy={busy}
-              error={error}
-              onCheck={handleCheck}
-              onError={setError}
-              shared={shared}
-            />
-            {familyCode && <PanicButton f={f} code={familyCode} language={language} />}
-          </div>
+          <ScanHub
+            t={t}
+            language={language}
+            nav={nav}
+            listen={listen}
+            apk={apk}
+            lookup={l}
+            onOpen={open}
+            onExample={(text) => {
+              setPrefill(text);
+              setView({ kind: "message" });
+            }}
+            onAlreadyPaid={() => setView({ kind: "golden-hour" })}
+            onRecent={() => setView({ kind: "hub" })}
+          />
         );
     }
   }
-
-  const footer = (
-    <footer className="border-t border-line bg-surface px-4 py-6">
-      <div className="mx-auto flex max-w-3xl flex-col items-center gap-2 text-center text-[0.85rem] text-muted">
-        <p>{t.footerDisclaimer}</p>
-        <p className="flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
-          <a href="tel:1930" className="inline-flex min-h-[44px] items-center font-bold text-action">
-            {t.footerHelpline}
-          </a>
-          <a
-            href="https://cybercrime.gov.in"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex min-h-[44px] items-center font-bold text-action"
-          >
-            {t.footerPortal}
-          </a>
-          <a href="/guardian" className="inline-flex min-h-[44px] items-center font-bold text-action">
-            {f.familyTitle}
-          </a>
-        </p>
-      </div>
-    </footer>
-  );
 
   return (
     <>
@@ -240,16 +314,31 @@ export default function App() {
         nav={nav}
         active={destination}
         onNavigate={go}
-        language={language}
-        onLanguage={changeLanguage}
-        languageLabel={t.languageLabel}
         appName={t.appName}
-        footer={footer}
-        wide={answer === "verdict"}
+        tagline={nav.meansStop}
+        languageName={languageInfo(language).endonym}
+        language={language}
+        parentMode={parentMode}
+        onParentMode={setParentMode}
+        parentLabel={nav.modeParent}
+        guardianLabel={nav.modeGuardian}
+        familyCode={familyCode}
+        familyLinkedLabel={familyCode ? f.familyLinked(familyCode) : undefined}
       >
         {content()}
-        <div className="mt-8 lg:hidden">{footer}</div>
       </Shell>
     </>
+  );
+}
+
+function BackLink({ label, onClick }: { label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex min-h-[44px] items-center gap-2 text-[0.92rem] font-semibold text-muted"
+    >
+      ← {label}
+    </button>
   );
 }

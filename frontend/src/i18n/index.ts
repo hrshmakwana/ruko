@@ -55,10 +55,58 @@ export function saveLanguage(language: Language): void {
   }
 }
 
-/** Apply the language to the document: screen readers and RTL both need this. */
+/** The Google Font that renders each script properly.
+ *
+ * Fifteen scripts cannot all be downloaded up front — that is megabytes on a
+ * phone. Only the one the person chose is fetched, when they choose it, and
+ * Latin (Inter) is always there underneath for the words that stay English,
+ * like OTP and UPI.
+ */
+const SCRIPT_FONTS: Partial<Record<Language, string>> = {
+  hi: "Noto+Sans+Devanagari",
+  mr: "Noto+Sans+Devanagari",
+  mai: "Noto+Sans+Devanagari",
+  ne: "Noto+Sans+Devanagari",
+  bn: "Noto+Sans+Bengali",
+  as: "Noto+Sans+Bengali",
+  gu: "Noto+Sans+Gujarati",
+  ta: "Noto+Sans+Tamil",
+  te: "Noto+Sans+Telugu",
+  kn: "Noto+Sans+Kannada",
+  ml: "Noto+Sans+Malayalam",
+  or: "Noto+Sans+Oriya",
+  pa: "Noto+Sans+Gurmukhi",
+  ur: "Noto+Nastaliq+Urdu",
+};
+
+function loadScriptFont(language: Language): void {
+  const family = SCRIPT_FONTS[language];
+  if (!family) {
+    document.documentElement.style.removeProperty("--script-font");
+    return;
+  }
+  const id = `ruko-font-${family}`;
+  if (!document.getElementById(id)) {
+    const link = document.createElement("link");
+    link.id = id;
+    link.rel = "stylesheet";
+    link.href = `https://fonts.googleapis.com/css2?family=${family}:wght@400;500;600;700&display=swap`;
+    document.head.appendChild(link);
+  }
+  // Put the script font first, so Devanagari is rendered by a Devanagari face
+  // and the Latin inside the same sentence still comes from Inter.
+  document.documentElement.style.setProperty(
+    "--script-font",
+    `"${family.replace(/\+/g, " ")}"`,
+  );
+}
+
+/** Apply the language to the document: screen readers, RTL and the script font
+ *  all follow from this one call, so a language choice is never half-applied. */
 export function applyLanguage(language: Language): void {
   document.documentElement.lang = language;
   document.documentElement.dir = directionFor(language);
+  loadScriptFont(language);
 }
 
 export { LANGUAGES, languageInfo, directionFor, isLanguage } from "./languages";

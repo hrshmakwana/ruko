@@ -1,83 +1,95 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------------------------
-   Ruko's visual language is the Indian road sign.
+   Civic Trust & Vigilance — Ruko's design system.
 
-   "Ruko" means stop, so risk is spoken in traffic-signal terms: a three-lamp
-   signal head, a red octagon, marigold for caution. That reads instantly to
-   someone who cannot read English, and it means risk is never carried by colour
-   alone - there is always a shape and a position too.
+   One rule holds the whole thing together: **colour is quarantined**. The app
+   chrome, navigation, cards and buttons are monochrome. Red, amber and green
+   appear nowhere except a verdict, so when something turns red it means one
+   thing and the person does not have to learn what.
 
-   Paper-warm surfaces in light mode so documents (the complaint pack) feel like
-   documents. Deep ink navy in dark mode, the colour of a road at night.
+   Two accessibility commitments are built into the tokens rather than bolted on:
+   every text pair clears 7:1, and Parent Mode scales the whole type system by
+   1.4 for someone who is sixty and holding the phone at arm's length.
 --------------------------------------------------------------------------- */
 :root {
-  --page: #f4efe7;
-  --surface: #fffdfa;
-  --sunken: #ece4d8;
-  --line: #d8ccba;
-  --ink: #101d2b;
-  --muted: #5a6776;
+  /* --- surfaces: a faint civic blue, never pure grey --- */
+  --page: #f8f9ff;
+  --surface: #ffffff;
+  --sunken: #eff4ff;
+  --raised: #e7eefc;
+  --line: #d3dae8;
+  --line-strong: #c6c6cb;
 
-  /* Signal colours. Text-safe variants are used for type on tinted panels. */
-  --red: #c00d24;
-  --red-panel: #c00d24;
-  --red-ink: #8d0518;
-  --red-tint: #fbe7ea;
-  --red-line: #eeb3bc;
+  --ink: #151c26;
+  --muted: #565d6a;
+  --paper: #ffffff;
 
-  --amber: #d98207;
+  /* --- the verdict palette. Nothing else may use these. --- */
+  --red: #c42b1c;
+  --red-panel: #c42b1c;
+  --red-ink: #93000a;
+  --red-tint: #fdf2f1;
+  --red-line: #f5c2be;
+
+  --amber: #b26a00;
   --amber-ink: #7d4a00;
-  --amber-tint: #fdf0d9;
-  --amber-line: #eccb8c;
+  --amber-tint: #fef8ec;
+  --amber-line: #fce0ae;
 
-  --green: #12784a;
-  --green-ink: #0b5433;
-  --green-tint: #e2f2e9;
-  --green-line: #9fd1b6;
+  --green: #1b7f4b;
+  --green-ink: #12653a;
+  --green-tint: #f0faf4;
+  --green-line: #b5e8cb;
 
-  /* Primary action. Navy on paper; marigold on night. */
-  --action: #101d2b;
-  --on-action: #fffdfa;
-  --action-soft: #e6e0d5;
+  /* --- actions are ink, never colour --- */
+  --action: #14161a;
+  --on-action: #ffffff;
+  --action-soft: #e2e8f7;
 
-  --signal-housing: #101d2b;
-  --focus: #c00d24;
-  --paper: #fffdf7;
+  --signal-housing: #151c26;
+  --focus: #14161a;
+
+  /* Parent Mode multiplies this. Every size below is expressed in rem so one
+     variable moves the entire interface, including the parts written later. */
+  --scale: 1;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --page: #0a141f;
-    --surface: #10202f;
-    --sunken: #17293a;
-    --line: #27405a;
-    --ink: #eef3f8;
-    --muted: #9cb0c4;
+    --page: #0e1013;
+    --surface: #191c21;
+    --sunken: #14171b;
+    --raised: #21252c;
+    --line: #272c35;
+    --line-strong: #39404b;
 
-    --red: #ff7085;
-    --red-panel: #9e0d22;
-    --red-ink: #ff9aa8;
-    --red-tint: #3b0f18;
-    --red-line: #7d2233;
+    --ink: #f2f3f5;
+    --muted: #a6adb9;
+    --paper: #191c21;
 
-    --amber: #f5b53d;
-    --amber-ink: #ffcd6b;
-    --amber-tint: #3a2708;
-    --amber-line: #7d5814;
+    --red: #ff6b5a;
+    --red-panel: #a32116;
+    --red-ink: #ffa094;
+    --red-tint: #2a1412;
+    --red-line: #5d221d;
 
-    --green: #4fd493;
-    --green-ink: #7fe4b1;
-    --green-tint: #0d3324;
-    --green-line: #1f6647;
+    --amber: #ffb454;
+    --amber-ink: #ffc87a;
+    --amber-tint: #281c08;
+    --amber-line: #5c3e08;
 
-    --action: #f0b429;
-    --on-action: #101d2b;
-    --action-soft: #1d3346;
+    --green: #4ade80;
+    --green-ink: #86efac;
+    --green-tint: #0e2318;
+    --green-line: #1d5537;
 
-    --signal-housing: #061019;
-    --focus: #f0b429;
-    --paper: #16283a;
+    --action: #f2f3f5;
+    --on-action: #0e1013;
+    --action-soft: #272c35;
+
+    --signal-housing: #0a0c0f;
+    --focus: #f2f3f5;
   }
 }
 
@@ -85,7 +97,9 @@
   --color-page: var(--page);
   --color-surface: var(--surface);
   --color-sunken: var(--sunken);
+  --color-raised: var(--raised);
   --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-paper: var(--paper);
@@ -111,50 +125,83 @@
   --color-action-soft: var(--action-soft);
   --color-housing: var(--signal-housing);
 
-  /* One family covers Latin, Devanagari and Gujarati, so the three languages
-     sit at the same optical weight instead of looking like three products. */
+  /* Inter for Latin; the script font for the chosen language is added to the
+     front of this list at runtime, so Tamil or Gujarati never falls back to a
+     system font that renders its matras badly. */
   --font-sans:
-    "Anek Latin", "Anek Devanagari", "Anek Gujarati", ui-sans-serif, system-ui,
+    var(--script-font, "Inter"), "Inter", ui-sans-serif, system-ui,
     -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Shapes, from the design system: cards 12, controls 14, pills round. */
+  --radius-card: 12px;
+  --radius-control: 14px;
 }
 
 html {
-  /* 18px base: this app is read by a 60-year-old on a 360px phone in daylight. */
-  font-size: 18px;
+  /* 17px base so an untouched body line is the design's body-lg. Parent Mode
+     multiplies it, and because the app sizes in rem, everything moves together
+     instead of one heading growing out of its card. */
+  font-size: calc(17px * var(--scale));
   -webkit-text-size-adjust: 100%;
   color-scheme: light dark;
 }
 
+/* Indic matras clip at Western line heights, so nothing here goes below 1.5. */
 body {
   margin: 0;
-  /* The stop panel scales past 100% for a moment as it lands; clip so that
-     never shows up as a horizontal scrollbar on a phone. */
   overflow-x: clip;
   background: var(--page);
   color: var(--ink);
   font-family: var(--font-sans);
   font-optical-sizing: auto;
-  line-height: 1.55;
+  font-synthesis-weight: none;
+  line-height: 1.6;
   min-height: 100dvh;
 }
 
+h1,
+h2,
+h3 {
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+}
+
 :where(a, button, input, textarea, select, [tabindex]):focus-visible {
-  outline: 3px solid var(--focus);
+  /* Never a coloured focus ring: colour means verdict here. */
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
   border-radius: 6px;
 }
 
+/* --- Parent Mode ----------------------------------------------------------
+   Not system magnification: a deliberate second scale, with bigger hit targets
+   to match. Someone hands their parent the phone and this is what they see. */
+:root[data-parent="on"] {
+  --scale: 1.35;
+}
+
+:root[data-parent="on"] button,
+:root[data-parent="on"] a[href],
+:root[data-parent="on"] summary {
+  min-height: 64px;
+}
+
+:root[data-parent="on"] .ruko-compact {
+  /* Chrome that must not grow: the language pill, the mode switch. */
+  min-height: 48px;
+}
+
 /* --- the Ruko moment -------------------------------------------------------
-   On a scam verdict the stop panel lands hard and everything else waits, then
+   On a scam verdict the billboard lands hard and everything else waits, then
    slides up underneath it. The product does what its name says. */
 @keyframes ruko-slam {
   0% {
-    transform: scale(1.35);
+    transform: scale(1.18);
     opacity: 0;
   }
   55% {
-    transform: scale(0.94);
+    transform: scale(0.97);
     opacity: 1;
   }
   100% {
@@ -165,7 +212,7 @@ body {
 
 @keyframes ruko-rise {
   from {
-    transform: translateY(14px);
+    transform: translateY(10px);
     opacity: 0;
   }
   to {
@@ -177,33 +224,49 @@ body {
 @keyframes ruko-lamp {
   0%,
   100% {
-    filter: brightness(1);
+    opacity: 1;
   }
   50% {
-    filter: brightness(1.35);
+    opacity: 0.35;
   }
 }
 
 .ruko-slam {
-  animation: ruko-slam 520ms cubic-bezier(0.2, 1.2, 0.3, 1) both;
+  animation: ruko-slam 460ms cubic-bezier(0.2, 1.1, 0.3, 1) both;
 }
 
 .ruko-rise {
-  animation: ruko-rise 420ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  animation: ruko-rise 380ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
   animation-delay: var(--rise-delay, 0ms);
 }
 
 .ruko-lamp-live {
-  animation: ruko-lamp 2.2s ease-in-out infinite;
+  animation: ruko-lamp 1.8s ease-in-out infinite;
 }
 
-/* A marker pen underline for scam evidence inside the message bubble. */
+/* Scam evidence inside a quoted message: a marker line, not a colour block, so
+   it survives colour-blindness and print. */
 .ruko-mark {
-  background: linear-gradient(transparent 58%, var(--amber-tint) 58%);
-  box-shadow: inset 0 -0.18em 0 var(--amber-line);
-  border-radius: 2px;
-  padding: 0 0.08em;
+  background: var(--red-tint);
+  box-shadow: inset 0 -0.14em 0 var(--red-line);
+  border-radius: 3px;
+  padding: 0 0.12em;
   font-weight: 600;
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-decoration-color: var(--red);
+  text-underline-offset: 3px;
+}
+
+/* One grounding shadow, permitted only on the verdict billboard. */
+.ruko-billboard {
+  box-shadow: 0 4px 12px rgb(20 22 26 / 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  .ruko-billboard {
+    box-shadow: 0 4px 16px rgb(0 0 0 / 0.4);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -135,6 +135,12 @@ def _feed_key(code: str) -> str:
     return f"FAMFEED#{normalise_code(code)}"
 
 
+# A live call is analysed every second or so while it runs. Without this, one
+# call would fill the guardian's phone with identical alerts and the alarm would
+# become noise at the exact moment it needs to mean something.
+REPEAT_WINDOW_SECONDS = 120
+
+
 def add_alert(code: str, alert: dict) -> str | None:
     """Push an alert onto the family feed, newest first, capped.
 
@@ -163,7 +169,20 @@ def add_alert(code: str, alert: dict) -> str | None:
 
     try:
         feed = table().get_item(Key={"pk": _feed_key(code)}).get("Item") or {}
-        alerts = [entry] + list(feed.get("alerts") or [])[: MAX_ALERTS - 1]
+        existing = list(feed.get("alerts") or [])
+
+        # One alert per situation. A repeat of the same kind inside the window
+        # is the same ongoing call or the same panic press, not a new event.
+        if entry["kind"] in {"live_call", "panic"}:
+            recent = next(
+                (a for a in existing if a.get("kind") == entry["kind"]),
+                None,
+            )
+            if recent and now - int(recent.get("at", 0)) < REPEAT_WINDOW_SECONDS:
+                LOG.info("alert_deduped family=%s kind=%s", code, entry["kind"])
+                return str(recent.get("id") or "")
+
+        alerts = [entry] + existing[: MAX_ALERTS - 1]
         table().put_item(
             Item={
                 "pk": _feed_key(code),

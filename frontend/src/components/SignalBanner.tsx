@@ -19,8 +19,8 @@ const LAMP_COLOUR: Record<RiskLevel, string> = {
  *  Position in the housing carries the meaning as much as the colour does. */
 function SignalHead({ level }: { level: RiskLevel }) {
   return (
-    <div
-      className="flex shrink-0 flex-col items-center gap-2 rounded-2xl bg-housing px-2.5 py-3 ring-1 ring-black/20"
+    <span
+      className="inline-flex shrink-0 items-center gap-1 rounded-full bg-black/15 px-1.5 py-1"
       aria-hidden="true"
     >
       {LAMPS.map((lamp) => {
@@ -28,16 +28,15 @@ function SignalHead({ level }: { level: RiskLevel }) {
         return (
           <span
             key={lamp}
-            className={`block h-7 w-7 rounded-full ${live ? "ruko-lamp-live" : ""}`}
+            className={`block h-2 w-2 rounded-full ${live ? "ruko-lamp-live" : ""}`}
             style={{
               background: LAMP_COLOUR[lamp],
-              opacity: live ? 1 : 0.14,
-              boxShadow: live ? `0 0 16px 2px ${LAMP_COLOUR[lamp]}aa` : "none",
+              opacity: live ? 1 : 0.25,
             }}
           />
         );
       })}
-    </div>
+    </span>
   );
 }
 
@@ -57,12 +56,14 @@ function Octagon({ className }: { className?: string }) {
 export function SignalBanner({ level, score, t }: Props) {
   const isScam = level === "scam";
 
+  // The design system's rule: a verdict is a card with a 1.5px border tinted to
+  // its own colour, and it is the only place in Ruko where colour appears.
   const panel =
     level === "scam"
-      ? "bg-red-panel text-white border-transparent"
+      ? "border-transparent bg-red-panel text-white"
       : level === "suspicious"
-        ? "bg-amber-tint text-amber-ink border-amber-line"
-        : "bg-green-tint text-green-ink border-green-line";
+        ? "border-amber-line bg-amber-tint text-amber-ink"
+        : "border-green-line bg-green-tint text-green-ink";
 
   const word =
     level === "scam" ? t.levelScam : level === "suspicious" ? t.levelSuspicious : t.levelNoScamSigns;
@@ -76,49 +77,37 @@ export function SignalBanner({ level, score, t }: Props) {
   return (
     <section
       aria-live="polite"
-      className={`relative overflow-hidden rounded-3xl border-2 px-4 py-4 ${panel} ${
+      className={`ruko-billboard relative overflow-hidden rounded-[12px] border-[1.5px] p-5 ${panel} ${
         isScam ? "ruko-slam" : "ruko-rise"
       }`}
     >
       {isScam && (
-        <Octagon className="pointer-events-none absolute -top-8 -right-10 h-44 w-44 text-white/15" />
+        <Octagon className="pointer-events-none absolute -top-6 -right-8 h-36 w-36 text-white/12" />
       )}
 
-      <div className="relative flex items-center gap-4">
-        <SignalHead level={level} />
-        <div className="min-w-0">
-          {isScam && (
-            <p className="text-[2.1rem] leading-none font-extrabold tracking-tight">
-              {t.stopWord}
-            </p>
-          )}
-          <p
-            className={
-              isScam
-                ? "mt-1 text-[1.05rem] font-bold uppercase tracking-[0.14em] opacity-95"
-                : "text-[1.9rem] leading-none font-extrabold tracking-tight"
-            }
-          >
-            {word}
-          </p>
-          <p className="mt-1.5 text-[0.95rem] leading-snug font-medium opacity-95">{sub}</p>
-        </div>
-      </div>
+      <div className="relative">
+        <p className="flex items-center gap-2 text-[0.72rem] font-bold uppercase tracking-[0.14em] opacity-90">
+          <SignalHead level={level} />
+          {isScam ? t.stopWord : t.scoreLabel}
+        </p>
 
-      <div className="relative mt-4">
-        <div className="mb-1 flex items-baseline justify-between text-[0.78rem] font-bold uppercase tracking-wider opacity-90">
-          <span>{t.scoreLabel}</span>
-          <span className="font-mono text-[0.9rem] tracking-normal">{score}/100</span>
-        </div>
-        <div
-          className="h-2 w-full overflow-hidden rounded-full bg-current/20"
-          role="img"
-          aria-label={`${t.scoreLabel}: ${score} / 100`}
-        >
+        {/* The verdict itself, at display size: readable at arm's length by
+            someone who is frightened and holding the phone away from them. */}
+        <p className="mt-2 text-[1.85rem] leading-tight font-bold tracking-tight">{word}</p>
+        <p className="mt-1.5 text-[0.98rem] leading-snug font-medium opacity-95">{sub}</p>
+
+        <div className="mt-4 flex items-center gap-3">
           <div
-            className="h-full rounded-full bg-current transition-[width] duration-700"
-            style={{ width: `${Math.max(5, score)}%` }}
-          />
+            className="h-1.5 flex-1 overflow-hidden rounded-full bg-current/20"
+            role="img"
+            aria-label={`${t.scoreLabel}: ${score} / 100`}
+          >
+            <div
+              className="h-full rounded-full bg-current transition-[width] duration-700"
+              style={{ width: `${Math.max(5, score)}%` }}
+            />
+          </div>
+          <span className="font-mono text-[0.8rem] font-semibold opacity-90">{score}/100</span>
         </div>
       </div>
     </section>

@@ -28,6 +28,7 @@ export const en = {
       text: "This is Delhi Cyber Crime Branch. A parcel in your name contains illegal items. Join this video call immediately for verification or a non-bailable warrant will be issued. Do not tell anyone, this is a confidential investigation.",
     },
   ],
+  recentTitle: "Recent checks",
   languageLabel: "Language",
   emptyInputError: "Paste a message or upload a screenshot first.",
   networkError: "Could not reach Ruko. Check your internet and try again.",

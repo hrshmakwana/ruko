@@ -129,3 +129,63 @@ class TestPrivacy:
         logged = " ".join(record.getMessage() for record in caplog.records)
         assert "OTP now" not in logged
         assert "live_analyse" in logged
+
+
+class TestOneAlertPerCall:
+    """A call is analysed every second; the guardian must be told once.
+
+    Without this the alarm fires on every sentence the scammer says, and an
+    alarm that fires thirty times is an alarm nobody looks at again.
+    """
+
+    def test_repeat_live_alerts_collapse_into_one(self, monkeypatch):
+        from ruko import family
+
+        written = []
+        now = [1_000_000]
+
+        class FakeTable:
+            def get_item(self, Key):  # noqa: N803, ARG002
+                return {"Item": {"alerts": list(written)}} if written else {}
+
+            def put_item(self, Item):  # noqa: N803
+                written.clear()
+                written.extend(Item["alerts"])
+
+        monkeypatch.setattr(family, "table", lambda: FakeTable())
+        monkeypatch.setattr(family.notify, "publish_alert", lambda *a, **k: None)
+        monkeypatch.setattr(family.time, "time", lambda: now[0])
+
+        alert = {"kind": "live_call", "risk_level": "scam", "risk_score": 80, "headline": "heard it"}
+        first = family.add_alert("BCD234", alert)
+        second = family.add_alert("BCD234", alert)
+
+        assert first == second, "the second alert should reuse the first"
+        assert len(written) == 1
+
+        # A new call, two minutes later, is a new event.
+        now[0] += family.REPEAT_WINDOW_SECONDS + 1
+        family.add_alert("BCD234", alert)
+        assert len(written) == 2
+
+    def test_a_checked_message_is_never_deduped(self, monkeypatch):
+        """Two scam messages in a row are two things worth knowing about."""
+        from ruko import family
+
+        written = []
+
+        class FakeTable:
+            def get_item(self, Key):  # noqa: N803, ARG002
+                return {"Item": {"alerts": list(written)}} if written else {}
+
+            def put_item(self, Item):  # noqa: N803
+                written.clear()
+                written.extend(Item["alerts"])
+
+        monkeypatch.setattr(family, "table", lambda: FakeTable())
+        monkeypatch.setattr(family.notify, "publish_alert", lambda *a, **k: None)
+
+        alert = {"kind": "scam", "risk_level": "scam", "risk_score": 90, "headline": "a scam"}
+        family.add_alert("BCD234", alert)
+        family.add_alert("BCD234", alert)
+        assert len(written) == 2

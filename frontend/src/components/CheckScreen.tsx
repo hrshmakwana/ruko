@@ -12,14 +12,40 @@ interface Props {
   onError: (message: string | null) => void;
   /** A screenshot or text shared into Ruko from another app's share sheet. */
   shared?: { file: File | null; text: string } | null;
+  /** An example the person tapped on the hub, dropped into the box for them. */
+  prefill?: string | null;
+  /** Entered from the Screenshot tile: open the picker without a second tap. */
+  openPicker?: boolean;
+  onBack?: () => void;
 }
 
 const MAX_SOURCE_BYTES = 12 * 1024 * 1024; // before we resize it down to <5 MB
 
-export function CheckScreen({ t, busy, error, onCheck, onError, shared }: Props) {
+export function CheckScreen({
+  t,
+  busy,
+  error,
+  onCheck,
+  onError,
+  shared,
+  prefill,
+  openPicker,
+  onBack,
+}: Props) {
   const [text, setText] = useState("");
   const [image, setImage] = useState<PreparedImage | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (prefill) setText(prefill);
+  }, [prefill]);
+
+  // Arriving from the Screenshot tile means the gallery, not a blank box.
+  useEffect(() => {
+    if (openPicker) fileInput.current?.click();
+    // Only on the way in; re-opening the picker on every render would trap them.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Something shared in from WhatsApp or the gallery lands here, filled in and
   // ready, so the person only has to press the one button they came for.
@@ -66,6 +92,16 @@ export function CheckScreen({ t, busy, error, onCheck, onError, shared }: Props)
 
   return (
     <div className="space-y-5">
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          className="inline-flex min-h-[44px] items-center gap-2 text-[0.92rem] font-semibold text-muted"
+        >
+          ← {t.backButton}
+        </button>
+      )}
+
       <header className="ruko-rise space-y-1.5">
         <h1 className="text-[1.75rem] leading-tight font-extrabold tracking-tight">
           {t.checkHeading}
