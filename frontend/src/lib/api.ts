@@ -107,10 +107,16 @@ export interface LiveVerdict {
   scam_type: string;
   alerts: LiveAlert[];
   language: Language;
+  /** True once the family has been told about this call. */
+  family_told?: boolean;
 }
 
 /** Run the rules over what has been heard so far. Nothing is stored. */
-export async function liveAnalyse(text: string, language: Language): Promise<LiveVerdict> {
+export async function liveAnalyse(
+  text: string,
+  language: Language,
+  familyCode?: string | null,
+): Promise<LiveVerdict> {
   if (IS_MOCK) {
     const lower = text.toLowerCase();
     const hit = /otp|digital arrest|anydesk|upi pin/.test(lower);
@@ -131,5 +137,9 @@ export async function liveAnalyse(text: string, language: Language): Promise<Liv
       language,
     };
   }
-  return post<LiveVerdict>("/live/analyse", { text, language });
+  return post<LiveVerdict>("/live/analyse", {
+    text,
+    language,
+    family_code: familyCode ?? undefined,
+  });
 }

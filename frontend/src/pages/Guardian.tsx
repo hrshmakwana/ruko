@@ -173,7 +173,11 @@ export default function Guardian() {
               <ScamIcon className="h-9 w-9 shrink-0" />
               <div className="min-w-0">
                 <p className="text-[0.78rem] font-bold uppercase tracking-wider opacity-90">
-                  {live[0].kind === "panic" ? "They pressed the panic button" : "Scam detected"}
+                  {live[0].kind === "panic"
+                    ? "They pressed the panic button"
+                    : live[0].kind === "live_call"
+                      ? "They are on a scam call RIGHT NOW"
+                      : "Scam detected"}
                   {" · "}
                   {timeAgo(live[0].at)}
                 </p>

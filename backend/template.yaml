@@ -251,6 +251,10 @@ Resources:
               Action:
                 - transcribe:StartStreamTranscriptionWebSocket
               Resource: "*"
+        # A scam heard on a live call tells the family while the call is still
+        # going, which means writing one alert onto the family's feed.
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RukoTable
       Events:
         Token:
           Type: HttpApi

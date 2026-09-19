@@ -9,6 +9,9 @@ interface Props {
   l: ListenStrings;
   language: Language;
   onBack: () => void;
+  /** Set once a family is linked: the guardian is told during the call, not after. */
+  familyCode?: string | null;
+  familyToldLabel?: string;
 }
 
 /** Ruko listening to a call on speakerphone.
@@ -18,7 +21,7 @@ interface Props {
  * one colour, the newest warning is on top, and the transcript — the part that
  * is interesting to build but useless in the moment — sits at the bottom.
  */
-export function ListenScreen({ l, language, onBack }: Props) {
+export function ListenScreen({ l, language, onBack, familyCode, familyToldLabel }: Props) {
   const [phase, setPhase] = useState<"idle" | "listening" | "stopped">("idle");
   const [source, setSource] = useState<{ kind: ListenSource; borrowed: boolean } | null>(null);
   const [settled, setSettled] = useState("");
@@ -27,6 +30,7 @@ export function ListenScreen({ l, language, onBack }: Props) {
   const [score, setScore] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(0);
+  const [familyTold, setFamilyTold] = useState(false);
 
   const session = useRef<ListenSession | null>(null);
   const analysing = useRef(false);
@@ -49,7 +53,8 @@ export function ListenScreen({ l, language, onBack }: Props) {
       analysing.current = true;
       lastAnalysed.current = text;
       try {
-        const verdict = await liveAnalyse(text.slice(-1500), language);
+        const verdict = await liveAnalyse(text.slice(-1500), language, familyCode);
+        if (verdict.family_told) setFamilyTold(true);
         setScore((previous) => Math.max(previous, verdict.risk_score));
         setAlerts((previous) => {
           const seen = new Set(previous.map((alert) => alert.rule));
@@ -62,7 +67,7 @@ export function ListenScreen({ l, language, onBack }: Props) {
         analysing.current = false;
       }
     },
-    [language],
+    [language, familyCode],
   );
 
   useEffect(() => {
@@ -78,6 +83,7 @@ export function ListenScreen({ l, language, onBack }: Props) {
     setSettled("");
     setPartial("");
     setSeconds(0);
+    setFamilyTold(false);
     lastAnalysed.current = "";
     setPhase("listening");
 
@@ -197,6 +203,12 @@ export function ListenScreen({ l, language, onBack }: Props) {
           className="rounded-xl border border-amber-line bg-amber-tint px-3 py-2 text-[0.92rem] font-semibold text-amber-ink"
         >
           {error}
+        </p>
+      )}
+
+      {familyTold && familyToldLabel && (
+        <p className="ruko-rise rounded-2xl border-2 border-green-line bg-green-tint px-4 py-3 text-[0.95rem] font-bold text-green-ink">
+          {familyToldLabel}
         </p>
       )}
 

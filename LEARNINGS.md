@@ -368,3 +368,25 @@ Median 2.8s, slowest 11.5s.
 **Said out loud, not buried:** with Gemini the message leaves AWS and goes to Google. That is now a
 line in the landing page's privacy list, in all three of its languages, and a section of its own in
 the README. Bedrock keeps everything inside AWS, and going back is one parameter.
+
+## Day 3 — the family hears the call, not just the message
+
+**What was added:** when live call mode judges a call to be a scam, the guardian is alerted **during
+the call**, not afterwards. The parent's phone shows "your family has been told"; the son's screen
+says *they are on a scam call right now*, and the STOP he sends lands on the parent's screen while
+the scammer is still talking. That is the whole loop closed: hear it, tell someone who can act, act.
+
+Only the headline and the reason travel. The words heard on the call are never sent to the guardian
+and never stored, exactly as with a checked message.
+
+**What was checked rather than assumed:** the whole family loop was run end to end against the live
+API — two accounts get two different codes, a parent links, a scam check alerts the guardian, a
+directive lands on the parent's poll, panic reaches the guardian. It all worked, which matters,
+because it was reported as broken. The code being "always the same" is the same account: a family
+code belongs to a family, not to a session.
+
+**What was refused, and why it is the right call:** remote control of the parent's phone. A browser
+cannot do it, and a native app doing it would make Ruko into the exact thing it warns about —
+`phrase.remote_access` exists in the rules engine because AnyDesk-style control is how these scams
+are run. Ruko can tell the family, push a message onto the screen and sound an alarm. It cannot take
+someone's phone, and it should not be able to.

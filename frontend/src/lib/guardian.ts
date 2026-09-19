@@ -6,7 +6,7 @@ export const GUARDIAN_MOCK = API_URL === "";
 export interface Alert {
   id: string;
   at: number;
-  kind: "scam" | "panic";
+  kind: "scam" | "panic" | "live_call";
   risk_level: string | null;
   risk_score: number;
   scam_type: string | null;

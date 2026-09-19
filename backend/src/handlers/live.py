@@ -28,7 +28,9 @@ import boto3
 from botocore.auth import SigV4QueryAuth
 from botocore.awsrequest import AWSRequest
 
+from ruko import family
 from ruko.extract import extract_all
+from ruko.fallback import text as fallback_text
 from ruko.http import ApiError, LOG, handler_wrapper, parse_json_body, response
 from ruko.rule_text import reason_for
 from ruko.rules import SEVERITY_FLOOR, run_rules
@@ -135,6 +137,7 @@ def _analyse(event: dict) -> dict:
         raise ApiError(400, "empty_input", "There is nothing to check yet.")
     text = text[-MAX_TRANSCRIPT_CHARS:]
     language = normalise_language(body.get("language"))
+    family_code = body.get("family_code")
 
     started = time.perf_counter()
     extracted = extract_all(text)
@@ -163,6 +166,30 @@ def _analyse(event: dict) -> dict:
         int((time.perf_counter() - started) * 1000),
     )
 
+    # The point of the whole feature: the family is told while the call is still
+    # happening, not afterwards. One alert per call, not one per sentence — the
+    # guardian's phone should ring once and stay useful.
+    told_family = False
+    if level == "scam" and isinstance(family_code, str) and family_code.strip():
+        first_alert = alerts[0]["why"] if alerts else ""
+        told_family = (
+            family.add_alert(
+                family_code,
+                {
+                    "kind": "live_call",
+                    "risk_level": level,
+                    "risk_score": score,
+                    "scam_type": rules.suggested_scam_type() or "other_scam",
+                    # The words heard are never sent on: only why it was flagged.
+                    "headline": fallback_text(language).get("live_call")
+                    or "Ruko heard a scam on a call happening right now.",
+                    "language": language,
+                    "detail": first_alert[:160],
+                },
+            )
+            is not None
+        )
+
     return response(
         200,
         {
@@ -171,6 +198,7 @@ def _analyse(event: dict) -> dict:
             "scam_type": rules.suggested_scam_type() or "none_detected",
             "alerts": alerts,
             "language": language,
+            "family_told": told_family,
         },
     )
 

@@ -167,7 +167,15 @@ export default function App() {
 
     switch (destination) {
       case "call":
-        return <ListenScreen l={listen} language={language} onBack={() => go("message")} />;
+        return (
+          <ListenScreen
+            l={listen}
+            language={language}
+            onBack={() => go("message")}
+            familyCode={familyCode}
+            familyToldLabel={f.familyToldLive}
+          />
+        );
       case "app":
         return <ApkScreen s={apk} initialFile={sharedApk} onBack={() => go("message")} />;
       case "number":

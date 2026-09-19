@@ -35,6 +35,8 @@ export interface FamilyStrings {
   allowMic: string;
   micAllowed: string;
   micBlocked: string;
+  /** Shown on the call screen the moment the guardian has been alerted. */
+  familyToldLive: string;
   panicButton: string;
   panicHint: string;
   panicSending: string;
@@ -49,6 +51,7 @@ export interface FamilyStrings {
 }
 
 const en: FamilyStrings = {
+  familyToldLive: "Your family has been told about this call.",
   roleProtectedTitle: "Someone in my family protects me",
   roleProtectedBody: "They created a family code. Enter it once and Ruko tells them when it finds a scam.",
   roleGuardianTitle: "I want to protect someone",
@@ -86,6 +89,7 @@ const en: FamilyStrings = {
 };
 
 const hi: FamilyStrings = {
+  familyToldLive: "इस कॉल के बारे में आपके परिवार को बता दिया गया है।",
   roleProtectedTitle: "परिवार का कोई मुझे बचाता है",
   roleProtectedBody: "उन्होंने फ़ैमिली कोड बनाया है। एक बार डालें, फिर ठगी मिलते ही उन्हें ख़बर हो जाएगी।",
   roleGuardianTitle: "मैं किसी को बचाना चाहता हूँ",
@@ -124,6 +128,7 @@ const hi: FamilyStrings = {
 };
 
 const bn: FamilyStrings = {
+  familyToldLive: "এই কল সম্পর্কে আপনার পরিবারকে জানানো হয়েছে।",
   roleProtectedTitle: "পরিবারের কেউ আমাকে রক্ষা করে",
   roleProtectedBody: "তাঁরা একটি ফ্যামিলি কোড বানিয়েছেন। একবার দিন, তারপর প্রতারণা ধরা পড়লেই তাঁরা জানবেন।",
   roleGuardianTitle: "আমি কাউকে রক্ষা করতে চাই",
@@ -162,6 +167,7 @@ const bn: FamilyStrings = {
 };
 
 const mr: FamilyStrings = {
+  familyToldLive: "या कॉलबद्दल तुमच्या कुटुंबाला कळवले आहे.",
   roleProtectedTitle: "कुटुंबातील कोणी मला वाचवते",
   roleProtectedBody: "त्यांनी फॅमिली कोड तयार केला आहे. एकदा टाका, मग फसवणूक दिसताच त्यांना कळेल.",
   roleGuardianTitle: "मला कोणाला वाचवायचे आहे",
@@ -200,6 +206,7 @@ const mr: FamilyStrings = {
 };
 
 const te: FamilyStrings = {
+  familyToldLive: "ఈ కాల్ గురించి మీ కుటుంబానికి తెలియజేశాం.",
   roleProtectedTitle: "నా కుటుంబంలో ఎవరో నన్ను కాపాడుతున్నారు",
   roleProtectedBody: "వాళ్ళు ఫ్యామిలీ కోడ్ సృష్టించారు. ఒకసారి నమోదు చేయండి, మోసం కనిపించగానే వాళ్ళకు తెలుస్తుంది.",
   roleGuardianTitle: "నేను ఎవరినైనా కాపాడాలనుకుంటున్నాను",
@@ -238,6 +245,7 @@ const te: FamilyStrings = {
 };
 
 const ta: FamilyStrings = {
+  familyToldLive: "இந்த அழைப்பு பற்றி உங்கள் குடும்பத்துக்குத் தெரிவிக்கப்பட்டது.",
   roleProtectedTitle: "என் குடும்பத்தில் ஒருவர் என்னைக் காக்கிறார்",
   roleProtectedBody: "அவர்கள் குடும்பக் குறியீடு உருவாக்கியுள்ளார்கள். ஒருமுறை உள்ளிடுங்கள், மோசடி தெரிந்ததும் அவர்களுக்குத் தெரியும்.",
   roleGuardianTitle: "நான் ஒருவரைக் காக்க விரும்புகிறேன்",
@@ -276,6 +284,7 @@ const ta: FamilyStrings = {
 };
 
 const gu: FamilyStrings = {
+  familyToldLive: "આ કૉલ વિશે તમારા પરિવારને જાણ કરી દેવાઈ છે.",
   roleProtectedTitle: "મારા પરિવારમાં કોઈ મને બચાવે છે",
   roleProtectedBody: "તેમણે ફેમિલી કોડ બનાવ્યો છે. એક વાર નાખો, પછી છેતરપિંડી મળતાં જ તેમને ખબર પડશે.",
   roleGuardianTitle: "મારે કોઈને બચાવવું છે",
@@ -314,6 +323,7 @@ const gu: FamilyStrings = {
 };
 
 const ur: FamilyStrings = {
+  familyToldLive: "اس کال کے بارے میں آپ کے خاندان کو بتا دیا گیا ہے۔",
   roleProtectedTitle: "میرے خاندان میں کوئی میری حفاظت کرتا ہے",
   roleProtectedBody: "انہوں نے فیملی کوڈ بنایا ہے۔ ایک بار درج کریں، پھر فراڈ ملتے ہی انہیں خبر ہو جائے گی۔",
   roleGuardianTitle: "میں کسی کی حفاظت کرنا چاہتا ہوں",
@@ -352,6 +362,7 @@ const ur: FamilyStrings = {
 };
 
 const kn: FamilyStrings = {
+  familyToldLive: "ಈ ಕರೆಯ ಬಗ್ಗೆ ನಿಮ್ಮ ಕುಟುಂಬಕ್ಕೆ ತಿಳಿಸಲಾಗಿದೆ.",
   roleProtectedTitle: "ನನ್ನ ಕುಟುಂಬದಲ್ಲಿ ಯಾರೋ ನನ್ನನ್ನು ಕಾಪಾಡುತ್ತಾರೆ",
   roleProtectedBody: "ಅವರು ಫ್ಯಾಮಿಲಿ ಕೋಡ್ ರಚಿಸಿದ್ದಾರೆ. ಒಮ್ಮೆ ನಮೂದಿಸಿ, ಮೋಸ ಸಿಕ್ಕ ತಕ್ಷಣ ಅವರಿಗೆ ತಿಳಿಯುತ್ತದೆ.",
   roleGuardianTitle: "ನಾನು ಯಾರನ್ನಾದರೂ ಕಾಪಾಡಬೇಕು",
@@ -390,6 +401,7 @@ const kn: FamilyStrings = {
 };
 
 const or: FamilyStrings = {
+  familyToldLive: "ଏହି କଲ ବିଷୟରେ ଆପଣଙ୍କ ପରିବାରକୁ ଜଣାଇ ଦିଆଯାଇଛି।",
   roleProtectedTitle: "ମୋ ପରିବାରର କେହି ମୋତେ ରକ୍ଷା କରନ୍ତି",
   roleProtectedBody: "ସେମାନେ ଏକ ଫ୍ୟାମିଲି କୋଡ ତିଆରି କରିଛନ୍ତି। ଥରେ ଦିଅନ୍ତୁ, ତାପରେ ଠକାମି ଦେଖାଯିବା ମାତ୍ରେ ସେମାନେ ଜାଣିବେ।",
   roleGuardianTitle: "ମୁଁ କାହାକୁ ରକ୍ଷା କରିବାକୁ ଚାହେଁ",
@@ -428,6 +440,7 @@ const or: FamilyStrings = {
 };
 
 const ml: FamilyStrings = {
+  familyToldLive: "ഈ കോളിനെക്കുറിച്ച് നിങ്ങളുടെ കുടുംബത്തെ അറിയിച്ചു.",
   roleProtectedTitle: "എന്റെ കുടുംബത്തിൽ ആരോ എന്നെ കാക്കുന്നു",
   roleProtectedBody: "അവർ ഒരു ഫാമിലി കോഡ് ഉണ്ടാക്കിയിട്ടുണ്ട്. ഒരിക്കൽ നൽകൂ, തട്ടിപ്പ് കണ്ടാലുടൻ അവർ അറിയും.",
   roleGuardianTitle: "എനിക്ക് ആരെയെങ്കിലും കാക്കണം",
@@ -466,6 +479,7 @@ const ml: FamilyStrings = {
 };
 
 const pa: FamilyStrings = {
+  familyToldLive: "ਇਸ ਕਾਲ ਬਾਰੇ ਤੁਹਾਡੇ ਪਰਿਵਾਰ ਨੂੰ ਦੱਸ ਦਿੱਤਾ ਗਿਆ ਹੈ।",
   roleProtectedTitle: "ਮੇਰੇ ਪਰਿਵਾਰ ਵਿੱਚੋਂ ਕੋਈ ਮੈਨੂੰ ਬਚਾਉਂਦਾ ਹੈ",
   roleProtectedBody: "ਉਹਨਾਂ ਨੇ ਫ਼ੈਮਿਲੀ ਕੋਡ ਬਣਾਇਆ ਹੈ। ਇੱਕ ਵਾਰ ਪਾਓ, ਫਿਰ ਠੱਗੀ ਮਿਲਦੇ ਹੀ ਉਹਨਾਂ ਨੂੰ ਪਤਾ ਲੱਗੇਗਾ।",
   roleGuardianTitle: "ਮੈਂ ਕਿਸੇ ਨੂੰ ਬਚਾਉਣਾ ਚਾਹੁੰਦਾ ਹਾਂ",
@@ -504,6 +518,7 @@ const pa: FamilyStrings = {
 };
 
 const as: FamilyStrings = {
+  familyToldLive: "এই কলৰ বিষয়ে আপোনাৰ পৰিয়ালক জনোৱা হৈছে।",
   roleProtectedTitle: "মোৰ পৰিয়ালৰ কোনোবাই মোক ৰক্ষা কৰে",
   roleProtectedBody: "তেওঁলোকে এটা ফেমিলি ক'ড বনাইছে। এবাৰ দিয়ক, তাৰ পিছত প্ৰতাৰণা ধৰা পৰিলেই তেওঁলোকে জানিব।",
   roleGuardianTitle: "মই কাৰোবাক ৰক্ষা কৰিব বিচাৰো",
@@ -542,6 +557,7 @@ const as: FamilyStrings = {
 };
 
 const mai: FamilyStrings = {
+  familyToldLive: "एहि कॉलक बारे मे अहाँक परिवार केँ कहि देल गेल अछि।",
   roleProtectedTitle: "परिवार मे केओ हमरा बचबैत अछि",
   roleProtectedBody: "हुनका फैमिली कोड बनाओल अछि। एक बेर दिअ, फेर ठकी भेटते हुनका पता चलि जाएत।",
   roleGuardianTitle: "हम ककरो बचाबय चाहैत छी",
@@ -580,6 +596,7 @@ const mai: FamilyStrings = {
 };
 
 const ne: FamilyStrings = {
+  familyToldLive: "यो कलबारे तपाईंको परिवारलाई जानकारी दिइएको छ।",
   roleProtectedTitle: "मेरो परिवारमा कसैले मलाई जोगाउँछ",
   roleProtectedBody: "उहाँले फ्यामिली कोड बनाउनुभएको छ। एक पटक हाल्नुहोस्, ठगी भेटिनासाथ उहाँलाई थाहा हुन्छ।",
   roleGuardianTitle: "म कसैलाई जोगाउन चाहन्छु",
