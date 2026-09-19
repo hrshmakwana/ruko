@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import { ApkScreen } from "./components/ApkScreen";
 import { CheckScreen } from "./components/CheckScreen";
 import { DirectiveOverlay } from "./components/DirectiveOverlay";
-import { FamilyPanel } from "./components/FamilyPanel";
+import { FamilyScreen } from "./components/FamilyScreen";
 import { GoldenHourScreen } from "./components/GoldenHourScreen";
-import { InstallCard } from "./components/InstallCard";
 import { ListenScreen } from "./components/ListenScreen";
 import { Loading } from "./components/Loading";
 import { LookupPanel } from "./components/LookupPanel";
@@ -175,11 +174,13 @@ export default function App() {
         return <LookupPanel t={t} l={l} language={language} />;
       case "family":
         return (
-          <div className="space-y-5">
-            <FamilyPanel f={f} code={familyCode} onChange={setFamilyCode} />
-            {familyCode && <PanicButton f={f} code={familyCode} language={language} />}
-            <InstallCard s={install} />
-          </div>
+          <FamilyScreen
+            f={f}
+            install={install}
+            code={familyCode}
+            onChange={setFamilyCode}
+            language={language}
+          />
         );
       default:
         return (

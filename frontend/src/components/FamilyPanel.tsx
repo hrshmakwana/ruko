@@ -6,6 +6,9 @@ interface Props {
   f: FamilyStrings;
   code: string | null;
   onChange: (code: string | null) => void;
+  /** On the Family screen the person is already here on purpose, so the field
+   *  is open. Elsewhere it stays a single button until they ask for it. */
+  startOpen?: boolean;
 }
 
 function ShieldCheck({ className }: { className?: string }) {
@@ -32,8 +35,8 @@ function ShieldCheck({ className }: { className?: string }) {
 
 /** Linking a family is one field and one button. Anything longer and the
  *  person it protects will never finish it. */
-export function FamilyPanel({ f, code, onChange }: Props) {
-  const [open, setOpen] = useState(false);
+export function FamilyPanel({ f, code, onChange, startOpen = false }: Props) {
+  const [open, setOpen] = useState(startOpen);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -97,11 +100,17 @@ export function FamilyPanel({ f, code, onChange }: Props) {
   }
 
   return (
-    <section className="rounded-2xl border border-line bg-surface p-4">
-      <h3 className="text-[1.05rem] font-bold">{f.familyTitle}</h3>
-      <p className="mt-1 text-[0.9rem] text-muted">{f.familyIntro}</p>
+    <section className={startOpen ? "" : "rounded-2xl border border-line bg-surface p-4"}>
+      {/* On the Family screen the card around this already carries the title
+          and the explanation; repeating them reads as a bug. */}
+      {!startOpen && (
+        <>
+          <h3 className="text-[1.05rem] font-bold">{f.familyTitle}</h3>
+          <p className="mt-1 text-[0.9rem] text-muted">{f.familyIntro}</p>
+        </>
+      )}
 
-      <label htmlFor="family-code" className="mt-3 block text-[0.85rem] font-bold">
+      <label htmlFor="family-code" className="block text-[0.85rem] font-bold">
         {f.familyCodeLabel}
       </label>
       <div className="mt-1.5 flex gap-2">

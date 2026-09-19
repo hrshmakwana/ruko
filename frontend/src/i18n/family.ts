@@ -21,6 +21,20 @@ export interface FamilyStrings {
   familyUnlink: string;
   familyBadCode: string;
   familySetupCta: string;
+  /** The two people in this feature: the one being protected, and the one who
+   *  is told. Until this existed there was no way into the guardian side from
+   *  inside the app, so nobody could find out where a family code comes from. */
+  roleProtectedTitle: string;
+  roleProtectedBody: string;
+  roleGuardianTitle: string;
+  roleGuardianBody: string;
+  createCode: string;
+  permsTitle: string;
+  micTitle: string;
+  micBody: string;
+  allowMic: string;
+  micAllowed: string;
+  micBlocked: string;
   panicButton: string;
   panicHint: string;
   panicSending: string;
@@ -35,6 +49,17 @@ export interface FamilyStrings {
 }
 
 const en: FamilyStrings = {
+  roleProtectedTitle: "Someone in my family protects me",
+  roleProtectedBody: "They created a family code. Enter it once and Ruko tells them when it finds a scam.",
+  roleGuardianTitle: "I want to protect someone",
+  roleGuardianBody: "Create an account, get a family code, and read it out to your parent. You are told the moment Ruko finds a scam on their phone.",
+  createCode: "Create a family code",
+  permsTitle: "What Ruko asks your phone for",
+  micTitle: "Microphone",
+  micBody: "Only for listening to a call on speaker. Nothing is recorded, and Ruko asks before it starts.",
+  allowMic: "Allow the microphone",
+  micAllowed: "Microphone allowed",
+  micBlocked: "Blocked. Allow it in your browser settings for this site.",
   familyTitle: "Family protection",
   familyIntro:
     "If someone in your family set up Ruko, enter their code. When Ruko finds a scam, they are told straight away.",
@@ -61,6 +86,17 @@ const en: FamilyStrings = {
 };
 
 const hi: FamilyStrings = {
+  roleProtectedTitle: "परिवार का कोई मुझे बचाता है",
+  roleProtectedBody: "उन्होंने फ़ैमिली कोड बनाया है। एक बार डालें, फिर ठगी मिलते ही उन्हें ख़बर हो जाएगी।",
+  roleGuardianTitle: "मैं किसी को बचाना चाहता हूँ",
+  roleGuardianBody: "खाता बनाएँ, फ़ैमिली कोड लें, और माता-पिता को बता दें। उनके फ़ोन पर ठगी मिलते ही आपको पता चलेगा।",
+  createCode: "फ़ैमिली कोड बनाएँ",
+  permsTitle: "रुको को फ़ोन से क्या चाहिए",
+  micTitle: "माइक्रोफ़ोन",
+  micBody: "सिर्फ़ स्पीकर पर कॉल सुनने के लिए। कुछ रिकॉर्ड नहीं होता, और रुको पहले पूछता है।",
+  allowMic: "माइक्रोफ़ोन की अनुमति दें",
+  micAllowed: "माइक्रोफ़ोन चालू है",
+  micBlocked: "रोका हुआ है। ब्राउज़र सेटिंग में इस साइट के लिए अनुमति दें।",
   familyTitle: "परिवार सुरक्षा",
   familyIntro:
     "अगर आपके परिवार में किसी ने रुको सेट किया है, तो उनका कोड डालें। जब रुको को धोखा मिलेगा, उन्हें तुरंत पता चल जाएगा।",
@@ -88,6 +124,17 @@ const hi: FamilyStrings = {
 };
 
 const bn: FamilyStrings = {
+  roleProtectedTitle: "পরিবারের কেউ আমাকে রক্ষা করে",
+  roleProtectedBody: "তাঁরা একটি ফ্যামিলি কোড বানিয়েছেন। একবার দিন, তারপর প্রতারণা ধরা পড়লেই তাঁরা জানবেন।",
+  roleGuardianTitle: "আমি কাউকে রক্ষা করতে চাই",
+  roleGuardianBody: "অ্যাকাউন্ট খুলুন, ফ্যামিলি কোড নিন, আর বাবা-মাকে বলে দিন। তাঁদের ফোনে প্রতারণা ধরা পড়লেই আপনি জানবেন।",
+  createCode: "ফ্যামিলি কোড তৈরি করুন",
+  permsTitle: "রুকো ফোনের কাছে যা চায়",
+  micTitle: "মাইক্রোফোন",
+  micBody: "শুধু স্পিকারে কল শোনার জন্য। কিছুই রেকর্ড হয় না, আর রুকো আগে জিজ্ঞেস করে।",
+  allowMic: "মাইক্রোফোনের অনুমতি দিন",
+  micAllowed: "মাইক্রোফোন চালু",
+  micBlocked: "বন্ধ আছে। ব্রাউজার সেটিংসে এই সাইটের জন্য অনুমতি দিন।",
   familyTitle: "পরিবার সুরক্ষা",
   familyIntro:
     "আপনার পরিবারের কেউ রুকো সেট করে থাকলে তাঁর কোড দিন। রুকো প্রতারণা ধরলে তাঁকে সঙ্গে সঙ্গে জানানো হবে।",
@@ -115,6 +162,17 @@ const bn: FamilyStrings = {
 };
 
 const mr: FamilyStrings = {
+  roleProtectedTitle: "कुटुंबातील कोणी मला वाचवते",
+  roleProtectedBody: "त्यांनी फॅमिली कोड तयार केला आहे. एकदा टाका, मग फसवणूक दिसताच त्यांना कळेल.",
+  roleGuardianTitle: "मला कोणाला वाचवायचे आहे",
+  roleGuardianBody: "खाते तयार करा, फॅमिली कोड घ्या आणि आई-वडिलांना सांगा. त्यांच्या फोनवर फसवणूक दिसताच तुम्हाला कळेल.",
+  createCode: "फॅमिली कोड तयार करा",
+  permsTitle: "रुकोला फोनकडून काय हवे",
+  micTitle: "मायक्रोफोन",
+  micBody: "फक्त स्पीकरवरचा कॉल ऐकण्यासाठी. काहीही रेकॉर्ड होत नाही, आणि रुको आधी विचारते.",
+  allowMic: "मायक्रोफोनला परवानगी द्या",
+  micAllowed: "मायक्रोफोन सुरू",
+  micBlocked: "अडवलेले आहे. ब्राउझर सेटिंगमध्ये या साइटला परवानगी द्या.",
   familyTitle: "कुटुंब सुरक्षा",
   familyIntro:
     "तुमच्या कुटुंबातील कोणी रुको सेट केले असेल तर त्यांचा कोड टाका. रुकोला फसवणूक आढळल्यावर त्यांना लगेच कळेल.",
@@ -142,6 +200,17 @@ const mr: FamilyStrings = {
 };
 
 const te: FamilyStrings = {
+  roleProtectedTitle: "నా కుటుంబంలో ఎవరో నన్ను కాపాడుతున్నారు",
+  roleProtectedBody: "వాళ్ళు ఫ్యామిలీ కోడ్ సృష్టించారు. ఒకసారి నమోదు చేయండి, మోసం కనిపించగానే వాళ్ళకు తెలుస్తుంది.",
+  roleGuardianTitle: "నేను ఎవరినైనా కాపాడాలనుకుంటున్నాను",
+  roleGuardianBody: "ఖాతా సృష్టించి, ఫ్యామిలీ కోడ్ తీసుకుని అమ్మానాన్నలకు చెప్పండి. వాళ్ళ ఫోన్‌లో మోసం కనిపించగానే మీకు తెలుస్తుంది.",
+  createCode: "ఫ్యామిలీ కోడ్ సృష్టించండి",
+  permsTitle: "రుకో ఫోన్ నుంచి ఏమి అడుగుతుంది",
+  micTitle: "మైక్రోఫోన్",
+  micBody: "స్పీకర్‌లో కాల్ వినడానికి మాత్రమే. ఏదీ రికార్డ్ కాదు, రుకో ముందే అడుగుతుంది.",
+  allowMic: "మైక్రోఫోన్ అనుమతించండి",
+  micAllowed: "మైక్రోఫోన్ అనుమతించబడింది",
+  micBlocked: "నిరోధించబడింది. బ్రౌజర్ సెట్టింగ్‌లలో ఈ సైట్‌కు అనుమతి ఇవ్వండి.",
   familyTitle: "కుటుంబ రక్షణ",
   familyIntro:
     "మీ కుటుంబంలో ఎవరైనా రుకో సెట్ చేసి ఉంటే వారి కోడ్ వేయండి. రుకోకు మోసం కనిపించినప్పుడు వారికి వెంటనే తెలుస్తుంది.",
@@ -169,6 +238,17 @@ const te: FamilyStrings = {
 };
 
 const ta: FamilyStrings = {
+  roleProtectedTitle: "என் குடும்பத்தில் ஒருவர் என்னைக் காக்கிறார்",
+  roleProtectedBody: "அவர்கள் குடும்பக் குறியீடு உருவாக்கியுள்ளார்கள். ஒருமுறை உள்ளிடுங்கள், மோசடி தெரிந்ததும் அவர்களுக்குத் தெரியும்.",
+  roleGuardianTitle: "நான் ஒருவரைக் காக்க விரும்புகிறேன்",
+  roleGuardianBody: "கணக்கு உருவாக்கி, குடும்பக் குறியீடு பெற்று, பெற்றோரிடம் சொல்லுங்கள். அவர்கள் தொலைபேசியில் மோசடி தெரிந்ததும் உங்களுக்குத் தெரியும்.",
+  createCode: "குடும்பக் குறியீடு உருவாக்கு",
+  permsTitle: "ருகோ தொலைபேசியிடம் என்ன கேட்கிறது",
+  micTitle: "மைக்ரோஃபோன்",
+  micBody: "ஸ்பீக்கரில் அழைப்பைக் கேட்க மட்டும். எதுவும் பதிவு செய்யப்படுவதில்லை, ருகோ முன்பே கேட்கும்.",
+  allowMic: "மைக்ரோஃபோனை அனுமதி",
+  micAllowed: "மைக்ரோஃபோன் அனுமதிக்கப்பட்டது",
+  micBlocked: "தடுக்கப்பட்டது. உலாவி அமைப்புகளில் இந்த தளத்திற்கு அனுமதி கொடுங்கள்.",
   familyTitle: "குடும்பப் பாதுகாப்பு",
   familyIntro:
     "உங்கள் குடும்பத்தில் யாராவது ருகோவை அமைத்திருந்தால் அவர்களின் குறியீட்டை உள்ளிடுங்கள். ருகோ மோசடியைக் கண்டறியும்போது அவர்களுக்கு உடனே தெரிவிக்கப்படும்.",
@@ -196,6 +276,17 @@ const ta: FamilyStrings = {
 };
 
 const gu: FamilyStrings = {
+  roleProtectedTitle: "મારા પરિવારમાં કોઈ મને બચાવે છે",
+  roleProtectedBody: "તેમણે ફેમિલી કોડ બનાવ્યો છે. એક વાર નાખો, પછી છેતરપિંડી મળતાં જ તેમને ખબર પડશે.",
+  roleGuardianTitle: "મારે કોઈને બચાવવું છે",
+  roleGuardianBody: "ખાતું બનાવો, ફેમિલી કોડ લો અને માતા-પિતાને કહી દો. તેમના ફોન પર છેતરપિંડી મળતાં જ તમને ખબર પડશે.",
+  createCode: "ફેમિલી કોડ બનાવો",
+  permsTitle: "રુકોને ફોન પાસેથી શું જોઈએ",
+  micTitle: "માઇક્રોફોન",
+  micBody: "ફક્ત સ્પીકર પરનો કૉલ સાંભળવા માટે. કંઈ રેકોર્ડ થતું નથી, અને રુકો પહેલાં પૂછે છે.",
+  allowMic: "માઇક્રોફોનની પરવાનગી આપો",
+  micAllowed: "માઇક્રોફોન ચાલુ",
+  micBlocked: "રોકેલું છે. બ્રાઉઝર સેટિંગમાં આ સાઇટને પરવાનગી આપો.",
   familyTitle: "પરિવાર સુરક્ષા",
   familyIntro:
     "તમારા પરિવારમાં કોઈએ રુકો સેટ કર્યું હોય તો તેમનો કોડ નાખો. રુકોને છેતરપિંડી મળશે ત્યારે તેમને તરત ખબર પડશે.",
@@ -223,6 +314,17 @@ const gu: FamilyStrings = {
 };
 
 const ur: FamilyStrings = {
+  roleProtectedTitle: "میرے خاندان میں کوئی میری حفاظت کرتا ہے",
+  roleProtectedBody: "انہوں نے فیملی کوڈ بنایا ہے۔ ایک بار درج کریں، پھر فراڈ ملتے ہی انہیں خبر ہو جائے گی۔",
+  roleGuardianTitle: "میں کسی کی حفاظت کرنا چاہتا ہوں",
+  roleGuardianBody: "اکاؤنٹ بنائیں، فیملی کوڈ لیں اور والدین کو بتا دیں۔ ان کے فون پر فراڈ ملتے ہی آپ کو پتا چل جائے گا۔",
+  createCode: "فیملی کوڈ بنائیں",
+  permsTitle: "رُکو فون سے کیا مانگتا ہے",
+  micTitle: "مائیکروفون",
+  micBody: "صرف اسپیکر پر کال سننے کے لیے۔ کچھ ریکارڈ نہیں ہوتا، اور رُکو پہلے پوچھتا ہے۔",
+  allowMic: "مائیکروفون کی اجازت دیں",
+  micAllowed: "مائیکروفون چالو",
+  micBlocked: "روکا ہوا ہے۔ براؤزر سیٹنگز میں اس سائٹ کو اجازت دیں۔",
   familyTitle: "خاندانی تحفظ",
   familyIntro:
     "اگر آپ کے خاندان میں کسی نے رُکو سیٹ کیا ہے تو ان کا کوڈ درج کریں۔ جب رُکو کو فراڈ ملے گا، انہیں فوراً بتا دیا جائے گا۔",
@@ -250,6 +352,17 @@ const ur: FamilyStrings = {
 };
 
 const kn: FamilyStrings = {
+  roleProtectedTitle: "ನನ್ನ ಕುಟುಂಬದಲ್ಲಿ ಯಾರೋ ನನ್ನನ್ನು ಕಾಪಾಡುತ್ತಾರೆ",
+  roleProtectedBody: "ಅವರು ಫ್ಯಾಮಿಲಿ ಕೋಡ್ ರಚಿಸಿದ್ದಾರೆ. ಒಮ್ಮೆ ನಮೂದಿಸಿ, ಮೋಸ ಸಿಕ್ಕ ತಕ್ಷಣ ಅವರಿಗೆ ತಿಳಿಯುತ್ತದೆ.",
+  roleGuardianTitle: "ನಾನು ಯಾರನ್ನಾದರೂ ಕಾಪಾಡಬೇಕು",
+  roleGuardianBody: "ಖಾತೆ ರಚಿಸಿ, ಫ್ಯಾಮಿಲಿ ಕೋಡ್ ಪಡೆದು ಪೋಷಕರಿಗೆ ಹೇಳಿ. ಅವರ ಫೋನ್‌ನಲ್ಲಿ ಮೋಸ ಸಿಕ್ಕ ತಕ್ಷಣ ನಿಮಗೆ ತಿಳಿಯುತ್ತದೆ.",
+  createCode: "ಫ್ಯಾಮಿಲಿ ಕೋಡ್ ರಚಿಸಿ",
+  permsTitle: "ರುಕೋ ಫೋನಿನಿಂದ ಏನು ಕೇಳುತ್ತದೆ",
+  micTitle: "ಮೈಕ್ರೊಫೋನ್",
+  micBody: "ಸ್ಪೀಕರ್‌ನಲ್ಲಿ ಕರೆ ಕೇಳಲು ಮಾತ್ರ. ಏನೂ ರೆಕಾರ್ಡ್ ಆಗುವುದಿಲ್ಲ, ರುಕೋ ಮೊದಲೇ ಕೇಳುತ್ತದೆ.",
+  allowMic: "ಮೈಕ್ರೊಫೋನ್ ಅನುಮತಿಸಿ",
+  micAllowed: "ಮೈಕ್ರೊಫೋನ್ ಚಾಲನೆಯಲ್ಲಿದೆ",
+  micBlocked: "ತಡೆಯಲಾಗಿದೆ. ಬ್ರೌಸರ್ ಸೆಟ್ಟಿಂಗ್‌ನಲ್ಲಿ ಈ ಸೈಟ್‌ಗೆ ಅನುಮತಿ ನೀಡಿ.",
   familyTitle: "ಕುಟುಂಬ ರಕ್ಷಣೆ",
   familyIntro:
     "ನಿಮ್ಮ ಕುಟುಂಬದಲ್ಲಿ ಯಾರಾದರೂ ರುಕೋ ಸೆಟ್ ಮಾಡಿದ್ದರೆ ಅವರ ಕೋಡ್ ಹಾಕಿ. ರುಕೋಗೆ ಮೋಸ ಕಂಡಾಗ ಅವರಿಗೆ ತಕ್ಷಣ ತಿಳಿಯುತ್ತದೆ.",
@@ -277,6 +390,17 @@ const kn: FamilyStrings = {
 };
 
 const or: FamilyStrings = {
+  roleProtectedTitle: "ମୋ ପରିବାରର କେହି ମୋତେ ରକ୍ଷା କରନ୍ତି",
+  roleProtectedBody: "ସେମାନେ ଏକ ଫ୍ୟାମିଲି କୋଡ ତିଆରି କରିଛନ୍ତି। ଥରେ ଦିଅନ୍ତୁ, ତାପରେ ଠକାମି ଦେଖାଯିବା ମାତ୍ରେ ସେମାନେ ଜାଣିବେ।",
+  roleGuardianTitle: "ମୁଁ କାହାକୁ ରକ୍ଷା କରିବାକୁ ଚାହେଁ",
+  roleGuardianBody: "ଖାତା ତିଆରି କରି ଫ୍ୟାମିଲି କୋଡ ନିଅନ୍ତୁ ଓ ବାପା-ମାଆଙ୍କୁ କୁହନ୍ତୁ। ସେମାନଙ୍କ ଫୋନରେ ଠକାମି ଦେଖାଯିବା ମାତ୍ରେ ଆପଣ ଜାଣିବେ।",
+  createCode: "ଫ୍ୟାମିଲି କୋଡ ତିଆରି କରନ୍ତୁ",
+  permsTitle: "ରୁକୋ ଫୋନଠାରୁ କଣ ମାଗେ",
+  micTitle: "ମାଇକ୍ରୋଫୋନ",
+  micBody: "କେବଳ ସ୍ପିକରରେ କଲ ଶୁଣିବା ପାଇଁ। କିଛି ରେକର୍ଡ ହୁଏ ନାହିଁ, ରୁକୋ ଆଗରୁ ପଚାରେ।",
+  allowMic: "ମାଇକ୍ରୋଫୋନ ଅନୁମତି ଦିଅନ୍ତୁ",
+  micAllowed: "ମାଇକ୍ରୋଫୋନ ଚାଲୁ",
+  micBlocked: "ଅଟକାଯାଇଛି। ବ୍ରାଉଜର ସେଟିଂସରେ ଏହି ସାଇଟକୁ ଅନୁମତି ଦିଅନ୍ତୁ।",
   familyTitle: "ପରିବାର ସୁରକ୍ଷା",
   familyIntro:
     "ଆପଣଙ୍କ ପରିବାରରେ କେହି ରୁକୋ ସେଟ କରିଥିଲେ ତାଙ୍କ କୋଡ ଦିଅନ୍ତୁ। ରୁକୋ ଠକାମି ଧରିଲେ ତାଙ୍କୁ ତୁରନ୍ତ ଜଣାଇ ଦିଆଯିବ।",
@@ -304,6 +428,17 @@ const or: FamilyStrings = {
 };
 
 const ml: FamilyStrings = {
+  roleProtectedTitle: "എന്റെ കുടുംബത്തിൽ ആരോ എന്നെ കാക്കുന്നു",
+  roleProtectedBody: "അവർ ഒരു ഫാമിലി കോഡ് ഉണ്ടാക്കിയിട്ടുണ്ട്. ഒരിക്കൽ നൽകൂ, തട്ടിപ്പ് കണ്ടാലുടൻ അവർ അറിയും.",
+  roleGuardianTitle: "എനിക്ക് ആരെയെങ്കിലും കാക്കണം",
+  roleGuardianBody: "അക്കൗണ്ട് ഉണ്ടാക്കി ഫാമിലി കോഡ് എടുത്ത് അച്ഛനമ്മമാരോട് പറയൂ. അവരുടെ ഫോണിൽ തട്ടിപ്പ് കണ്ടാലുടൻ നിങ്ങൾ അറിയും.",
+  createCode: "ഫാമിലി കോഡ് ഉണ്ടാക്കൂ",
+  permsTitle: "റുകോ ഫോണിനോട് ചോദിക്കുന്നത്",
+  micTitle: "മൈക്രോഫോൺ",
+  micBody: "സ്പീക്കറിലെ കോൾ കേൾക്കാൻ മാത്രം. ഒന്നും റെക്കോർഡ് ചെയ്യുന്നില്ല, റുകോ മുൻകൂട്ടി ചോദിക്കും.",
+  allowMic: "മൈക്രോഫോൺ അനുവദിക്കൂ",
+  micAllowed: "മൈക്രോഫോൺ അനുവദിച്ചു",
+  micBlocked: "തടഞ്ഞിരിക്കുന്നു. ബ്രൗസർ ക്രമീകരണത്തിൽ ഈ സൈറ്റിന് അനുമതി നൽകൂ.",
   familyTitle: "കുടുംബ സുരക്ഷ",
   familyIntro:
     "നിങ്ങളുടെ കുടുംബത്തിൽ ആരെങ്കിലും രുകോ സജ്ജമാക്കിയിട്ടുണ്ടെങ്കിൽ അവരുടെ കോഡ് നൽകുക. രുകോ തട്ടിപ്പ് കണ്ടെത്തുമ്പോൾ അവരെ ഉടൻ അറിയിക്കും.",
@@ -331,6 +466,17 @@ const ml: FamilyStrings = {
 };
 
 const pa: FamilyStrings = {
+  roleProtectedTitle: "ਮੇਰੇ ਪਰਿਵਾਰ ਵਿੱਚੋਂ ਕੋਈ ਮੈਨੂੰ ਬਚਾਉਂਦਾ ਹੈ",
+  roleProtectedBody: "ਉਹਨਾਂ ਨੇ ਫ਼ੈਮਿਲੀ ਕੋਡ ਬਣਾਇਆ ਹੈ। ਇੱਕ ਵਾਰ ਪਾਓ, ਫਿਰ ਠੱਗੀ ਮਿਲਦੇ ਹੀ ਉਹਨਾਂ ਨੂੰ ਪਤਾ ਲੱਗੇਗਾ।",
+  roleGuardianTitle: "ਮੈਂ ਕਿਸੇ ਨੂੰ ਬਚਾਉਣਾ ਚਾਹੁੰਦਾ ਹਾਂ",
+  roleGuardianBody: "ਖਾਤਾ ਬਣਾਓ, ਫ਼ੈਮਿਲੀ ਕੋਡ ਲਵੋ ਅਤੇ ਮਾਪਿਆਂ ਨੂੰ ਦੱਸੋ। ਉਹਨਾਂ ਦੇ ਫ਼ੋਨ ਉੱਤੇ ਠੱਗੀ ਮਿਲਦੇ ਹੀ ਤੁਹਾਨੂੰ ਪਤਾ ਲੱਗੇਗਾ।",
+  createCode: "ਫ਼ੈਮਿਲੀ ਕੋਡ ਬਣਾਓ",
+  permsTitle: "ਰੁਕੋ ਫ਼ੋਨ ਤੋਂ ਕੀ ਮੰਗਦਾ ਹੈ",
+  micTitle: "ਮਾਈਕ੍ਰੋਫ਼ੋਨ",
+  micBody: "ਸਿਰਫ਼ ਸਪੀਕਰ ਉੱਤੇ ਕਾਲ ਸੁਣਨ ਲਈ। ਕੁਝ ਰਿਕਾਰਡ ਨਹੀਂ ਹੁੰਦਾ, ਅਤੇ ਰੁਕੋ ਪਹਿਲਾਂ ਪੁੱਛਦਾ ਹੈ।",
+  allowMic: "ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ",
+  micAllowed: "ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਚਾਲੂ",
+  micBlocked: "ਰੋਕਿਆ ਹੋਇਆ ਹੈ। ਬ੍ਰਾਊਜ਼ਰ ਸੈਟਿੰਗ ਵਿੱਚ ਇਸ ਸਾਈਟ ਨੂੰ ਇਜਾਜ਼ਤ ਦਿਓ।",
   familyTitle: "ਪਰਿਵਾਰ ਸੁਰੱਖਿਆ",
   familyIntro:
     "ਜੇ ਤੁਹਾਡੇ ਪਰਿਵਾਰ ਵਿੱਚ ਕਿਸੇ ਨੇ ਰੁਕੋ ਸੈੱਟ ਕੀਤਾ ਹੈ ਤਾਂ ਉਨ੍ਹਾਂ ਦਾ ਕੋਡ ਪਾਓ। ਜਦੋਂ ਰੁਕੋ ਨੂੰ ਠੱਗੀ ਮਿਲੇਗੀ, ਉਨ੍ਹਾਂ ਨੂੰ ਤੁਰੰਤ ਪਤਾ ਲੱਗ ਜਾਵੇਗਾ।",
@@ -358,6 +504,17 @@ const pa: FamilyStrings = {
 };
 
 const as: FamilyStrings = {
+  roleProtectedTitle: "মোৰ পৰিয়ালৰ কোনোবাই মোক ৰক্ষা কৰে",
+  roleProtectedBody: "তেওঁলোকে এটা ফেমিলি ক'ড বনাইছে। এবাৰ দিয়ক, তাৰ পিছত প্ৰতাৰণা ধৰা পৰিলেই তেওঁলোকে জানিব।",
+  roleGuardianTitle: "মই কাৰোবাক ৰক্ষা কৰিব বিচাৰো",
+  roleGuardianBody: "একাউণ্ট খোলক, ফেমিলি ক'ড লওক আৰু মা-দেউতাক কওক। তেওঁলোকৰ ফোনত প্ৰতাৰণা ধৰা পৰিলেই আপুনি জানিব।",
+  createCode: "ফেমিলি ক'ড বনাওক",
+  permsTitle: "ৰুকোৱে ফোনৰ পৰা কি বিচাৰে",
+  micTitle: "মাইক্ৰ'ফোন",
+  micBody: "কেৱল স্পীকাৰত কল শুনিবলৈ। একোৱে ৰেকৰ্ড নহয়, আৰু ৰুকোৱে আগতেই সোধে।",
+  allowMic: "মাইক্ৰ'ফোনৰ অনুমতি দিয়ক",
+  micAllowed: "মাইক্ৰ'ফোন চালু",
+  micBlocked: "বন্ধ কৰা আছে। ব্ৰাউজাৰ ছেটিংছত এই ছাইটক অনুমতি দিয়ক।",
   familyTitle: "পৰিয়াল সুৰক্ষা",
   familyIntro:
     "আপোনাৰ পৰিয়ালৰ কোনোবাই ৰুকো ছেট কৰি থাকিলে তেওঁৰ ক'ড দিয়ক। ৰুকোৱে প্ৰতাৰণা ধৰিলে তেওঁক লগে লগে জনোৱা হ'ব।",
@@ -385,6 +542,17 @@ const as: FamilyStrings = {
 };
 
 const mai: FamilyStrings = {
+  roleProtectedTitle: "परिवार मे केओ हमरा बचबैत अछि",
+  roleProtectedBody: "हुनका फैमिली कोड बनाओल अछि। एक बेर दिअ, फेर ठकी भेटते हुनका पता चलि जाएत।",
+  roleGuardianTitle: "हम ककरो बचाबय चाहैत छी",
+  roleGuardianBody: "खाता बनाउ, फैमिली कोड लिअ आ माए-बाबूजी केँ कहि दिअ। हुनक फोन पर ठकी भेटते अहाँ केँ पता चलि जाएत।",
+  createCode: "फैमिली कोड बनाउ",
+  permsTitle: "रुको फोन सँ की मंगैत अछि",
+  micTitle: "माइक्रोफोन",
+  micBody: "खाली स्पीकर पर कॉल सुनबा लेल। किछु रिकॉर्ड नहि होइत अछि, आ रुको पहिने पूछैत अछि।",
+  allowMic: "माइक्रोफोनक अनुमति दिअ",
+  micAllowed: "माइक्रोफोन चालू",
+  micBlocked: "रोकल अछि। ब्राउज़र सेटिंग मे एहि साइट लेल अनुमति दिअ।",
   familyTitle: "परिवार सुरक्षा",
   familyIntro:
     "जँ अहाँक परिवार मे ककरो रुको सेट कयने अछि त' हुनकर कोड देल जाउ। रुको के ठकी भेटला पर हुनका तुरंत पता चलि जायत।",
@@ -412,6 +580,17 @@ const mai: FamilyStrings = {
 };
 
 const ne: FamilyStrings = {
+  roleProtectedTitle: "मेरो परिवारमा कसैले मलाई जोगाउँछ",
+  roleProtectedBody: "उहाँले फ्यामिली कोड बनाउनुभएको छ। एक पटक हाल्नुहोस्, ठगी भेटिनासाथ उहाँलाई थाहा हुन्छ।",
+  roleGuardianTitle: "म कसैलाई जोगाउन चाहन्छु",
+  roleGuardianBody: "खाता बनाउनुहोस्, फ्यामिली कोड लिनुहोस् र आमाबुबालाई भन्नुहोस्। उहाँको फोनमा ठगी भेटिनासाथ तपाईंलाई थाहा हुन्छ।",
+  createCode: "फ्यामिली कोड बनाउनुहोस्",
+  permsTitle: "रुकोले फोनसँग के माग्छ",
+  micTitle: "माइक्रोफोन",
+  micBody: "स्पिकरमा कल सुन्न मात्र। केही रेकर्ड हुँदैन, र रुकोले पहिले सोध्छ।",
+  allowMic: "माइक्रोफोन अनुमति दिनुहोस्",
+  micAllowed: "माइक्रोफोन चालु",
+  micBlocked: "रोकिएको छ। ब्राउजर सेटिङमा यो साइटलाई अनुमति दिनुहोस्।",
   familyTitle: "परिवार सुरक्षा",
   familyIntro:
     "तपाईंको परिवारमा कसैले रुको सेट गरेको छ भने उहाँको कोड हाल्नुहोस्। रुकोले ठगी भेट्टाउँदा उहाँलाई तुरुन्तै थाहा हुनेछ।",
