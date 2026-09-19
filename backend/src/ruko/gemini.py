@@ -34,7 +34,12 @@ from .prompt import build_gemini_contents, response_schema, system_prompt
 
 _ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 _TIMEOUT_SECONDS = 20
-_MAX_TOKENS = 1400
+# Gemini 3.x thinks before it answers, and those thoughts are billed against the
+# same budget as the reply. A verdict costs ~600 tokens and the thinking ran to
+# ~700 on the first real message, so 1400 silently truncated every answer: a
+# STOP finish, a part with no text, and a fall back to rules that looked like
+# the model was unreachable.
+_MAX_TOKENS = 4000
 _TEMPERATURE = 0.2
 
 # Scam messages are full of threats, blackmail and police impersonation. That is
@@ -102,7 +107,7 @@ def _request_body(text: str, language: str, image_bytes: bytes | None, image_for
 
 
 def _post(body: dict) -> dict:
-    model = os.environ.get("GEMINI_MODEL_ID", "gemini-2.5-flash")
+    model = os.environ.get("GEMINI_MODEL_ID", "gemini-3.6-flash")
     request = urllib.request.Request(
         _ENDPOINT.format(model=model),
         data=json.dumps(body).encode("utf-8"),
@@ -128,8 +133,12 @@ def _payload_from(response: dict) -> dict | None:
     if not candidates:
         return None
     candidate = candidates[0]
-    if candidate.get("finishReason") in {"SAFETY", "RECITATION", "BLOCKLIST", "PROHIBITED_CONTENT"}:
-        LOG.warning("gemini_blocked reason=%s", candidate.get("finishReason"))
+    finish = candidate.get("finishReason")
+    if finish in {"SAFETY", "RECITATION", "BLOCKLIST", "PROHIBITED_CONTENT"}:
+        LOG.warning("gemini_blocked reason=%s", finish)
+        return None
+    if finish == "MAX_TOKENS":
+        LOG.warning("gemini_truncated: raise _MAX_TOKENS")
         return None
     for part in candidate.get("content", {}).get("parts", []):
         raw = part.get("text")

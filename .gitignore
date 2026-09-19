@@ -42,3 +42,7 @@ backend/.venv/
 
 # relative-base preview build, published for phone testing
 frontend/dist-preview/
+
+# never again: a key pasted into a document in the repo
+*api*key*
+*.pdf

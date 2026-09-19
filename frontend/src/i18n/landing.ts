@@ -77,6 +77,7 @@ const en: LandingStrings = {
 
   privacyTitle: "What Ruko never does",
   privacyPoints: [
+    "Sends the message to an AI only to explain it — today that is Google Gemini, named here because it leaves AWS. The rules run on AWS either way.",
     "Never asks for your OTP, PIN, password or any account detail.",
     "Never files a complaint on your behalf, and says so.",
     "Never stores your message. Screenshots are deleted within a day.",
@@ -135,6 +136,7 @@ const hi: LandingStrings = {
 
   privacyTitle: "रुको यह कभी नहीं करता",
   privacyPoints: [
+    "संदेश सिर्फ़ समझाने के लिए AI को भेजा जाता है — अभी वह Google Gemini है, और वह AWS से बाहर जाता है, इसलिए यह बताया गया है। नियम हर हाल में AWS पर ही चलते हैं।",
     "आपका OTP, PIN, पासवर्ड या खाते की कोई जानकारी कभी नहीं माँगता।",
     "आपकी ओर से शिकायत दर्ज नहीं करता, और यह साफ़ कहता है।",
     "आपका संदेश सहेजकर नहीं रखता। स्क्रीनशॉट एक दिन में मिटा दिए जाते हैं।",
@@ -193,6 +195,7 @@ const gu: LandingStrings = {
 
   privacyTitle: "રુકો આ ક્યારેય કરતું નથી",
   privacyPoints: [
+    "સંદેશ ફક્ત સમજાવવા માટે AI ને મોકલાય છે — અત્યારે તે Google Gemini છે, અને તે AWS ની બહાર જાય છે, એટલે અહીં જણાવ્યું છે. નિયમો તો હંમેશા AWS પર જ ચાલે છે.",
     "તમારો OTP, PIN, પાસવર્ડ કે ખાતાની કોઈ વિગત ક્યારેય માગતું નથી.",
     "તમારા વતી ફરિયાદ નોંધાવતું નથી, અને એ સ્પષ્ટ કહે છે.",
     "તમારો સંદેશ સાચવી રાખતું નથી. સ્ક્રીનશોટ એક દિવસમાં ભૂંસાઈ જાય છે.",

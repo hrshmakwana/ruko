@@ -42,7 +42,7 @@ Parameters:
 
   GeminiModelId:
     Type: String
-    Default: gemini-2.5-flash
+    Default: gemini-3.6-flash
     Description: Model name used when ModelProvider is gemini.
 
   GeminiKeyParam:

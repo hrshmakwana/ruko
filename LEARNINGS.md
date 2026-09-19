@@ -341,3 +341,30 @@ appended `<style>` tag survives React, and now the captures are stable.
 **Copy that was quietly wrong:** the landing page still promised three languages and "scam phrases in
 four languages", and named Bedrock as the reader while Bedrock is switched off. Fixed in all three
 landing languages.
+
+## Day 3 — the AI layer, switched on
+
+**What was new:** the key went into **SSM Parameter Store** as a SecureString, never into a file. It
+arrived in a PDF sitting in the repo folder — untracked and never pushed, checked before anything
+else — read straight out of the PDF, written to Parameter Store, and the PDF deleted. `.gitignore`
+now refuses `*api*key*` and `*.pdf` so the same slip cannot reach a public repo.
+
+**Three things broke, in order:**
+
+1. **404 on every call.** `gemini-2.5-flash` is retired for new keys — the API says so in the error
+   body and names its replacement. Only a POST shows this; listing models still returns 2.5 happily.
+   Now on `gemini-3.6-flash`, as a stack parameter.
+2. **A silent truncation that looked like an outage.** Gemini 3.x thinks before it answers and those
+   thoughts are billed against the same budget: ~700 thinking tokens plus ~600 of verdict against a
+   1400 limit meant a `STOP` finish with an empty text part, no error anywhere, and a fall back to
+   rules. Budget raised to 4000, and `MAX_TOKENS` is now logged by name instead of vanishing.
+3. **429 from the free tier** after running the 37-sample eval twice in a row. It degrades correctly
+   — rules answer alone — but it is worth not hammering the API right before a demo.
+
+**Result:** 37/37 on the live API with the model on, zero missed scams, zero false alarms, and the
+verdicts now carry the Gujarati headline, the consequence chain, the callback script and the lesson.
+Median 2.8s, slowest 11.5s.
+
+**Said out loud, not buried:** with Gemini the message leaves AWS and goes to Google. That is now a
+line in the landing page's privacy list, in all three of its languages, and a section of its own in
+the README. Bedrock keeps everything inside AWS, and going back is one parameter.

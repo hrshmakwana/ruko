@@ -97,7 +97,7 @@ flowchart TB
 | **Amplify Hosting** | Static site on CloudFront with one command. Manual zip deploy means no GitHub OAuth and no console clicks, so it deploys from a laptop — or from a phone. |
 | **API Gateway (HTTP API)** | Cheaper and simpler than REST API, and throttling at the edge caps the damage anyone can do. |
 | **Lambda (Python 3.12, arm64)** | Pay per request, nothing running between checks. arm64 is cheaper per millisecond than x86. |
-| **Bedrock — Amazon Nova 2 Lite** | Reads text *and* the screenshot in one call. Amazon's own model, so no Marketplace subscription. Model id and region are stack parameters, so switching model is a config change. |
+| **The model layer — a stack parameter** | `ModelProvider` is `bedrock`, `gemini` or `none`. Bedrock (Amazon Nova 2 Lite) is preferred because the message never leaves AWS; while Bedrock access is pending account verification, Ruko runs on Google Gemini, which the landing page says out loud because the message does leave AWS in that mode. Both go through the same prompt, the same schema and the same validation, and `none` runs the rules alone. |
 | **S3** | The browser uploads the screenshot straight to S3 with a presigned PUT, so images never pass through Lambda. Private bucket, everything deleted after one day. |
 | **DynamoDB** | One on-demand table for community counts and check records, with TTL doing the deleting for free. |
 | **CloudWatch Logs** | Declared explicitly in the template so retention is 7 days rather than forever. |
@@ -135,7 +135,7 @@ reach, and the level comes from fixed score bands rather than from anything the 
    shorteners, `.apk` downloads, risky TLDs, OTP/PIN requests, the UPI collect-as-refund trap, and
    high-risk phrases across English, Hindi, Gujarati and Hinglish. Each rule carries a severity, and
    a severity is a floor: high means at least 80.
-3. **The model** — Bedrock Converse, text and screenshot together. The message goes inside an
+3. **The model** — whichever provider is configured, text and screenshot together. The message goes inside an
    `<untrusted_evidence>` block with instructions to analyse it and never obey it. Output is forced
    through a tool schema, so there is no prose to parse and nothing to guess. One retry, then a
    rules-only verdict rather than an error.
