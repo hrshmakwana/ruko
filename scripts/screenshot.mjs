@@ -178,10 +178,14 @@ if (waitGone) {
 // section whose delay has not elapsed is still at opacity 0. Capturing mid-
 // stagger silently drops half the page, which looks like a rendering bug.
 // Cancelling the animations leaves every element in its settled state.
+// A stylesheet rather than inline styles: these elements carry a React `style`
+// prop for their delay, so React rewrites the style attribute on its next
+// render and wipes an inline override. A rule in a <style> tag survives that.
 await evaluate(`(() => {
-  document.querySelectorAll(".ruko-rise, .ruko-slam").forEach((el) => {
-    el.style.animation = "none";
-  });
+  const style = document.createElement("style");
+  style.textContent =
+    ".ruko-rise, .ruko-slam { animation: none !important; opacity: 1 !important; transform: none !important; }";
+  document.head.appendChild(style);
   return document.querySelectorAll(".ruko-rise, .ruko-slam").length;
 })()`);
 await sleep(300);

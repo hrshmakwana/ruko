@@ -311,3 +311,33 @@ sideloaded at all — Apple allows only the App Store, TestFlight (paid account 
 ad-hoc builds signed per device id. And the machine has no Android toolchain, with no Android phone
 to test on. The installable PWA reaches both platforms today, and the one thing a native app would
 genuinely add — reading SMS — stays on the roadmap slide instead of half-built.
+
+## Day 3 — one design, every screen size
+
+**What changed:** Ruko had good screens hidden behind a bad frame. Call mode, the app checker and
+lookup were cards and tabs buried down a single scrolling page, and on a laptop the whole app was a
+narrow ribbon in the middle of a wide screen.
+
+Now there is one shell that changes *shape* rather than content:
+
+- **phone** — a bar across the bottom, where the thumb already is
+- **tablet** — the same bar, roomier
+- **laptop** — a rail down the left, because the bottom of a 1440px screen is nowhere near the eye
+
+Both come from one list of destinations, so they cannot drift apart. Every capability is now a place
+with a name and an icon instead of something you had to scroll to discover. The verdict reads as two
+columns on a wide screen and one on a phone, with the banner and the message spanning the top.
+
+**The landing page** was rebuilt for the two audiences it actually has: someone on a phone who needs
+the app, and a judge on a laptop who needs to see the whole product. A hero that shows a verdict, a
+grid linking to every page, the fifteen languages as buttons that switch the page, and the install QR.
+
+**A tooling bug worth remembering:** the screenshot script disabled the entrance animations by setting
+`el.style.animation = "none"`, and that silently stopped working. Those elements carry a React `style`
+prop for their stagger delay, so on the next render React rewrote the style attribute and wiped the
+override — the capture then showed a half-faded page that looked like a rendering bug. A rule in an
+appended `<style>` tag survives React, and now the captures are stable.
+
+**Copy that was quietly wrong:** the landing page still promised three languages and "scam phrases in
+four languages", and named Bedrock as the reader while Bedrock is switched off. Fixed in all three
+landing languages.
