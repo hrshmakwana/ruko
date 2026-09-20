@@ -8,11 +8,12 @@ import { ListenScreen } from "./components/ListenScreen";
 import { Loading } from "./components/Loading";
 import { LookupPanel } from "./components/LookupPanel";
 import { PanicButton } from "./components/PanicButton";
-import { RoleGate } from "./components/RoleGate";
+import { Welcome } from "./components/Welcome";
 import { ScanHub, type HubTarget } from "./components/ScanHub";
 import { SettingsScreen } from "./components/SettingsScreen";
 import { Shell, type Destination } from "./components/Shell";
 import { VerdictScreen } from "./components/VerdictScreen";
+import { Icon } from "./components/Icon";
 import { applyLanguage, dictionaries, loadLanguage, saveLanguage } from "./i18n";
 import { apkFor } from "./i18n/apk";
 import { familyFor } from "./i18n/family";
@@ -21,12 +22,13 @@ import { languageInfo } from "./i18n/languages";
 import { listenFor } from "./i18n/listen";
 import { lookupFor } from "./i18n/lookup";
 import { navFor } from "./i18n/nav";
+import { welcomeFor, type WelcomeStrings } from "./i18n/welcome";
 import { ApiError, checkMessage, reportScam, uploadImage } from "./lib/api";
 import { loadFamilyCode } from "./lib/guardian";
 import { takeSharedPayload, type SharedPayload } from "./lib/install";
 import { applyParentMode, loadParentMode } from "./lib/parentMode";
 import { rememberCheck } from "./lib/recent";
-import { loadRole, saveRole, type Role } from "./lib/role";
+import { loadRole, needsAccount, saveRole, type Role } from "./lib/role";
 import { useDirective } from "./lib/useDirective";
 import type { PreparedImage } from "./lib/image";
 import type { Language, Verdict } from "./types";
@@ -75,6 +77,7 @@ export default function App() {
   const install = installFor(language);
   const apk = apkFor(language);
   const nav = navFor(language);
+  const w = welcomeFor(language);
   const { directive, dismiss } = useDirective(familyCode);
 
   useEffect(() => applyParentMode(parentMode), [parentMode]);
@@ -184,10 +187,12 @@ export default function App() {
     }
   }
 
-  function chooseRole(next: Role) {
+  function chooseRole(next: Role, code?: string) {
     saveRole(next);
     setRole(next);
-    if (next === "guardian") window.location.href = "/guardian";
+    if (code) setFamilyCode(code);
+    // The admin's app is the dashboard, which is its own page.
+    if (next === "admin") window.location.href = "/guardian";
   }
 
   function content() {
@@ -229,6 +234,9 @@ export default function App() {
     }
 
     if (destination === "call") {
+      if (needsAccount(role)) {
+        return <Locked w={w} onSignIn={() => chooseRole(null as unknown as Role)} />;
+      }
       return (
         <ListenScreen
           l={listen}
@@ -241,6 +249,9 @@ export default function App() {
     }
 
     if (destination === "family") {
+      if (needsAccount(role)) {
+        return <Locked w={w} onSignIn={() => chooseRole(null as unknown as Role)} />;
+      }
       return (
         <FamilyScreen
           f={f}
@@ -269,6 +280,7 @@ export default function App() {
             saveRole(null);
             setRole(null);
           }}
+          roleLabel={role === "guest" ? w.guestLabel : f.familyTitle}
         />
       );
     }
@@ -323,7 +335,14 @@ export default function App() {
   // unreadable in the first place.
   if (!role) {
     return (
-      <RoleGate t={t} f={f} language={language} onLanguage={changeLanguage} onChoose={chooseRole} />
+      <Welcome
+        t={t}
+        f={f}
+        w={w}
+        language={language}
+        onLanguage={changeLanguage}
+        onChoose={chooseRole}
+      />
     );
   }
 
@@ -350,11 +369,35 @@ export default function App() {
         parentLabel={nav.modeParent}
         guardianLabel={nav.modeGuardian}
         familyCode={familyCode}
-        familyLinkedLabel={familyCode ? f.familyLinked(familyCode) : undefined}
+        familyLinkedLabel={
+          role === "guest" ? w.guestLabel : familyCode ? f.familyLinked(familyCode) : undefined
+        }
       >
         {content()}
       </Shell>
     </>
+  );
+}
+
+/** What a guest sees where a signed-in feature would be: what it does, why it
+ *  needs an account, and one button. Not a hidden tab — hiding it would mean
+ *  nobody ever discovers the half of Ruko that protects two people. */
+function Locked({ w, onSignIn }: { w: WelcomeStrings; onSignIn: () => void }) {
+  return (
+    <div className="rounded-xl bg-surface-container-low p-5 text-center shadow-sm">
+      <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-surface-container">
+        <Icon name="lock" className="text-[26px]" />
+      </span>
+      <h1 className="mt-3 text-headline-md font-semibold">{w.lockedTitle}</h1>
+      <p className="mt-1.5 text-body-md text-secondary">{w.lockedBody}</p>
+      <button
+        type="button"
+        onClick={onSignIn}
+        className="mt-4 min-h-[52px] w-full rounded-xl bg-primary px-5 text-body-lg font-semibold text-on-primary"
+      >
+        {w.signIn}
+      </button>
+    </div>
   );
 }
 

@@ -21,6 +21,8 @@ interface Props {
   onAskMic: () => void;
   /** Back to the first question: this phone is now someone else's. */
   onSwitchRole: () => void;
+  /** Which of the three ways in this phone is using. */
+  roleLabel: string;
 }
 
 /** Everything that is a choice rather than a check.
@@ -42,6 +44,7 @@ export function SettingsScreen({
   micState,
   onAskMic,
   onSwitchRole,
+  roleLabel,
 }: Props) {
   const hasHistory = recentChecks().length > 0;
 
@@ -122,7 +125,7 @@ export function SettingsScreen({
           className="flex min-h-[56px] w-full items-center gap-3 border-b border-outline-variant/30 px-4 py-3 text-left"
         >
           <ShieldCheckIcon className="h-5 w-5 shrink-0 text-muted" />
-          <span className="min-w-0 flex-1 text-[0.98rem] font-semibold">{f.familyTitle}</span>
+          <span className="min-w-0 flex-1 text-[0.98rem] font-semibold">{roleLabel}</span>
           <ChevronRightIcon className="h-5 w-5 shrink-0 text-muted" />
         </button>
         <a
