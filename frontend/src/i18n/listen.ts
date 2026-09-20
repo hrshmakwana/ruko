@@ -28,10 +28,13 @@ export interface ListenStrings {
   dangerTitle: string;
   warnTitle: string;
   back: string;
+  /** The language the caller is speaking, which need not be the app's. */
+  spokenLanguage: string;
 }
 
 const dictionaries: Record<Language, ListenStrings> = {
   en: {
+    spokenLanguage: "Language on the call",
     entry: "Someone is on the phone right now",
     entryHint: "Put the call on speaker and Ruko will listen along",
     heading: "Ruko is listening to the call",
@@ -54,6 +57,7 @@ const dictionaries: Record<Language, ListenStrings> = {
     back: "Back",
   },
   hi: {
+    spokenLanguage: "कॉल की भाषा",
     entry: "अभी कोई फ़ोन पर है?",
     entryHint: "कॉल को स्पीकर पर रखें, रुको साथ में सुनेगा",
     heading: "रुको कॉल सुन रहा है",
@@ -76,6 +80,7 @@ const dictionaries: Record<Language, ListenStrings> = {
     back: "वापस",
   },
   bn: {
+    spokenLanguage: "কলের ভাষা",
     entry: "এখন কেউ ফোনে আছে?",
     entryHint: "কলটি স্পিকারে দিন, রুকো সঙ্গে শুনবে",
     heading: "রুকো কলটি শুনছে",
@@ -98,6 +103,7 @@ const dictionaries: Record<Language, ListenStrings> = {
     back: "ফিরে যান",
   },
   mr: {
+    spokenLanguage: "कॉलची भाषा",
     entry: "आत्ता कोणी फोनवर आहे का?",
     entryHint: "कॉल स्पीकरवर ठेवा, रुको सोबत ऐकेल",
     heading: "रुको कॉल ऐकत आहे",
@@ -120,6 +126,7 @@ const dictionaries: Record<Language, ListenStrings> = {
     back: "मागे",
   },
   te: {
+    spokenLanguage: "కాల్ భాష",
     entry: "ఇప్పుడు ఎవరైనా ఫోన్‌లో ఉన్నారా?",
     entryHint: "కాల్‌ను స్పీకర్‌లో పెట్టండి, రుకో కూడా వింటుంది",
     heading: "రుకో కాల్ వింటోంది",
@@ -142,6 +149,7 @@ const dictionaries: Record<Language, ListenStrings> = {
     back: "వెనక్కి",
   },
   ta: {
+    spokenLanguage: "அழைப்பின் மொழி",
     entry: "இப்போது யாராவது தொலைபேசியில் இருக்கிறார்களா?",
     entryHint: "அழைப்பை ஸ்பீக்கரில் வையுங்கள், ருகோவும் கேட்கும்",
     heading: "ருகோ அழைப்பைக் கேட்டுக்கொண்டிருக்கிறது",
@@ -164,6 +172,7 @@ const dictionaries: Record<Language, ListenStrings> = {
     back: "பின்செல்",
   },
   gu: {
+    spokenLanguage: "કૉલની ભાષા",
     entry: "અત્યારે કોઈ ફોન પર છે?",
     entryHint: "કૉલ સ્પીકર પર રાખો, રુકો સાથે સાંભળશે",
     heading: "રુકો કૉલ સાંભળી રહ્યું છે",
@@ -186,6 +195,7 @@ const dictionaries: Record<Language, ListenStrings> = {
     back: "પાછળ",
   },
   ur: {
+    spokenLanguage: "کال کی زبان",
     entry: "کیا ابھی کوئی فون پر ہے؟",
     entryHint: "کال کو اسپیکر پر رکھیں، رُکو ساتھ سنے گا",
     heading: "رُکو کال سن رہا ہے",
@@ -208,6 +218,7 @@ const dictionaries: Record<Language, ListenStrings> = {
     back: "واپس",
   },
   kn: {
+    spokenLanguage: "ಕರೆಯ ಭಾಷೆ",
     entry: "ಈಗ ಯಾರಾದರೂ ಫೋನ್‌ನಲ್ಲಿ ಇದ್ದಾರೆಯೇ?",
     entryHint: "ಕರೆಯನ್ನು ಸ್ಪೀಕರ್‌ನಲ್ಲಿ ಇಡಿ, ರುಕೋ ಜೊತೆಗೆ ಕೇಳುತ್ತದೆ",
     heading: "ರುಕೋ ಕರೆಯನ್ನು ಕೇಳುತ್ತಿದೆ",
@@ -230,6 +241,7 @@ const dictionaries: Record<Language, ListenStrings> = {
     back: "ಹಿಂದೆ",
   },
   or: {
+    spokenLanguage: "କଲର ଭାଷା",
     entry: "ବର୍ତ୍ତମାନ କେହି ଫୋନରେ ଅଛନ୍ତି କି?",
     entryHint: "କଲକୁ ସ୍ପିକରରେ ରଖନ୍ତୁ, ରୁକୋ ସାଙ୍ଗରେ ଶୁଣିବ",
     heading: "ରୁକୋ କଲ ଶୁଣୁଛି",
@@ -252,6 +264,7 @@ const dictionaries: Record<Language, ListenStrings> = {
     back: "ପଛକୁ",
   },
   ml: {
+    spokenLanguage: "കോളിന്റെ ഭാഷ",
     entry: "ഇപ്പോൾ ആരെങ്കിലും ഫോണിലുണ്ടോ?",
     entryHint: "കോൾ സ്പീക്കറിൽ ഇടൂ, റുകോയും കേൾക്കും",
     heading: "റുകോ കോൾ കേൾക്കുന്നു",
@@ -274,6 +287,7 @@ const dictionaries: Record<Language, ListenStrings> = {
     back: "തിരികെ",
   },
   pa: {
+    spokenLanguage: "ਕਾਲ ਦੀ ਭਾਸ਼ਾ",
     entry: "ਕੀ ਹੁਣ ਕੋਈ ਫ਼ੋਨ ਉੱਤੇ ਹੈ?",
     entryHint: "ਕਾਲ ਸਪੀਕਰ ਉੱਤੇ ਰੱਖੋ, ਰੁਕੋ ਨਾਲ ਸੁਣੇਗਾ",
     heading: "ਰੁਕੋ ਕਾਲ ਸੁਣ ਰਿਹਾ ਹੈ",
@@ -296,6 +310,7 @@ const dictionaries: Record<Language, ListenStrings> = {
     back: "ਪਿੱਛੇ",
   },
   as: {
+    spokenLanguage: "কলৰ ভাষা",
     entry: "এতিয়া কোনোবাই ফোনত আছে নেকি?",
     entryHint: "কলটো স্পীকাৰত ৰাখক, ৰুকোৱে লগতে শুনিব",
     heading: "ৰুকোৱে কল শুনি আছে",
@@ -318,6 +333,7 @@ const dictionaries: Record<Language, ListenStrings> = {
     back: "পিছলৈ",
   },
   mai: {
+    spokenLanguage: "कॉलक भाषा",
     entry: "की एखन कियो फोन पर अछि?",
     entryHint: "कॉल केँ स्पीकर पर राखू, रुको सेहो सुनत",
     heading: "रुको कॉल सुनि रहल अछि",
@@ -340,6 +356,7 @@ const dictionaries: Record<Language, ListenStrings> = {
     back: "पाछू",
   },
   ne: {
+    spokenLanguage: "कलको भाषा",
     entry: "अहिले कोही फोनमा हुनुहुन्छ?",
     entryHint: "कललाई स्पिकरमा राख्नुहोस्, रुकोले पनि सुन्छ",
     heading: "रुकोले कल सुनिरहेको छ",

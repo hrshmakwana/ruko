@@ -187,3 +187,32 @@ class TestRequestValidation:
         event = {"body": json.dumps({"text": "hi", "image_key": "uploads/../../etc/passwd"})}
         result = check_handler.lambda_handler(event, None)
         assert result["statusCode"] == 400
+
+
+class TestRukoNeverSaysSafe:
+    """The one promise the product rests on, enforced in code.
+
+    The prompt forbids the word, but a model writing in fifteen languages will
+    eventually write it anyway — it did, in Gujarati, on a live call. So a clean
+    verdict is always announced in Ruko's own words, whatever the model wrote.
+    """
+
+    def test_a_clean_verdict_uses_rukos_headline_not_the_models(self, monkeypatch):
+        from ruko.fallback import text as fallback_text
+
+        monkeypatch.setattr(
+            "handlers.check.analyse",
+            model_returning(5, headline="This message is completely safe.", scam_type="none_detected"),
+        )
+        verdict = call("Hello beta, did you eat? See you tomorrow.")
+        assert verdict["risk_level"] == "no_scam_signs"
+        assert verdict["headline"] == fallback_text("en")["no_scam_signs"]
+        assert "safe" not in verdict["headline"].lower()
+
+    def test_a_scam_verdict_still_uses_the_models_headline(self, monkeypatch):
+        monkeypatch.setattr(
+            "handlers.check.analyse",
+            model_returning(92, headline="This is a fake KYC message.", scam_type="kyc_update"),
+        )
+        verdict = call("Your KYC expired, share the OTP at http://sbi-kyc-verify.in")
+        assert verdict["headline"] == "This is a fake KYC message."

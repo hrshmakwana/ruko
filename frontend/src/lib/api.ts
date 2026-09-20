@@ -109,6 +109,9 @@ export interface LiveVerdict {
   language: Language;
   /** True once the family has been told about this call. */
   family_told?: boolean;
+  /** One sentence about the call, written by the model on a deep pass. */
+  headline?: string;
+  engine?: string;
 }
 
 /** Run the rules over what has been heard so far. Nothing is stored. */
@@ -116,6 +119,7 @@ export async function liveAnalyse(
   text: string,
   language: Language,
   familyCode?: string | null,
+  deep = false,
 ): Promise<LiveVerdict> {
   if (IS_MOCK) {
     const lower = text.toLowerCase();
@@ -141,5 +145,6 @@ export async function liveAnalyse(
     text,
     language,
     family_code: familyCode ?? undefined,
+    deep,
   });
 }

@@ -28,7 +28,7 @@ import boto3
 from botocore.auth import SigV4QueryAuth
 from botocore.awsrequest import AWSRequest
 
-from ruko import family
+from ruko import family, model
 from ruko.extract import extract_all
 from ruko.fallback import text as fallback_text
 from ruko.http import ApiError, LOG, handler_wrapper, parse_json_body, response
@@ -74,6 +74,16 @@ URL_TTL_SECONDS = 300
 MAX_SECONDS = 300
 
 MAX_TRANSCRIPT_CHARS = 4000
+
+# What the model is looking at is half of a phone call, transcribed live and
+# imperfectly. Saying so stops it marking ordinary broken speech as suspicious.
+CALL_CONTEXT = (
+    "The text below is a live, imperfect transcription of a phone call that is "
+    "happening right now, heard through the speaker. Words may be missing or "
+    "wrong. Judge the caller's intent, not the grammar. If the caller is asking "
+    "for an OTP or PIN, claiming to be police or a bank, threatening arrest or "
+    "a blocked account, or pushing for an urgent payment, that is a scam call.\n\n"
+)
 
 _session = None
 
@@ -138,6 +148,11 @@ def _analyse(event: dict) -> dict:
     text = text[-MAX_TRANSCRIPT_CHARS:]
     language = normalise_language(body.get("language"))
     family_code = body.get("family_code")
+    # The rules run on every pass, cheaply. The model is asked only on the
+    # occasional "deep" pass, because a call is checked every second and the
+    # free tier would be spent in a minute — and because what the model adds is
+    # judgement about a whole conversation, not about the last sentence.
+    deep = bool(body.get("deep")) and len(text.strip()) >= 40
 
     started = time.perf_counter()
     extracted = extract_all(text)
@@ -157,11 +172,45 @@ def _analyse(event: dict) -> dict:
         )
     ]
 
+    headline = ""
+    engine = "rules"
+    if deep:
+        try:
+            verdict, _ = model.analyse(CALL_CONTEXT + text, language)
+            model_score = int(verdict.get("risk_score", 0))
+            if model_score > score:
+                score = model_score
+                level = level_from_score(score)
+            headline = str(verdict.get("headline") or "")
+            engine = "rules+model"
+            seen = {a["why"] for a in alerts}
+            for flag in verdict.get("red_flags", [])[:4]:
+                if flag["why"] not in seen:
+                    alerts.append(
+                        {
+                            "rule": "model",
+                            "evidence": flag["evidence"],
+                            "why": flag["why"],
+                            "severity": "high" if model_score >= 75 else "medium",
+                        }
+                    )
+        except Exception as exc:  # noqa: BLE001
+            # A call must not stop because the model is busy: the rules already
+            # answered, and that answer is the one that cannot be argued with.
+            LOG.warning("live_model_unavailable type=%s", type(exc).__name__)
+
+    # Ruko's own words whenever the call looks clean: the model must never be
+    # the one to tell somebody a caller is safe.
+    if not headline or level == "no_scam_signs":
+        strings = fallback_text(language)
+        headline = strings.get(level) or ""
+
     # Words are never logged: only how many, and what fired.
     LOG.info(
-        "live_analyse chars=%d hits=%s score=%d ms=%d",
+        "live_analyse chars=%d hits=%s engine=%s score=%d ms=%d",
         len(text),
         ",".join(rules.ids) or "-",
+        engine,
         score,
         int((time.perf_counter() - started) * 1000),
     )
@@ -181,7 +230,8 @@ def _analyse(event: dict) -> dict:
                     "risk_score": score,
                     "scam_type": rules.suggested_scam_type() or "other_scam",
                     # The words heard are never sent on: only why it was flagged.
-                    "headline": fallback_text(language).get("live_call")
+                    "headline": headline
+                    or fallback_text(language).get("live_call")
                     or "Ruko heard a scam on a call happening right now.",
                     "language": language,
                     "detail": first_alert[:160],
@@ -196,6 +246,8 @@ def _analyse(event: dict) -> dict:
             "risk_level": level,
             "risk_score": score,
             "scam_type": rules.suggested_scam_type() or "none_detected",
+            "headline": headline,
+            "engine": engine,
             "alerts": alerts,
             "language": language,
             "family_told": told_family,

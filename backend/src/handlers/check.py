@@ -226,6 +226,12 @@ def lambda_handler(event, context):  # noqa: ANN001, ARG001
     if model_result and score > model_score and level == "scam":
         headline = strings["scam"]
 
+    # And a clean verdict is always said in Ruko's own words. The prompt forbids
+    # "safe", but a model writing in fifteen languages will slip eventually, and
+    # this is the one promise the whole product rests on.
+    if level == "no_scam_signs" and not nothing_was_read:
+        headline = strings["no_scam_signs"]
+
     verdict = build_verdict(
         check_id=check_id,
         risk_score=score,

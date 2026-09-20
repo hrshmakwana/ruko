@@ -426,3 +426,34 @@ rounds with constant-time comparison; signed, expiring tokens; private encrypted
 a one-day lifecycle and presigned PUTs limited to JPEG/PNG under 5 MB; the API throttled; IAM scoped
 per function; no handler logs message text. One limitation stands and belongs in the README: a family
 code is a six-character secret with no second factor, so whoever knows it can link to that family.
+
+## Day 4 — the call feature had no verdict, and the model was locked out of it
+
+Testing on a real phone found three things, in the order they mattered:
+
+1. **A phone that had opened Ruko once kept running the old app.** The service
+   worker cached a shell and never expired it, so several deploys were invisible
+   on the device they were meant for — indistinguishable, from the outside, from
+   features that were never built. The worker now versions its cache, deletes the
+   old one, tells open tabs to reload, and checks for a new build whenever the app
+   comes back to the foreground. A deploy reaches a phone on the next open.
+
+2. **Live call mode ran the rules alone.** A scam spoken in Gujarati with no word
+   any rule knows — *"your son's name has come up in a case, don't tell anyone,
+   send fifty thousand now"* — scored zero. The call transcript now also goes to
+   the model, on a deep pass every nine seconds rather than every second, so the
+   free tier survives a five-minute call. That sentence now scores 95, and the
+   screen says in Gujarati: *"This is a fake call to extort money in your son's
+   name."* A call is also judged in the language being spoken, which is chosen on
+   the screen — the app's language and the caller's are rarely the same.
+
+3. **The model called a clean call "safe", in Gujarati.** The prompt forbids the
+   word, and Ruko's whole promise is that it never says it. A prompt is not an
+   enforcement mechanism: a clean verdict is now always announced in Ruko's own
+   words, in both the message path and the call path, whatever the model wrote.
+   There is a test for it.
+
+Also found while wiring it up: the live function could not read the model key at
+all, because only the check function had been given permission. It failed quietly
+into rules-only — the same shape of bug as the truncation earlier. Two "the model
+is not answering" incidents in one day, neither of which announced itself.

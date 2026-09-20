@@ -264,6 +264,30 @@ Resources:
         # going, which means writing one alert onto the family's feed.
         - DynamoDBCrudPolicy:
             TableName: !Ref RukoTable
+        # The call is judged by the same model as a pasted message, so this
+        # function needs the same one key — and nothing else.
+        - Statement:
+            - Sid: ReadModelKey
+              Effect: Allow
+              Action:
+                - ssm:GetParameter
+              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GeminiKeyParam}"
+            - Sid: DecryptModelKey
+              Effect: Allow
+              Action:
+                - kms:Decrypt
+              Resource: "*"
+              Condition:
+                StringEquals:
+                  kms:ViaService: !Sub "ssm.${AWS::Region}.amazonaws.com"
+        - Statement:
+            - Sid: BedrockForCalls
+              Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+              Resource:
+                - !Sub "arn:aws:bedrock:*::foundation-model/${BedrockFoundationModelId}"
+                - !Sub "arn:aws:bedrock:${BedrockRegion}:${AWS::AccountId}:inference-profile/${BedrockModelId}"
       Events:
         Token:
           Type: HttpApi

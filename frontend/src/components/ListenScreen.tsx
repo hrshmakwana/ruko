@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { LANGUAGES } from "../i18n/languages";
 import { CrossIcon, OkIcon, ScamIcon, SuspiciousIcon } from "./Icons";
 import type { ListenStrings } from "../i18n/listen";
 import { liveAnalyse, type LiveAlert } from "../lib/api";
@@ -31,10 +32,15 @@ export function ListenScreen({ l, language, onBack, familyCode, familyToldLabel 
   const [error, setError] = useState<string | null>(null);
   const [seconds, setSeconds] = useState(0);
   const [familyTold, setFamilyTold] = useState(false);
+  const [headline, setHeadline] = useState("");
+  // The call may be in a different language than the app: a son sets Ruko up in
+  // English and hands the phone to a parent who is about to be called in Tamil.
+  const [spoken, setSpoken] = useState<Language>(language);
 
   const session = useRef<ListenSession | null>(null);
   const analysing = useRef(false);
   const lastAnalysed = useRef("");
+  const lastDeep = useRef(0);
 
   // Stop the microphone if the person navigates away mid-call.
   useEffect(() => () => session.current?.stop(), []);
@@ -53,8 +59,15 @@ export function ListenScreen({ l, language, onBack, familyCode, familyToldLabel 
       analysing.current = true;
       lastAnalysed.current = text;
       try {
-        const verdict = await liveAnalyse(text.slice(-1500), language, familyCode);
+        // Every pass runs the rules; roughly every fourth also asks the model,
+        // which is what catches a scam phrased in words no rule knows.
+        const now = Date.now();
+        const deep = now - lastDeep.current > 9000;
+        if (deep) lastDeep.current = now;
+
+        const verdict = await liveAnalyse(text.slice(-1500), spoken, familyCode, deep);
         if (verdict.family_told) setFamilyTold(true);
+        if (verdict.headline) setHeadline(verdict.headline);
         setScore((previous) => Math.max(previous, verdict.risk_score));
         setAlerts((previous) => {
           const seen = new Set(previous.map((alert) => alert.rule));
@@ -67,7 +80,7 @@ export function ListenScreen({ l, language, onBack, familyCode, familyToldLabel 
         analysing.current = false;
       }
     },
-    [language, familyCode],
+    [spoken, familyCode],
   );
 
   useEffect(() => {
@@ -84,10 +97,12 @@ export function ListenScreen({ l, language, onBack, familyCode, familyToldLabel 
     setPartial("");
     setSeconds(0);
     setFamilyTold(false);
+    setHeadline("");
     lastAnalysed.current = "";
+    lastDeep.current = 0;
     setPhase("listening");
 
-    session.current = await startListening(language, {
+    session.current = await startListening(spoken, {
       onTranscript: (next, live) => {
         setSettled(next);
         setPartial(live);
@@ -163,6 +178,15 @@ export function ListenScreen({ l, language, onBack, familyCode, familyToldLabel 
             >
               {danger ? l.dangerTitle : warn ? l.warnTitle : l.nothingYet}
             </p>
+            {headline && (
+              <p
+                className={`mt-1.5 text-[0.98rem] leading-snug font-medium ${
+                  danger ? "text-white/90" : warn ? "text-amber-ink" : "text-muted"
+                }`}
+              >
+                {headline}
+              </p>
+            )}
             {phase === "listening" && (
               <p
                 className={`mt-1 flex items-center gap-2 text-[0.92rem] font-semibold ${
@@ -177,6 +201,23 @@ export function ListenScreen({ l, language, onBack, familyCode, familyToldLabel 
           </div>
         </div>
       </section>
+
+      {phase !== "listening" && (
+        <label className="flex items-center justify-between gap-3 rounded-xl bg-surface-container-low px-4 py-3 shadow-sm">
+          <span className="min-w-0 text-body-md font-semibold">{l.spokenLanguage}</span>
+          <select
+            value={spoken}
+            onChange={(event) => setSpoken(event.target.value as Language)}
+            className="min-h-[44px] rounded-xl bg-surface-container px-3 text-body-md font-semibold text-on-surface"
+          >
+            {LANGUAGES.map((option) => (
+              <option key={option.code} value={option.code}>
+                {option.endonym}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
 
       <button
         type="button"
