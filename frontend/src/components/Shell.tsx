@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { Icon } from "./Icon";
+import { LANGUAGES } from "../i18n/languages";
 import type { NavStrings } from "../i18n/nav";
+import type { Language } from "../types";
 
 export type Destination = "check" | "call" | "family" | "settings";
 
@@ -13,6 +15,10 @@ interface Props {
   /** The section title in the header's second row, e.g. "Scam Checker". */
   sectionTitle: string;
   languageName: string;
+  language: Language;
+  onLanguage: (next: Language) => void;
+  languageLabel: string;
+  profileLabel: string;
   parentMode: boolean;
   onParentMode: (on: boolean) => void;
   parentLabel: string;
@@ -45,6 +51,10 @@ export function Shell({
   tagline,
   sectionTitle,
   languageName,
+  language,
+  onLanguage,
+  languageLabel,
+  profileLabel,
   parentMode,
   onParentMode,
   parentLabel,
@@ -73,17 +83,38 @@ export function Shell({
             </div>
 
             <div className="flex items-center gap-1.5">
+              {/* The pill is the control, not a signpost to one: tapping the
+                  language opens the phone's own picker, which is what everyone
+                  expects and what works on an iPhone. The native select sits
+                  invisibly on top of the pill it belongs to. */}
+              <div className="relative">
+                <span className="ruko-compact pointer-events-none flex min-h-[44px] items-center gap-1 rounded-full bg-surface-container px-3 text-caption font-medium text-on-surface">
+                  <Icon name="translate" className="text-[18px] text-secondary" />
+                  {languageName}
+                  <Icon name="expand_more" className="text-[16px] text-secondary" />
+                </span>
+                <select
+                  aria-label={languageLabel}
+                  value={language}
+                  onChange={(event) => onLanguage(event.target.value as Language)}
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                >
+                  {LANGUAGES.map((option) => (
+                    <option key={option.code} value={option.code}>
+                      {option.endonym}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <button
                 type="button"
-                onClick={() => onNavigate("settings")}
-                className="ruko-compact flex min-h-[44px] items-center gap-1 rounded-full bg-surface-container px-3 text-caption font-medium text-on-surface transition-colors hover:bg-surface-variant"
+                aria-label={profileLabel}
+                onClick={() => onNavigate("family")}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary"
               >
-                <Icon name="translate" className="text-[18px] text-secondary" />
-                {languageName}
-              </button>
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary">
                 <Icon name="person" className="text-[18px] text-on-primary" />
-              </span>
+              </button>
             </div>
           </div>
 

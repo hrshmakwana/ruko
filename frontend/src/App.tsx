@@ -317,6 +317,10 @@ export default function App() {
         appName={t.appName}
         tagline={nav.meansStop}
         languageName={languageInfo(language).endonym}
+        language={language}
+        onLanguage={changeLanguage}
+        languageLabel={t.languageLabel}
+        profileLabel={f.familyTitle}
         sectionTitle={nav.check}
         offlineLabel={t.networkError}
         parentMode={parentMode}
