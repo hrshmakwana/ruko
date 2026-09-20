@@ -69,7 +69,7 @@ export function VerdictScreen({
       </button>
 
       {verdict.image_unread ? (
-        <section className="ruko-slam rounded-3xl border-2 border-amber-line bg-amber-tint p-5 lg:col-span-2">
+        <section className="ruko-slam rounded-xl bg-warn-container p-5 shadow-sm lg:col-span-2">
           <div className="flex items-start gap-3">
             <SuspiciousIcon className="h-10 w-10 shrink-0 text-amber" />
             <div>
@@ -91,7 +91,7 @@ export function VerdictScreen({
       <Rise delay={next()} span>
         <div className={`space-y-2 ${verdict.image_unread ? "hidden" : ""}`}>
           {verdict.scam_type !== "none_detected" && (
-            <span className="inline-block rounded-full border border-line bg-sunken px-3 py-1 text-[0.78rem] font-bold uppercase tracking-wider text-muted">
+            <span className="inline-block rounded-full bg-surface-container-low px-3 py-1 text-[0.78rem] font-bold uppercase tracking-wider text-muted">
               {t.scamTypes[verdict.scam_type]}
             </span>
           )}
@@ -122,7 +122,7 @@ export function VerdictScreen({
 
       {verdict.red_flags.length > 0 && (
         <Rise delay={next()}>
-          <section className="rounded-2xl border border-line bg-surface p-4">
+          <section className="rounded-xl bg-surface-container p-4 shadow-sm">
             <h3 className="text-[1.05rem] font-bold">{t.whyTitle}</h3>
             <ul className="mt-3 space-y-3">
               {verdict.red_flags.map((flag, i) => (
@@ -149,14 +149,14 @@ export function VerdictScreen({
 
       {verdict.do_now.length > 0 && (
         <Rise delay={next()}>
-          <section className="rounded-2xl border-2 border-green-line bg-green-tint p-4">
-            <h3 className="flex items-center gap-2 text-[1.05rem] font-bold text-green-ink">
+          <section className="rounded-xl bg-clear-container p-4 shadow-sm">
+            <h3 className="flex items-center gap-2 text-[1.05rem] font-bold text-on-clear-container">
               <OkIcon className="h-6 w-6" />
               {t.doNowTitle}
             </h3>
             <ol className="mt-3 space-y-2">
               {verdict.do_now.map((step, i) => (
-                <li key={i} className="flex gap-3 text-[1rem] text-green-ink">
+                <li key={i} className="flex gap-3 text-[1rem] text-on-clear-container">
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-green text-[0.8rem] font-bold text-white">
                     {i + 1}
                   </span>
@@ -170,14 +170,14 @@ export function VerdictScreen({
 
       {verdict.dont_do.length > 0 && (
         <Rise delay={next()}>
-          <section className="rounded-2xl border-2 border-red-line bg-red-tint p-4">
-            <h3 className="flex items-center gap-2 text-[1.05rem] font-bold text-red-ink">
+          <section className="rounded-xl bg-error-container p-4 shadow-sm">
+            <h3 className="flex items-center gap-2 text-[1.05rem] font-bold text-on-error-container">
               <CrossIcon className="h-6 w-6" />
               {t.dontDoTitle}
             </h3>
             <ul className="mt-3 space-y-2">
               {verdict.dont_do.map((item, i) => (
-                <li key={i} className="flex gap-3 text-[1rem] text-red-ink">
+                <li key={i} className="flex gap-3 text-[1rem] text-on-error-container">
                   <CrossIcon className="mt-0.5 h-5 w-5 shrink-0" />
                   <span>{item}</span>
                 </li>
@@ -195,13 +195,13 @@ export function VerdictScreen({
 
       {verdict.community.length > 0 && (
         <Rise delay={next()}>
-          <section className="rounded-2xl border border-line bg-surface p-4">
+          <section className="rounded-xl bg-surface-container p-4 shadow-sm">
             <h3 className="text-[1.05rem] font-bold">{t.communityTitle}</h3>
             <ul className="mt-2 space-y-1.5">
               {verdict.community.map((hit, i) => (
                 <li key={i} className="flex items-center justify-between gap-3">
                   <code className="truncate font-mono text-[0.88rem]">{hit.masked}</code>
-                  <span className="shrink-0 rounded-full bg-red-tint px-2.5 py-0.5 text-[0.78rem] font-bold text-red-ink">
+                  <span className="shrink-0 rounded-full bg-red-tint px-2.5 py-0.5 text-[0.78rem] font-bold text-on-error-container">
                     {t.communityCount(hit.report_count)}
                   </span>
                 </li>
@@ -222,7 +222,7 @@ export function VerdictScreen({
           <button
             type="button"
             onClick={onAlreadyPaid}
-            className="min-h-[58px] w-full rounded-2xl bg-action px-5 text-[1.05rem] font-bold text-on-action"
+            className="min-h-[58px] w-full rounded-xl bg-primary px-5 text-[1.05rem] font-bold text-on-primary"
           >
             {t.alreadyPaidButton}
           </button>
@@ -237,7 +237,7 @@ export function VerdictScreen({
               )}
               target="_blank"
               rel="noreferrer"
-              className="flex min-h-[54px] w-full items-center justify-center gap-2 rounded-2xl border-2 border-green-line bg-green-tint px-5 text-[1.02rem] font-bold text-green-ink"
+              className="flex min-h-[54px] w-full items-center justify-center gap-2 rounded-xl bg-clear-container px-5 text-[1.02rem] font-bold text-on-clear-container"
             >
               <WhatsAppIcon className="h-5 w-5" />
               {t.warnFamilyButton}
@@ -247,7 +247,7 @@ export function VerdictScreen({
             type="button"
             onClick={onReport}
             disabled={reported}
-            className="min-h-[54px] w-full rounded-2xl border-2 border-line bg-surface px-5 text-[1.02rem] font-bold text-ink disabled:opacity-60"
+            className="min-h-[54px] w-full rounded-xl bg-surface-container px-5 text-[1.02rem] font-bold text-ink disabled:opacity-60"
           >
             {reported ? t.reportedButton : t.reportButton}
           </button>

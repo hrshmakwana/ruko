@@ -317,7 +317,8 @@ export default function App() {
         appName={t.appName}
         tagline={nav.meansStop}
         languageName={languageInfo(language).endonym}
-        language={language}
+        sectionTitle={nav.check}
+        offlineLabel={t.networkError}
         parentMode={parentMode}
         onParentMode={setParentMode}
         parentLabel={nav.modeParent}

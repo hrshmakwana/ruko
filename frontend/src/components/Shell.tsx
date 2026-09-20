@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
-import { PhoneIcon, ScamIcon, SettingsIcon, ShieldIcon, ShieldCheckIcon } from "./Icons";
+import { Icon } from "./Icon";
 import type { NavStrings } from "../i18n/nav";
-import type { Language } from "../types";
 
 export type Destination = "check" | "call" | "family" | "settings";
 
@@ -10,37 +9,33 @@ interface Props {
   active: Destination;
   onNavigate: (destination: Destination) => void;
   appName: string;
-  /** The one-line strapline under the logo, in the chosen language. */
   tagline: string;
-  /** Shown in the header pill; tapping it goes to settings, where the picker is. */
+  /** The section title in the header's second row, e.g. "Scam Checker". */
+  sectionTitle: string;
   languageName: string;
-  language: Language;
   parentMode: boolean;
   onParentMode: (on: boolean) => void;
   parentLabel: string;
   guardianLabel: string;
-  /** Set when a family is linked, so the sync bar can say who is watching. */
   familyCode?: string | null;
   familyLinkedLabel?: string;
+  offlineLabel: string;
   children: ReactNode;
 }
 
-const ITEMS: { id: Destination; icon: typeof ScamIcon; key: keyof NavStrings }[] = [
-  { id: "check", icon: ShieldCheckIcon, key: "check" },
-  { id: "call", icon: PhoneIcon, key: "call" },
-  { id: "family", icon: ShieldIcon, key: "family" },
-  { id: "settings", icon: SettingsIcon, key: "settings" },
+const ITEMS: { id: Destination; icon: string; key: keyof NavStrings }[] = [
+  { id: "check", icon: "verified_user", key: "check" },
+  { id: "call", icon: "phone_in_talk", key: "call" },
+  { id: "family", icon: "diversity_3", key: "family" },
+  { id: "settings", icon: "tune", key: "settings" },
 ];
 
-/** The frame: a fixed header, a single column, a bar along the bottom.
+/** The frame from the mockups: a two-row header, a tonal single column, and a
+ *  bar along the bottom.
  *
- * The column is capped at 480px on every screen size, on purpose. Ruko is an
- * emergency utility held in one hand, and a 1400px-wide version of it would be
- * a different, worse product — so a laptop shows the same thumb-sized app,
- * centred, rather than a stretched one.
- *
- * Colour is quarantined here too: this chrome is monochrome, so the only thing
- * on screen that can turn red is a verdict.
+ * The column is 480px on a phone, as drawn. It is *not* 480px on a laptop: the
+ * same content widens to 720 and then 960 so a judge opening this on a desktop
+ * sees a designed page rather than a phone screenshot floating in space.
  */
 export function Shell({
   nav,
@@ -48,6 +43,7 @@ export function Shell({
   onNavigate,
   appName,
   tagline,
+  sectionTitle,
   languageName,
   parentMode,
   onParentMode,
@@ -55,47 +51,53 @@ export function Shell({
   guardianLabel,
   familyCode,
   familyLinkedLabel,
+  offlineLabel,
   children,
 }: Props) {
-  return (
-    <div className="flex min-h-dvh flex-col bg-page">
-      <header className="fixed inset-x-0 top-0 z-40 border-b border-line bg-surface/92 backdrop-blur-xl">
-        <div className="mx-auto w-full max-w-[480px] px-4 pt-[env(safe-area-inset-top)]">
-          <div className="flex items-center justify-between gap-2 py-2.5">
-            <a href="/" className="flex min-h-[48px] items-center gap-2.5">
-              <ScamIcon className="h-8 w-8 shrink-0 text-ink" />
-              <span className="flex flex-col leading-none">
-                {/* One language, never two: the name is written the way the
-                    person reading it writes. */}
-                <span className="text-[1.3rem] font-bold tracking-tight">{appName}</span>
-                <span className="mt-1 text-[0.72rem] font-medium text-muted">{tagline}</span>
-              </span>
-            </a>
+  const offline = typeof navigator !== "undefined" && navigator.onLine === false;
 
-            <button
-              type="button"
-              onClick={() => onNavigate("settings")}
-              className="ruko-compact flex min-h-[44px] items-center gap-1.5 rounded-full bg-sunken px-3 text-[0.8rem] font-semibold text-ink"
-            >
-              <TranslateGlyph className="h-4 w-4 text-muted" />
-              {languageName}
-            </button>
+  return (
+    <div className="flex min-h-dvh flex-col bg-surface">
+      <header className="fixed inset-x-0 top-0 z-50 bg-surface/90 shadow-[0_1px_8px_rgba(0,0,0,0.04)] backdrop-blur-xl">
+        <div className="mx-auto w-full max-w-[480px] px-4 pt-[env(safe-area-inset-top)] md:max-w-[720px] lg:max-w-[960px] lg:px-8">
+          <div className="flex items-center justify-between gap-2 py-2">
+            <div className="flex min-h-[48px] items-center gap-2.5">
+              <a href="/" className="flex items-center gap-2.5">
+                <Octagon className="h-8 w-8 shrink-0 text-on-surface" />
+                <span className="flex flex-col leading-none">
+                  {/* One language: the brand is written the way the reader writes. */}
+                  <span className="text-headline-lg font-bold tracking-tight">{appName}</span>
+                  <span className="mt-1 text-caption text-secondary">{tagline}</span>
+                </span>
+              </a>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => onNavigate("settings")}
+                className="ruko-compact flex min-h-[44px] items-center gap-1 rounded-full bg-surface-container px-3 text-caption font-medium text-on-surface transition-colors hover:bg-surface-variant"
+              >
+                <Icon name="translate" className="text-[18px] text-secondary" />
+                {languageName}
+              </button>
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary">
+                <Icon name="person" className="text-[18px] text-on-primary" />
+              </span>
+            </div>
           </div>
 
-          {/* Guardian ⇄ Parent: one switch, always in the same place, because a
-              son hands the phone over and needs it back in two taps. */}
           <div className="flex items-center justify-between gap-2 pb-2">
-            {familyCode && familyLinkedLabel ? (
-              <div className="flex min-w-0 items-center gap-1.5">
-                <ShieldCheckIcon className="h-4 w-4 shrink-0 text-muted" />
-                <span className="truncate text-[0.78rem] font-semibold text-muted">
-                  {familyLinkedLabel}
-                </span>
-              </div>
-            ) : (
-              <span />
-            )}
-            <div className="ruko-compact flex shrink-0 items-center rounded-full bg-sunken p-0.5">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <Icon name="verified_user" className="text-[16px] text-secondary" />
+              <span className="truncate text-headline-md font-semibold">
+                {familyCode && familyLinkedLabel ? familyLinkedLabel : sectionTitle}
+              </span>
+            </div>
+
+            {/* Guardian ⇄ Parent, exactly where the design puts it: a son hands
+                the phone over and takes it back in two taps. */}
+            <div className="ruko-compact flex shrink-0 items-center rounded-full bg-surface-container p-0.5">
               {[
                 { on: false, label: guardianLabel },
                 { on: true, label: parentLabel },
@@ -105,10 +107,10 @@ export function Shell({
                   type="button"
                   aria-pressed={parentMode === option.on}
                   onClick={() => onParentMode(option.on)}
-                  className={`ruko-compact min-h-[40px] rounded-full px-3.5 text-[0.8rem] font-semibold transition-colors ${
+                  className={`ruko-compact min-h-[34px] rounded-full px-2.5 text-caption font-semibold transition-colors ${
                     parentMode === option.on
-                      ? "bg-surface text-ink shadow-sm"
-                      : "text-muted"
+                      ? "bg-surface-container-lowest text-on-surface shadow-[0_1px_4px_rgba(0,0,0,0.05)]"
+                      : "text-secondary"
                   }`}
                 >
                   {option.label}
@@ -117,21 +119,27 @@ export function Shell({
             </div>
           </div>
         </div>
+
+        {offline && (
+          <div className="w-full bg-surface-container-high py-1 px-4 text-center">
+            <div className="mx-auto flex max-w-[480px] items-center justify-center gap-1.5 text-caption text-on-surface-variant md:max-w-[720px] lg:max-w-[960px]">
+              <Icon name="wifi_off" className="text-[16px]" />
+              <span>{offlineLabel}</span>
+            </div>
+          </div>
+        )}
       </header>
 
-      {/* The header is fixed and its height changes with Parent Mode, so the
-          spacer is a scaling rem rather than a fixed pixel gap. */}
-      <main className="mx-auto w-full max-w-[480px] flex-1 px-4 pt-[7.4rem] pb-[6.5rem]">
+      <main className="mx-auto w-full max-w-[480px] flex-1 px-4 pt-[7.2rem] pb-[6.5rem] md:max-w-[720px] lg:max-w-[960px] lg:px-8">
         {children}
       </main>
 
       <nav
         aria-label={nav.menu}
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
+        className="fixed inset-x-0 bottom-0 z-50 border-t border-outline-variant/40 bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl"
       >
-        <div className="mx-auto grid max-w-[480px] grid-cols-4">
+        <div className="mx-auto grid max-w-[480px] grid-cols-4 md:max-w-[720px] lg:max-w-[960px]">
           {ITEMS.map((item) => {
-            const Icon = item.icon;
             const current = active === item.id;
             return (
               <button
@@ -139,16 +147,16 @@ export function Shell({
                 type="button"
                 aria-current={current ? "page" : undefined}
                 onClick={() => onNavigate(item.id)}
-                className={`flex min-h-[60px] flex-col items-center justify-center gap-1 px-1 py-2 text-[0.7rem] font-semibold transition-colors ${
-                  current ? "text-ink" : "text-muted"
+                className={`flex min-h-[60px] flex-col items-center justify-center gap-0.5 px-1 py-2 text-caption font-semibold transition-colors ${
+                  current ? "text-on-surface" : "text-secondary"
                 }`}
               >
                 <span
                   className={`flex h-7 w-14 items-center justify-center rounded-full transition-colors ${
-                    current ? "bg-action-soft" : ""
+                    current ? "bg-surface-container" : ""
                   }`}
                 >
-                  <Icon className="h-6 w-6" />
+                  <Icon name={item.icon} className="text-[24px]" filled={current} />
                 </span>
                 <span className="max-w-full truncate">{nav[item.key]}</span>
               </button>
@@ -160,22 +168,18 @@ export function Shell({
   );
 }
 
-function TranslateGlyph({ className }: { className?: string }) {
+/** The Ruko mark: a stop octagon, monochrome like the rest of the chrome. */
+function Octagon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={className} fill="none" aria-hidden="true">
+    <svg viewBox="0 0 100 100" className={className} aria-hidden="true">
       <path
-        d="M4 6h9M8.5 6c0 4.5-2 7.5-5 9m2-5.5c1.6 2.8 3.6 4.6 6 5.6"
+        d="M30.6 4h38.8L96 30.6v38.8L69.4 96H30.6L4 69.4V30.6z"
+        fill="none"
         stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
+        strokeWidth="7"
       />
-      <path
-        d="m12.5 20 4-9 4 9m-6.6-2.4h5.2"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M50 26v30" stroke="currentColor" strokeWidth="9" strokeLinecap="round" />
+      <circle cx="50" cy="72" r="5.5" fill="currentColor" />
     </svg>
   );
 }

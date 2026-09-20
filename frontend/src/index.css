@@ -1,161 +1,204 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------------------------
-   Civic Trust & Vigilance — Ruko's design system.
+   Civic Trust & Vigilance — the design system, as given.
 
-   One rule holds the whole thing together: **colour is quarantined**. The app
-   chrome, navigation, cards and buttons are monochrome. Red, amber and green
-   appear nowhere except a verdict, so when something turns red it means one
-   thing and the person does not have to learn what.
+   The token names below are the ones the design ships with (surface-container,
+   on-surface-variant, error-container …) so the mockups' markup can be carried
+   over as written instead of translated into a second vocabulary that drifts.
 
-   Two accessibility commitments are built into the tokens rather than bolted on:
-   every text pair clears 7:1, and Parent Mode scales the whole type system by
-   1.4 for someone who is sixty and holding the phone at arm's length.
+   The rule that holds it together: **colour is quarantined.** Chrome, cards,
+   navigation and buttons are monochrome and tonal; red, amber and green appear
+   only on a verdict.
 --------------------------------------------------------------------------- */
 :root {
-  /* --- surfaces: a faint civic blue, never pure grey --- */
-  --page: #f8f9ff;
-  --surface: #ffffff;
-  --sunken: #eff4ff;
-  --raised: #e7eefc;
-  --line: #d3dae8;
-  --line-strong: #c6c6cb;
+  --surface: #f8f9ff;
+  --surface-dim: #d3dae8;
+  --surface-bright: #f8f9ff;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #eff4ff;
+  --surface-container: #e7eefc;
+  --surface-container-high: #e2e8f7;
+  --surface-container-highest: #dce3f1;
+  --surface-variant: #dce3f1;
 
-  --ink: #151c26;
-  --muted: #565d6a;
-  --paper: #ffffff;
+  --on-surface: #151c26;
+  --on-surface-variant: #45474b;
+  --secondary: #585f6c;
+  --secondary-container: #d9e0ef;
+  --on-secondary-container: #5c6370;
+  --outline: #76777b;
+  --outline-variant: #c6c6cb;
 
-  /* --- the verdict palette. Nothing else may use these. --- */
-  --red: #c42b1c;
-  --red-panel: #c42b1c;
-  --red-ink: #93000a;
-  --red-tint: #fdf2f1;
-  --red-line: #f5c2be;
+  --primary: #000000;
+  --on-primary: #ffffff;
+  --inverse-surface: #2a313b;
+  --inverse-on-surface: #eaf1ff;
 
-  --amber: #b26a00;
-  --amber-ink: #7d4a00;
-  --amber-tint: #fef8ec;
-  --amber-line: #fce0ae;
+  /* Verdict only. Nothing else in the interface may use these. */
+  --error: #ba1a1a;
+  --on-error: #ffffff;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
 
-  --green: #1b7f4b;
-  --green-ink: #12653a;
-  --green-tint: #f0faf4;
-  --green-line: #b5e8cb;
+  --warn: #b26a00;
+  --warn-container: #fef0d4;
+  --on-warn-container: #6b3f00;
 
-  /* --- actions are ink, never colour --- */
-  --action: #14161a;
-  --on-action: #ffffff;
-  --action-soft: #e2e8f7;
+  --clear: #1b7f4b;
+  --clear-container: #d7f2e3;
+  --on-clear-container: #0d5030;
 
-  --signal-housing: #151c26;
-  --focus: #14161a;
-
-  /* Parent Mode multiplies this. Every size below is expressed in rem so one
-     variable moves the entire interface, including the parts written later. */
+  /* Parent Mode multiplies this; every size is in rem so the whole interface
+     scales together instead of one heading bursting out of its card. */
   --scale: 1;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --page: #0e1013;
-    --surface: #191c21;
-    --sunken: #14171b;
-    --raised: #21252c;
-    --line: #272c35;
-    --line-strong: #39404b;
+    --surface: #0e1013;
+    --surface-dim: #0a0c0f;
+    --surface-bright: #22262d;
+    --surface-container-lowest: #191c21;
+    --surface-container-low: #14171b;
+    --surface-container: #1d2128;
+    --surface-container-high: #252a32;
+    --surface-container-highest: #2d333c;
+    --surface-variant: #2d333c;
 
-    --ink: #f2f3f5;
-    --muted: #a6adb9;
-    --paper: #191c21;
+    --on-surface: #f2f3f5;
+    --on-surface-variant: #c3c7cf;
+    --secondary: #a6adb9;
+    --secondary-container: #333a45;
+    --on-secondary-container: #c9d0dd;
+    --outline: #8a9099;
+    --outline-variant: #3a4049;
 
-    --red: #ff6b5a;
-    --red-panel: #a32116;
-    --red-ink: #ffa094;
-    --red-tint: #2a1412;
-    --red-line: #5d221d;
+    --primary: #f2f3f5;
+    --on-primary: #0e1013;
+    --inverse-surface: #e6e9ef;
+    --inverse-on-surface: #151c26;
 
-    --amber: #ffb454;
-    --amber-ink: #ffc87a;
-    --amber-tint: #281c08;
-    --amber-line: #5c3e08;
+    --error: #d93a2b;
+    --on-error: #ffffff;
+    --error-container: #4a1512;
+    --on-error-container: #ffb4a8;
 
-    --green: #4ade80;
-    --green-ink: #86efac;
-    --green-tint: #0e2318;
-    --green-line: #1d5537;
+    --warn: #ffb454;
+    --warn-container: #3a2708;
+    --on-warn-container: #ffcd80;
 
-    --action: #f2f3f5;
-    --on-action: #0e1013;
-    --action-soft: #272c35;
-
-    --signal-housing: #0a0c0f;
-    --focus: #f2f3f5;
+    --clear: #4ade80;
+    --clear-container: #0e2318;
+    --on-clear-container: #86efac;
   }
 }
 
 @theme inline {
-  --color-page: var(--page);
   --color-surface: var(--surface);
-  --color-sunken: var(--sunken);
-  --color-raised: var(--raised);
-  --color-line: var(--line);
-  --color-line-strong: var(--line-strong);
-  --color-ink: var(--ink);
-  --color-muted: var(--muted);
-  --color-paper: var(--paper);
+  --color-surface-dim: var(--surface-dim);
+  --color-surface-bright: var(--surface-bright);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-surface-variant: var(--surface-variant);
 
-  --color-red: var(--red);
-  --color-red-panel: var(--red-panel);
-  --color-red-ink: var(--red-ink);
-  --color-red-tint: var(--red-tint);
-  --color-red-line: var(--red-line);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-secondary: var(--secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-on-secondary-container: var(--on-secondary-container);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
 
-  --color-amber: var(--amber);
-  --color-amber-ink: var(--amber-ink);
-  --color-amber-tint: var(--amber-tint);
-  --color-amber-line: var(--amber-line);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-inverse-surface: var(--inverse-surface);
+  --color-inverse-on-surface: var(--inverse-on-surface);
 
-  --color-green: var(--green);
-  --color-green-ink: var(--green-ink);
-  --color-green-tint: var(--green-tint);
-  --color-green-line: var(--green-line);
+  --color-error: var(--error);
+  --color-on-error: var(--on-error);
+  --color-error-container: var(--error-container);
+  --color-on-error-container: var(--on-error-container);
 
-  --color-action: var(--action);
-  --color-on-action: var(--on-action);
-  --color-action-soft: var(--action-soft);
-  --color-housing: var(--signal-housing);
+  --color-warn: var(--warn);
+  --color-warn-container: var(--warn-container);
+  --color-on-warn-container: var(--on-warn-container);
 
-  /* Inter for Latin; the script font for the chosen language is added to the
-     front of this list at runtime, so Tamil or Gujarati never falls back to a
-     system font that renders its matras badly. */
+  --color-clear: var(--clear);
+  --color-clear-container: var(--clear-container);
+  --color-on-clear-container: var(--on-clear-container);
+
+  /* --- the names the rest of the app already speaks, mapped onto the system,
+         so every older screen inherits the palette without being rewritten --- */
+  --color-page: var(--surface);
+  --color-paper: var(--surface-container-lowest);
+  --color-sunken: var(--surface-container-low);
+  --color-raised: var(--surface-container);
+  --color-line: var(--outline-variant);
+  --color-line-strong: var(--outline);
+  --color-ink: var(--on-surface);
+  --color-muted: var(--secondary);
+  --color-action: var(--primary);
+  --color-on-action: var(--on-primary);
+  --color-action-soft: var(--surface-container-high);
+  --color-housing: var(--inverse-surface);
+
+  --color-red: var(--error);
+  --color-red-panel: var(--error);
+  --color-red-ink: var(--on-error-container);
+  --color-red-tint: var(--error-container);
+  --color-red-line: var(--error);
+  --color-amber: var(--warn);
+  --color-amber-ink: var(--on-warn-container);
+  --color-amber-tint: var(--warn-container);
+  --color-amber-line: var(--warn);
+  --color-green: var(--clear);
+  --color-green-ink: var(--on-clear-container);
+  --color-green-tint: var(--clear-container);
+  --color-green-line: var(--clear);
+
+  /* Inter for Latin; the script font for the chosen language is put in front of
+     it at runtime, so Tamil or Gujarati is never left to a system fallback. */
   --font-sans:
     var(--script-font, "Inter"), "Inter", ui-sans-serif, system-ui,
     -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Shapes, from the design system: cards 12, controls 14, pills round. */
-  --radius-card: 12px;
-  --radius-control: 14px;
+  /* The design's type scale, in rem so Parent Mode moves all of it. */
+  --text-display: 1.9rem;
+  --text-display--line-height: 1.5;
+  --text-headline-lg: 1.53rem;
+  --text-headline-lg--line-height: 1.55;
+  --text-headline-md: 1.18rem;
+  --text-headline-md--line-height: 1.6;
+  --text-body-lg: 1rem;
+  --text-body-lg--line-height: 1.65;
+  --text-body-md: 0.88rem;
+  --text-body-md--line-height: 1.6;
+  --text-caption: 0.76rem;
+  --text-caption--line-height: 1.55;
+
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
 }
 
 html {
-  /* 17px base so an untouched body line is the design's body-lg. Parent Mode
-     multiplies it, and because the app sizes in rem, everything moves together
-     instead of one heading growing out of its card. */
   font-size: calc(17px * var(--scale));
   -webkit-text-size-adjust: 100%;
   color-scheme: light dark;
 }
 
-/* Indic matras clip at Western line heights, so nothing here goes below 1.5. */
 body {
   margin: 0;
   overflow-x: clip;
-  background: var(--page);
-  color: var(--ink);
+  background: var(--surface);
+  color: var(--on-surface);
   font-family: var(--font-sans);
   font-optical-sizing: auto;
-  font-synthesis-weight: none;
+  /* Indic matras clip at Western line heights; nothing here goes under 1.5. */
   line-height: 1.6;
   min-height: 100dvh;
 }
@@ -168,17 +211,35 @@ h3 {
 }
 
 :where(a, button, input, textarea, select, [tabindex]):focus-visible {
-  /* Never a coloured focus ring: colour means verdict here. */
-  outline: 2px solid var(--focus);
+  /* Never a coloured focus ring: colour is reserved for verdicts. */
+  outline: 2px solid var(--on-surface);
   outline-offset: 2px;
   border-radius: 6px;
 }
 
+/* Material Symbols, the icon set the design is drawn with. */
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  direction: ltr;
+  font-variation-settings:
+    "FILL" 0,
+    "wght" 400,
+    "GRAD" 0,
+    "opsz" 24;
+}
+
 /* --- Parent Mode ----------------------------------------------------------
-   Not system magnification: a deliberate second scale, with bigger hit targets
-   to match. Someone hands their parent the phone and this is what they see. */
+   A second, deliberate scale rather than system magnification: 1.4x type and
+   64px hit targets, as the design specifies. */
 :root[data-parent="on"] {
-  --scale: 1.35;
+  --scale: 1.4;
 }
 
 :root[data-parent="on"] button,
@@ -188,20 +249,17 @@ h3 {
 }
 
 :root[data-parent="on"] .ruko-compact {
-  /* Chrome that must not grow: the language pill, the mode switch. */
-  min-height: 48px;
+  min-height: 44px;
 }
 
-/* --- the Ruko moment -------------------------------------------------------
-   On a scam verdict the billboard lands hard and everything else waits, then
-   slides up underneath it. The product does what its name says. */
+/* --- motion ---------------------------------------------------------------- */
 @keyframes ruko-slam {
   0% {
-    transform: scale(1.18);
+    transform: scale(1.12);
     opacity: 0;
   }
-  55% {
-    transform: scale(0.97);
+  60% {
+    transform: scale(0.98);
     opacity: 1;
   }
   100% {
@@ -227,7 +285,7 @@ h3 {
     opacity: 1;
   }
   50% {
-    opacity: 0.35;
+    opacity: 0.3;
   }
 }
 
@@ -241,32 +299,20 @@ h3 {
 }
 
 .ruko-lamp-live {
-  animation: ruko-lamp 1.8s ease-in-out infinite;
+  animation: ruko-lamp 1.6s ease-in-out infinite;
 }
 
-/* Scam evidence inside a quoted message: a marker line, not a colour block, so
-   it survives colour-blindness and print. */
+/* Evidence inside a quoted message: the design marks it as a tappable chip in
+   the error container colour, underlined so colour is never the only signal. */
 .ruko-mark {
-  background: var(--red-tint);
-  box-shadow: inset 0 -0.14em 0 var(--red-line);
-  border-radius: 3px;
-  padding: 0 0.12em;
+  background: var(--error-container);
+  color: var(--on-error-container);
   font-weight: 600;
+  padding: 0.05em 0.35em;
+  border-radius: 4px;
   text-decoration: underline;
-  text-decoration-style: wavy;
-  text-decoration-color: var(--red);
+  text-decoration-style: dotted;
   text-underline-offset: 3px;
-}
-
-/* One grounding shadow, permitted only on the verdict billboard. */
-.ruko-billboard {
-  box-shadow: 0 4px 12px rgb(20 22 26 / 0.06);
-}
-
-@media (prefers-color-scheme: dark) {
-  .ruko-billboard {
-    box-shadow: 0 4px 16px rgb(0 0 0 / 0.4);
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
