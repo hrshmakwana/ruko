@@ -16,7 +16,7 @@
  * promise the rest of Ruko makes.
  */
 
-const VERSION = "ruko-v3";
+const VERSION = "ruko-v4";
 const SHELL = `${VERSION}-shell`;
 const SHARE = "ruko-share";
 
@@ -32,6 +32,9 @@ self.addEventListener("install", (event) => {
   );
 });
 
+// A new worker takes over the moment it is ready, and every open tab is told
+// to reload. Without this, a phone that opened Ruko once keeps running the old
+// app after a deploy — which looks exactly like a feature that was never built.
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
@@ -39,7 +42,11 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(keys.filter((key) => key.startsWith("ruko-v") && key !== SHELL).map((key) => caches.delete(key))),
       )
-      .then(() => self.clients.claim()),
+      .then(() => self.clients.claim())
+      .then(async () => {
+        const clients = await self.clients.matchAll({ type: "window" });
+        for (const client of clients) client.postMessage({ type: "ruko-updated" });
+      }),
   );
 });
 

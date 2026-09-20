@@ -11,9 +11,31 @@ const SHARE_CACHE = "ruko-share";
 
 export function registerServiceWorker(): void {
   if (!("serviceWorker" in navigator)) return;
+
+  // A worker that shipped last week must not keep serving last week's app. When
+  // a new one takes over it says so, and the page reloads once onto the new
+  // build. This is the difference between "deployed" and "the user has it".
+  let reloading = false;
+  navigator.serviceWorker.addEventListener("message", (event) => {
+    if ((event.data as { type?: string })?.type === "ruko-updated" && !reloading) {
+      reloading = true;
+      window.location.reload();
+    }
+  });
+
   // Registration failing is not worth a message: the app works without it.
   window.addEventListener("load", () => {
-    void navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => undefined);
+    void navigator.serviceWorker
+      .register("/sw.js", { scope: "/" })
+      .then((registration) => {
+        // Check for a new version every time the app is opened, and whenever it
+        // comes back to the foreground.
+        void registration.update();
+        document.addEventListener("visibilitychange", () => {
+          if (document.visibilityState === "visible") void registration.update();
+        });
+      })
+      .catch(() => undefined);
   });
 }
 
