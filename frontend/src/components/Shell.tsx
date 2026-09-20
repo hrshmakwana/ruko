@@ -126,9 +126,10 @@ export function Shell({
               </span>
             </div>
 
-            {/* Guardian ⇄ Parent, exactly where the design puts it: a son hands
-                the phone over and takes it back in two taps. */}
-            <div className="ruko-compact flex shrink-0 items-center rounded-full bg-surface-container p-0.5">
+            {/* Text size, not identity. Who you are was asked once, at the
+                door; this only makes the words bigger. */}
+            <div className="ruko-compact flex shrink-0 items-center gap-1 rounded-full bg-surface-container p-0.5 ps-2">
+              <Icon name="format_size" className="text-[16px] text-secondary" />
               {[
                 { on: false, label: guardianLabel },
                 { on: true, label: parentLabel },

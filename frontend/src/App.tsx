@@ -8,6 +8,7 @@ import { ListenScreen } from "./components/ListenScreen";
 import { Loading } from "./components/Loading";
 import { LookupPanel } from "./components/LookupPanel";
 import { PanicButton } from "./components/PanicButton";
+import { RoleGate } from "./components/RoleGate";
 import { ScanHub, type HubTarget } from "./components/ScanHub";
 import { SettingsScreen } from "./components/SettingsScreen";
 import { Shell, type Destination } from "./components/Shell";
@@ -25,6 +26,7 @@ import { loadFamilyCode } from "./lib/guardian";
 import { takeSharedPayload, type SharedPayload } from "./lib/install";
 import { applyParentMode, loadParentMode } from "./lib/parentMode";
 import { rememberCheck } from "./lib/recent";
+import { loadRole, saveRole, type Role } from "./lib/role";
 import { useDirective } from "./lib/useDirective";
 import type { PreparedImage } from "./lib/image";
 import type { Language, Verdict } from "./types";
@@ -64,6 +66,7 @@ export default function App() {
   const [sharedApk, setSharedApk] = useState<File | null>(null);
   const [prefill, setPrefill] = useState<string | null>(null);
   const [mic, setMic] = useState<"unknown" | "granted" | "denied">("unknown");
+  const [role, setRole] = useState<Role | null>(loadRole);
 
   const t = dictionaries[language];
   const f = familyFor(language);
@@ -181,6 +184,12 @@ export default function App() {
     }
   }
 
+  function chooseRole(next: Role) {
+    saveRole(next);
+    setRole(next);
+    if (next === "guardian") window.location.href = "/guardian";
+  }
+
   function content() {
     if (busy) return <Loading t={t} />;
 
@@ -256,6 +265,10 @@ export default function App() {
           onParentMode={setParentMode}
           micState={mic}
           onAskMic={() => void askForMic()}
+          onSwitchRole={() => {
+            saveRole(null);
+            setRole(null);
+          }}
         />
       );
     }
@@ -303,6 +316,15 @@ export default function App() {
           />
         );
     }
+  }
+
+  // Asked once, before anything else: the two people need opposite screens, and
+  // showing both sets of controls to both of them is how the app became
+  // unreadable in the first place.
+  if (!role) {
+    return (
+      <RoleGate t={t} f={f} language={language} onLanguage={changeLanguage} onChoose={chooseRole} />
+    );
   }
 
   return (

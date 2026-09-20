@@ -61,45 +61,29 @@ export function FamilyScreen({ f, install, code, onChange, language }: Props) {
   return (
     <div className="space-y-5">
       <header className="space-y-1.5">
-        <h1 className="text-[1.6rem] leading-tight font-extrabold tracking-tight">
+        <h1 className="text-headline-lg font-bold tracking-tight">
           {f.familyTitle}
         </h1>
-        <p className="text-[0.98rem] text-muted">{f.familyIntro}</p>
+        <p className="text-body-md text-secondary">{f.familyIntro}</p>
       </header>
 
-      <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
-        {/* ---------------------------------------- the person being protected --- */}
-        <section className="rounded-3xl border-2 border-action-soft bg-surface p-5">
-          <ShieldIcon className="h-8 w-8 text-green" />
-          <h2 className="mt-2.5 text-[1.15rem] font-extrabold">{f.roleProtectedTitle}</h2>
-          <p className="mt-1 text-[0.93rem] leading-relaxed text-muted">{f.roleProtectedBody}</p>
-          <div className="mt-4">
-            <FamilyPanel f={f} code={code} onChange={onChange} startOpen />
+      <section className="rounded-xl bg-surface-container-low p-5 shadow-sm">
+        <ShieldIcon className="h-8 w-8 text-clear" />
+        <h2 className="mt-2.5 text-headline-md font-semibold">{f.roleProtectedTitle}</h2>
+        <p className="mt-1 text-body-md text-secondary">{f.roleProtectedBody}</p>
+        <div className="mt-4">
+          <FamilyPanel f={f} code={code} onChange={onChange} startOpen />
+        </div>
+        {code && (
+          <div className="mt-3">
+            <PanicButton f={f} code={code} language={language} />
           </div>
-          {code && (
-            <div className="mt-3">
-              <PanicButton f={f} code={code} language={language} />
-            </div>
-          )}
-        </section>
-
-        {/* ------------------------------------------ the person who is told --- */}
-        <section className="rounded-3xl border border-line bg-surface p-5">
-          <OkIcon className="h-8 w-8 text-action" />
-          <h2 className="mt-2.5 text-[1.15rem] font-extrabold">{f.roleGuardianTitle}</h2>
-          <p className="mt-1 text-[0.93rem] leading-relaxed text-muted">{f.roleGuardianBody}</p>
-          <a
-            href="/guardian"
-            className="mt-4 flex min-h-[54px] w-full items-center justify-center rounded-2xl bg-action px-5 text-[1.02rem] font-extrabold text-on-action"
-          >
-            {f.createCode}
-          </a>
-        </section>
-      </div>
+        )}
+      </section>
 
       {/* ------------------------------------------------------ permissions --- */}
-      <section className="rounded-3xl border border-line bg-surface p-5">
-        <h2 className="text-[1.05rem] font-extrabold">{f.permsTitle}</h2>
+      <section className="rounded-xl bg-surface-container-low p-5 shadow-sm">
+        <h2 className="text-headline-md font-semibold">{f.permsTitle}</h2>
 
         <div className="mt-3 flex items-start gap-3">
           <PhoneIcon className="mt-0.5 h-6 w-6 shrink-0 text-muted" />
@@ -119,7 +103,7 @@ export function FamilyScreen({ f, install, code, onChange, language }: Props) {
                 type="button"
                 onClick={() => void askForMic()}
                 disabled={asking}
-                className="mt-3 min-h-[48px] rounded-xl border-2 border-line px-4 text-[0.95rem] font-bold disabled:opacity-60"
+                className="mt-3 min-h-[48px] rounded-xl bg-primary px-4 text-body-md font-semibold text-on-primary disabled:opacity-60"
               >
                 {f.allowMic}
               </button>

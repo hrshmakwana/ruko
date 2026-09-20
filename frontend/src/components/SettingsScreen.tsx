@@ -19,6 +19,8 @@ interface Props {
   onParentMode: (on: boolean) => void;
   micState: "unknown" | "granted" | "denied";
   onAskMic: () => void;
+  /** Back to the first question: this phone is now someone else's. */
+  onSwitchRole: () => void;
 }
 
 /** Everything that is a choice rather than a check.
@@ -39,6 +41,7 @@ export function SettingsScreen({
   onParentMode,
   micState,
   onAskMic,
+  onSwitchRole,
 }: Props) {
   const hasHistory = recentChecks().length > 0;
 
@@ -49,8 +52,8 @@ export function SettingsScreen({
       </header>
 
       {/* --------------------------------------------------- language --- */}
-      <section className="rounded-[12px] border border-line bg-surface p-4">
-        <h2 className="text-[1rem] font-semibold">{t.languageLabel}</h2>
+      <section className="rounded-xl bg-surface-container-low p-4 shadow-sm">
+        <h2 className="text-headline-md font-semibold">{t.languageLabel}</h2>
         <p className="mt-0.5 text-[0.85rem] text-muted">{nav.meansStop}</p>
         <div className="mt-3">
           <LanguageSelect value={language} onChange={onLanguage} label={t.languageLabel} />
@@ -58,10 +61,10 @@ export function SettingsScreen({
       </section>
 
       {/* ------------------------------------------------ parent mode --- */}
-      <section className="rounded-[12px] border border-line bg-surface p-4">
-        <h2 className="text-[1rem] font-semibold">{nav.modeParent}</h2>
+      <section className="rounded-xl bg-surface-container-low p-4 shadow-sm">
+        <h2 className="text-headline-md font-semibold">{nav.modeParent}</h2>
         <p className="mt-0.5 text-[0.85rem] text-muted">{f.roleProtectedBody}</p>
-        <div className="mt-3 flex items-center rounded-full bg-sunken p-1">
+        <div className="mt-3 flex items-center rounded-full bg-surface-container p-1">
           {[
             { on: false, label: nav.modeGuardian },
             { on: true, label: nav.modeParent },
@@ -72,7 +75,7 @@ export function SettingsScreen({
               aria-pressed={parentMode === option.on}
               onClick={() => onParentMode(option.on)}
               className={`min-h-[48px] flex-1 rounded-full px-3 text-[0.95rem] font-semibold transition-colors ${
-                parentMode === option.on ? "bg-surface text-ink shadow-sm" : "text-muted"
+                parentMode === option.on ? "bg-surface-container-lowest text-on-surface shadow-sm" : "text-secondary"
               }`}
             >
               {option.label}
@@ -82,8 +85,8 @@ export function SettingsScreen({
       </section>
 
       {/* ------------------------------------------------ permissions --- */}
-      <section className="rounded-[12px] border border-line bg-surface p-4">
-        <h2 className="text-[1rem] font-semibold">{f.permsTitle}</h2>
+      <section className="rounded-xl bg-surface-container-low p-4 shadow-sm">
+        <h2 className="text-headline-md font-semibold">{f.permsTitle}</h2>
         <div className="mt-3 flex items-start gap-3">
           <PhoneIcon className="mt-0.5 h-6 w-6 shrink-0 text-muted" />
           <div className="min-w-0 flex-1">
@@ -100,7 +103,7 @@ export function SettingsScreen({
               <button
                 type="button"
                 onClick={onAskMic}
-                className="mt-3 min-h-[48px] rounded-[14px] border-[1.5px] border-ink px-4 text-[0.95rem] font-semibold"
+                className="mt-3 min-h-[48px] rounded-xl bg-primary px-4 text-body-md font-semibold text-on-primary"
               >
                 {f.allowMic}
               </button>
@@ -112,7 +115,16 @@ export function SettingsScreen({
       <InstallCard s={install} />
 
       {/* --------------------------------------------------- the rest --- */}
-      <section className="overflow-hidden rounded-[12px] border border-line bg-surface">
+      <section className="overflow-hidden rounded-xl bg-surface-container-low shadow-sm">
+        <button
+          type="button"
+          onClick={onSwitchRole}
+          className="flex min-h-[56px] w-full items-center gap-3 border-b border-outline-variant/30 px-4 py-3 text-left"
+        >
+          <ShieldCheckIcon className="h-5 w-5 shrink-0 text-muted" />
+          <span className="min-w-0 flex-1 text-[0.98rem] font-semibold">{f.familyTitle}</span>
+          <ChevronRightIcon className="h-5 w-5 shrink-0 text-muted" />
+        </button>
         <a
           href="/guardian"
           className="flex min-h-[56px] items-center gap-3 px-4 py-3 text-left"
