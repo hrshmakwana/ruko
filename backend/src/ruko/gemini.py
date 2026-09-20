@@ -23,6 +23,7 @@ from __future__ import annotations
 import base64
 import json
 import os
+import time
 import urllib.error
 import urllib.request
 from typing import Any
@@ -41,6 +42,7 @@ _TIMEOUT_SECONDS = 20
 # the model was unreachable.
 _MAX_TOKENS = 4000
 _TEMPERATURE = 0.2
+RETRY_PAUSE_SECONDS = 1.2
 
 # Scam messages are full of threats, blackmail and police impersonation. That is
 # the material, not the intent, so the safety filters are set to block only the
@@ -106,8 +108,20 @@ def _request_body(text: str, language: str, image_bytes: bytes | None, image_for
     }
 
 
-def _post(body: dict) -> dict:
-    model = os.environ.get("GEMINI_MODEL_ID", "gemini-3.6-flash")
+def models() -> list[str]:
+    """The model to use, then the one to try when it is busy.
+
+    The free tier answers 503 when the good model is loaded and 429 when the
+    minute's quota is gone. Both are temporary and neither is helped by asking
+    the same model again a hundred milliseconds later — so the second attempt
+    goes to a lighter model, which has its own quota and answers faster.
+    """
+    first = os.environ.get("GEMINI_MODEL_ID", "gemini-3.6-flash")
+    second = os.environ.get("GEMINI_FALLBACK_MODEL_ID", "gemini-3.1-flash-lite")
+    return [first] + ([second] if second and second != first else [])
+
+
+def _post(body: dict, model: str) -> dict:
     request = urllib.request.Request(
         _ENDPOINT.format(model=model),
         data=json.dumps(body).encode("utf-8"),
@@ -123,7 +137,7 @@ def _post(body: dict) -> dict:
             return json.loads(handle.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
         # The body can quote the request back, so only the status is kept.
-        raise GeminiError(f"http {exc.code}") from None
+        raise GeminiError(f"http {exc.code}") from None  # noqa: TRY200
     except Exception as exc:  # noqa: BLE001
         raise GeminiError(type(exc).__name__) from None
 
@@ -161,7 +175,24 @@ def analyse(
 ) -> tuple[dict, dict[str, Any]]:
     """Return (raw payload, usage). Raises GeminiError if nothing usable came back."""
     body = _request_body(text, language, image_bytes, image_format)
-    response = _post(body)
+
+    response: dict | None = None
+    last: GeminiError | None = None
+    for attempt, model in enumerate(models()):
+        if attempt:
+            # A breath before the second try. Both 503 and 429 clear in about a
+            # second, and hammering them is what turns a slow answer into none.
+            time.sleep(RETRY_PAUSE_SECONDS)
+        try:
+            response = _post(body, model)
+            break
+        except GeminiError as exc:
+            LOG.warning("gemini_model_failed model=%s detail=%s", model, exc)
+            last = exc
+
+    if response is None:
+        raise last or GeminiError("no response")
+
     payload = _payload_from(response)
     if payload is None:
         raise GeminiError("no usable candidate")

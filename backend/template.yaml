@@ -45,6 +45,14 @@ Parameters:
     Default: gemini-3.6-flash
     Description: Model name used when ModelProvider is gemini.
 
+  GeminiFallbackModelId:
+    Type: String
+    Default: gemini-3.1-flash-lite
+    Description: >
+      Tried when the main model answers 503 (busy) or 429 (free-tier quota).
+      A lighter model with its own quota keeps the verdict explained instead of
+      falling back to rules-only at the worst moment.
+
   GeminiKeyParam:
     Type: String
     Default: /ruko/prod/gemini-api-key
@@ -78,6 +86,7 @@ Globals:
         BEDROCK_MODEL_ID: !Ref BedrockModelId
         MODEL_PROVIDER: !Ref ModelProvider
         GEMINI_MODEL_ID: !Ref GeminiModelId
+        GEMINI_FALLBACK_MODEL_ID: !Ref GeminiFallbackModelId
         GEMINI_KEY_PARAM: !Ref GeminiKeyParam
         ALERT_TOPIC_ARN: !Ref AlertTopic
         APP_URL: !Ref AppUrl

@@ -390,3 +390,39 @@ cannot do it, and a native app doing it would make Ruko into the exact thing it 
 `phrase.remote_access` exists in the rules engine because AnyDesk-style control is how these scams
 are run. Ruko can tell the family, push a message onto the screen and sound an alarm. It cannot take
 someone's phone, and it should not be able to.
+
+## Day 4 — the design system, and a free tier that says no
+
+**The redesign landed.** Harsh sent a design system ("Civic Trust & Vigilance") as HTML mockups, and
+its central rule is now enforced in code: **colour is quarantined**. Chrome, cards, navigation and
+buttons are monochrome; red, amber and green appear only on a verdict. That is why a red banner in
+Ruko means exactly one thing.
+
+What the rebuild changed, beyond paint:
+
+- A **scan hub**: five ways in, all visible without scrolling. Before, call mode, the app checker and
+  lookup were buried under a paste box, so most of the product was invisible.
+- **Four tabs and a settings screen.** The language picker, Parent Mode and the microphone permission
+  had no address before; "where do I change this?" had no answer.
+- **Parent Mode**: one CSS variable scales the entire interface 1.35x, hit targets included, because
+  every size is in rem. Not browser zoom, which reflows a layout into something broken.
+- **One language, everywhere.** The mockups show the brand bilingually; the app shows whichever
+  language the person chose, and only the script font for that language is downloaded — fifteen Noto
+  families up front would be megabytes on the phones this is built for.
+
+**Two failures worth writing down:**
+
+1. *A live call is analysed every second, and every pass wrote a new alert.* One call would have put
+   thirty identical alarms on the guardian's phone — an alarm that fires thirty times is one nobody
+   looks at again. Alerts of the same kind now collapse inside a two-minute window.
+2. *The free tier says 503 when the model is busy and 429 when the minute's quota is gone*, and the
+   retry fired a hundred milliseconds later, which is exactly when it cannot help. Now there is a
+   pause and a **second, lighter model with its own quota**. Three checks in a row came back with the
+   full AI explanation instead of "partial check".
+
+**Security review** (asked for, done before the push): no HTML injection sinks — the evidence
+highlighter works on indices, not markup; no secrets in the repo or its history; PBKDF2 at 210k
+rounds with constant-time comparison; signed, expiring tokens; private encrypted uploads bucket with
+a one-day lifecycle and presigned PUTs limited to JPEG/PNG under 5 MB; the API throttled; IAM scoped
+per function; no handler logs message text. One limitation stands and belongs in the README: a family
+code is a six-character secret with no second factor, so whoever knows it can link to that family.

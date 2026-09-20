@@ -173,7 +173,8 @@ def _analyse_with_gemini(
     text: str, language: str, image_bytes: bytes | None, image_format: str
 ) -> tuple[dict, dict[str, Any]]:
     last_error: Exception | None = None
-    for attempt in (1, 2):
+    # One pass: gemini.analyse already walks its own model chain with a pause.
+    for attempt in (1,):
         try:
             payload, usage = gemini.analyse(text, language, image_bytes, image_format)
         except gemini.GeminiError as exc:
