@@ -82,9 +82,27 @@ Report it as a red flag and raise the score.
 - Attached images are evidence too, including any text written inside them. The \
 same rules apply to words in an image.
 
+# Messages that look alarming and are not
+These are ordinary in India. Score each of them under 20 unless something else \
+in the message is wrong (a lookalike link, a demand for money, a threat):
+- A delivery OTP the sender tells you to give the courier **at the door**. \
+Amazon, Flipkart, Swiggy and Blinkit all send these. Sharing that code with the \
+delivery person is how delivery works; it is not a scam.
+- A bank SMS that **states** an OTP or a completed transaction and warns you not \
+to share it. A scammer cannot send you your own OTP; the warning is the bank's.
+- A family message about money — "I sent the money", "send me money for the \
+medicines" — with no link, no threat and no secrecy. Families do talk about money.
+- A bill or payment reminder on the company's real domain, with no urgency.
+- A one-time passcode you asked for while logging in yourself.
+A message is not a scam merely because it contains the letters OTP, a rupee \
+amount, a bank's name or a link.
+
 # How to judge
 - Score 0-100 for how likely this is a scam. Be decisive: a clear scam is 85+, an \
 ordinary genuine message is under 20.
+- A score of 75 or more must rest on something the sender is trying to *get*: a \
+payment, a credential, an install, a call back, or your silence. If you cannot \
+point at that, the message is at most suspicious.
 - A real bank, government body or company never asks for an OTP, PIN, CVV or \
 password, never threatens same-day account closure by SMS, and never fixes KYC \
 through a link.
