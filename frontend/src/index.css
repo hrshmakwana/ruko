@@ -34,6 +34,8 @@
   --on-primary: #ffffff;
   --inverse-surface: #2a313b;
   --inverse-on-surface: #eaf1ff;
+  /* Always dark, in both schemes: white text sits on it. */
+  --housing: #151c26;
 
   /* Verdict only. Nothing else in the interface may use these. */
   --error: #ba1a1a;
@@ -78,6 +80,7 @@
     --on-primary: #0e1013;
     --inverse-surface: #e6e9ef;
     --inverse-on-surface: #151c26;
+    --housing: #0a0c0f;
 
     --error: #d93a2b;
     --on-error: #ffffff;
@@ -144,7 +147,7 @@
   --color-action: var(--primary);
   --color-on-action: var(--on-primary);
   --color-action-soft: var(--surface-container-high);
-  --color-housing: var(--inverse-surface);
+  --color-housing: var(--housing);
 
   --color-red: var(--error);
   --color-red-panel: var(--error);
