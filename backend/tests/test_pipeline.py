@@ -216,3 +216,40 @@ class TestRukoNeverSaysSafe:
         )
         verdict = call("Your KYC expired, share the OTP at http://sbi-kyc-verify.in")
         assert verdict["headline"] == "This is a fake KYC message."
+
+
+class TestTheLogsCarryNoWords:
+    """The privacy promise in the README is only worth what a test says it is.
+
+    /live already guards its own log line; this is the same guard on the path
+    that sees the most text. If someone ever adds the message to the log line to
+    debug something, this fails before it reaches CloudWatch.
+    """
+
+    # Words that appear only in the message. Rule ids are fair game to log, so
+    # "lottery" is deliberately not on this list: phrase.lottery_prize is a rule
+    # id, not a quote of what the person was sent.
+    SECRETS = ("Congratulations", "9876543210", "sbi-kyc-verify", "beneficiary")
+
+    def test_no_part_of_the_message_reaches_the_log(self, monkeypatch, caplog):
+        monkeypatch.setattr("handlers.check.analyse", model_returning(90))
+        message = (
+            "Congratulations! Lottery winner. Call 9876543210 and open "
+            "http://sbi-kyc-verify.in to claim, beneficiary name required."
+        )
+        with caplog.at_level("INFO"):
+            call(message)
+        logged = " ".join(record.getMessage() for record in caplog.records)
+        assert logged, "the handler should still log something"
+        for secret in self.SECRETS:
+            assert secret.lower() not in logged.lower()
+
+    def test_it_still_logs_what_debugging_needs(self, monkeypatch, caplog):
+        monkeypatch.setattr("handlers.check.analyse", model_returning(90))
+        with caplog.at_level("INFO"):
+            call("Your KYC expired, share the OTP at http://sbi-kyc-verify.in")
+        logged = " ".join(record.getMessage() for record in caplog.records)
+        assert "check_id=" in logged
+        assert "level=" in logged
+        assert "rules=" in logged
+        assert "ms=" in logged
